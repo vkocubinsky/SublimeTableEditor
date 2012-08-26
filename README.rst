@@ -52,6 +52,26 @@ You can change justification several times
     |    2     | row 2    |       c2 |
     |    3     | row 3    |       c3 |
 
+
+-------------------------------------------
+Difference from emacs org-mode table editor
+-------------------------------------------
+
+The main difference is emacs use character '+' in separator line, sublime text editor use character '|'.
+::
+    Emacs table:
+    | col 1  | col2   | col3   |
+    |--------+--------+--------|
+    | data 1 | data 2 | data 3 |
+
+    Sublime text editor table:
+    | col 1  |  col2  |  col3  |
+    |--------|--------|--------|
+    | data 1 | data 2 | data 3 |
+
+This difference is for current version and I am going to get rid from it.
+
+
 -----------
 Key binding
 -----------
