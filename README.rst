@@ -8,7 +8,50 @@ Overview
 
 This package provide functionality similar to Emacs org-mode built-in table editor.
 
+--------
+Settings
+--------
 
+For disable table auto format you should set **disable_auto_table_edit=true**. 
+
+---------
+Alignment
+---------
+
+By default text data is left justified, numeric data is right justified, column header is centered.
+
+::
+    |     column 1     |      column 2      |
+    |  second line 1   |   second line 2    |
+    |------------------|--------------------|
+    | text value row 1 | 0.9999999999999999 |
+    | tv row 2         |                 99 |
+
+But you can explicit set justification with format characters '<','>','#'. 
+::
+    | column 1 | column 2 | column 3 |
+    | <<<<<<<< | >>>>>>>> | ######## |
+    |----------|----------|----------|
+    | 1        |    row 1 |    c1    |
+    | 2        |    row 2 |    c2    |
+    | 3        |    row 3 |    c3    |
+    | ######## | <<<<<<<< | >>>>>>>> |
+    |    1     | row 1    |       c1 |
+    |    2     | row 2    |       c2 |
+    |    3     | row 3    |       c3 |
+
+You can change justification several times
+::
+    | column 1 | column 2 | column 3 |
+    | <<<<<<<< | >>>>>>>> | ######## |
+    |----------|----------|----------|
+    | 1        |    row 1 |    c1    |
+    | 2        |    row 2 |    c2    |
+    | 3        |    row 3 |    c3    |
+    | ######## | <<<<<<<< | >>>>>>>> |
+    |    1     | row 1    |       c1 |
+    |    2     | row 2    |       c2 |
+    |    3     | row 3    |       c3 |
 
 -----------
 Key binding
