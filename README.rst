@@ -57,7 +57,7 @@ You can change justification several times
 Difference from emacs org-mode table editor
 -------------------------------------------
 
-The main difference is emacs use character '+' in separator line, sublime text editor use character '|'.
+The first difference is emacs use character '+' in separator line, sublime text editor use character '|'.
 ::
     Emacs table:
     | col 1  | col2   | col3   |
@@ -69,8 +69,20 @@ The main difference is emacs use character '+' in separator line, sublime text e
     |--------|--------|--------|
     | data 1 | data 2 | data 3 |
 
-This difference is for current version and I am going to get rid from it.
+The second difference is commands next field, previous filed in emacs skip separator line, sublime table editor doesn't skip.
 
+These difference is for current version and I am going to get rid from them.
+
+-----------------
+License and Price
+-----------------
+Package is distributed by Apache 2.0 License.
+
+-------
+Testing
+-------
+
+I tested **SublimeTextEditor** package only for windows. It should work under Linux and Mac, but I did not test.
 
 -----------
 Key binding
