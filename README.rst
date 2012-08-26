@@ -19,7 +19,6 @@ Alignment
 ---------
 
 By default text data is left justified, numeric data is right justified, column header is centered.
-
 ::
     |     column 1     |      column 2      |
     |  second line 1   |   second line 2    |
