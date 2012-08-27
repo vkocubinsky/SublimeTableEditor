@@ -8,11 +8,41 @@ Overview
 
 This package provide functionality similar to Emacs org-mode built-in table editor.
 
+Type 
+::
+    | column 1 | column 2 |
+    |-
+
+Then use "tab" key for switch between cells and add new line you can easy populate the table
+::
+    | column 1 | column 2 |
+    |----------|----------|
+    |        1 | foo      |
+    |        2 | bar      |
+
+
+------------
+Installation
+------------
+
+Use Package Control.
+
 --------
 Settings
 --------
 
 For disable table auto format you should set **disable_auto_table_edit=true**. 
+
+-----------------
+License and Price
+-----------------
+Package is distributed by Apache 2.0 License.
+
+-------
+Testing
+-------
+
+I tested **SublimeTextEditor** package only for windows. It should work under Linux and Mac, but I did not test.
 
 ---------
 Alignment
@@ -57,7 +87,7 @@ You can change justification several times
 Difference from emacs org-mode table editor
 -------------------------------------------
 
-The first difference is emacs use character '+' in separator line, sublime text editor use character '|'.
+1. Emacs use character '+' in separator line, sublime text editor use character '|'.
 ::
     Emacs table:
     | col 1  | col2   | col3   |
@@ -69,20 +99,11 @@ The first difference is emacs use character '+' in separator line, sublime text 
     |--------|--------|--------|
     | data 1 | data 2 | data 3 |
 
-The second difference is commands next field, previous filed in emacs skip separator line, sublime table editor doesn't skip.
+2. Commands next field, previous filed in emacs skip separator lines, sublime table editor doesn't skip.
 
-These difference is for current version and I am going to get rid from them.
 
------------------
-License and Price
------------------
-Package is distributed by Apache 2.0 License.
+These difference is for current version and I am going to get rid from some of them.
 
--------
-Testing
--------
-
-I tested **SublimeTextEditor** package only for windows. It should work under Linux and Mac, but I did not test.
 
 -----------
 Key binding
