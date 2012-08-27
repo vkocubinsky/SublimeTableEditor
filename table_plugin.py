@@ -143,7 +143,7 @@ class TableNextField(AbstractTableMultiSelect):
             line_region = self.view.full_line(sel)
             text = self.view.substr(line_region)
             i1 = find(text, '|', 1)
-            new_text = text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             field_num = 0
             sel_row += 1
@@ -197,7 +197,7 @@ class TableNextRow(AbstractTableMultiSelect):
             line_region = self.view.full_line(sel)
             text = self.view.substr(line_region)
             i1 = find(text, '|', 1)
-            new_text = text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             sel_row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
@@ -435,8 +435,8 @@ class TableInsertRow(AbstractTableMultiSelect):
         line_region = self.view.full_line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
-        new_text = text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
+        new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
         self.view.insert(edit, line_region.end(),new_text)
-        pt = self.view.text_point(sel_row + 1, sel_col)
+        pt = self.view.text_point(sel_row, sel_col)
         return sublime.Region(pt,pt)
 
