@@ -140,10 +140,10 @@ class TableNextField(AbstractTableMultiSelect):
             field_num = 0
             sel_row += 1
         else:
-            line_region = self.view.full_line(sel)
+            line_region = self.view.line(sel)
             text = self.view.substr(line_region)
             i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             field_num = 0
             sel_row += 1
@@ -194,10 +194,10 @@ class TableNextRow(AbstractTableMultiSelect):
         if sel_row < self.last_table_line_num(sel_row):
             sel_row += 1
         else:
-            line_region = self.view.full_line(sel)
+            line_region = self.view.line(sel)
             text = self.view.substr(line_region)
             i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             sel_row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
@@ -409,11 +409,11 @@ class TableKillRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        first_row = self.first_table_line_num(sel_row)
+        last_row = self.last_table_line_num(sel_row)
         self.view.erase(edit, self.view.full_line(sel))
-        if sel_row > 0:
+        if sel_row == last_row :
             sel_row = sel_row - 1
-        else:
-            sel_row = 0
         if not self.is_table_line(sel_row):
             sel_col = 0
         pt = self.view.text_point(sel_row, sel_col)
@@ -432,11 +432,11 @@ class TableInsertRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        line_region = self.view.full_line(sel)
+        line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
-        new_text = "\n" + text[:i1] + re.sub(r"[^\|\r\n]",' ',text[i1:])
-        self.view.insert(edit, line_region.end(),new_text)
+        new_text = text[:i1] + re.sub(r"[^\|]",' ',text[i1:]) + "\n"
+        self.view.insert(edit, line_region.begin(),new_text)
         pt = self.view.text_point(sel_row, sel_col)
         return sublime.Region(pt,pt)
 
