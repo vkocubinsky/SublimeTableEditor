@@ -36,7 +36,7 @@ For disable table auto format you should set **disable_auto_table_edit=true**.
 -----------------
 License and Price
 -----------------
-Package is distributed by Apache 2.0 License.
+Package is distributed by GPL v 3.0 License.
 
 -------
 Testing

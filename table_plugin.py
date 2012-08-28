@@ -146,8 +146,8 @@ class TableNextField(AbstractTableMultiSelect):
         else:
             region = self.view.line(sel)
             text = self.get_text(sel_row)
-            sep_index = find(text, '|', 1)
-            new_text = "\n" + text[:sep_index] + re.sub(r"[^\|]",' ',text[sep_index:])
+            i1 = find(text, '|', 1)
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
             self.view.insert(edit, region.end(),new_text)
             field_num = 0
             sel_row += 1
@@ -198,8 +198,8 @@ class TableNextRow(AbstractTableMultiSelect):
         else:
             line_region = self.view.line(sel)
             text = self.get_text(sel_row)
-            sep_index = find(text, '|', 1)
-            new_text = "\n" + text[:sep_index] + re.sub(r"[^\|]",' ',text[sep_index:])
+            i1 = find(text, '|', 1)
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             sel_row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
