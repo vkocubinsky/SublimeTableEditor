@@ -24,6 +24,12 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         text = self.view.substr(region)
         return text
 
+    def get_full_text(self, row):
+        point = self.view.text_point(row,0)
+        region = self.view.full_line(point)
+        text = self.view.substr(region)
+        return text
+
     def get_line_num(self, point):
         return self.view.rowcol(point)[0]
 
