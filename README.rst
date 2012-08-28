@@ -25,7 +25,26 @@ Then use "tab" key for switch between cells and add new line you can easy popula
 Installation
 ------------
 
-Use Package Control.
+
+Using Sublime Package Control
+=============================
+
+Not available
+
+Using Git
+=========
+
+You can locate your Sublime Text 2 Packages directory by using the menu item Preferences -> Browse Packages....
+While inside the Packages directory, clone the theme repository using the command below:
+git clone https://github.com/vkocubinsky/SublimeTableEditor.git SublimeTableEditor
+
+Download Manually
+==========================
+
+- Download the files using the GitHub .zip download option.
+- Unzip the files and rename the folder to SublimeTableEditor.
+- Copy the folder to your Sublime Text 2 Packages directory.
+
 
 --------
 Settings
@@ -36,7 +55,7 @@ For disable table auto format you should set **disable_auto_table_edit=true**.
 -----------------
 License and Price
 -----------------
-Package is distributed by GPL v 3.0 License.
+Package is distributed by GPL v3.0 License.
 
 -------
 Testing
