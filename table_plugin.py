@@ -137,20 +137,18 @@ class TableNextField(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-        field_count = self.get_field_count(sel_row)
-        last_row_num = self.last_table_line_num(sel_row)
 
-        if field_num +1 < field_count:
+        if field_num +1 < self.get_field_count(sel_row):
             field_num += 1
-        elif sel_row < last_row_num:
+        elif sel_row < self.last_table_line_num(sel_row):
             field_num = 0
             sel_row += 1
         else:
-            line_region = self.view.line(sel)
-            text = self.view.substr(line_region)
-            i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-            self.view.insert(edit, line_region.end(),new_text)
+            region = self.view.line(sel)
+            text = self.get_text(sel_row)
+            sep_index = find(text, '|', 1)
+            new_text = "\n" + text[:sep_index] + re.sub(r"[^\|]",' ',text[sep_index:])
+            self.view.insert(edit, region.end(),new_text)
             field_num = 0
             sel_row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
@@ -170,14 +168,12 @@ class TablePreviousField(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-        first_row_num = self.first_table_line_num(sel_row)
-        field_count = self.get_field_count(sel_row)
 
         if field_num > 0:
            field_num = field_num -1
-        elif sel_row > first_row_num:
+        elif sel_row > self.first_table_line_num(sel_row):
             sel_row -= 1
-            field_num = field_count - 1
+            field_num = self.get_field_count(sel_row) - 1
         pt = self.get_field_begin_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
@@ -201,9 +197,9 @@ class TableNextRow(AbstractTableMultiSelect):
             sel_row += 1
         else:
             line_region = self.view.line(sel)
-            text = self.view.substr(line_region)
-            i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+            text = self.get_text(sel_row)
+            sep_index = find(text, '|', 1)
+            new_text = "\n" + text[:sep_index] + re.sub(r"[^\|]",' ',text[sep_index:])
             self.view.insert(edit, line_region.end(),new_text)
             sel_row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
@@ -247,7 +243,6 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-        field_count = self.get_field_count(sel_row)
         if field_num == 0:
             return sel
         start_row = self.first_table_line_num(sel_row)
@@ -282,8 +277,7 @@ class TableMoveColumnRight(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-        field_count = self.get_field_count(sel_row)
-        if field_num == field_count - 1:
+        if field_num == self.get_field_count(sel_row) - 1:
             return sel
         start_row = self.first_table_line_num(sel_row)
         end_row = self.last_table_line_num(sel_row)
