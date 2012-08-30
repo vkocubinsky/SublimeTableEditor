@@ -6,7 +6,16 @@ SublimeTableEditor
 Overview
 --------
 
-This package provide functionality similar to Emacs org-mode built-in table editor.
+SublimeTableEditor is a package for everyone who uses Sublime Editor for edit simple text tables in text mode, markdown mode, textile mode etc. SublimeTableEditor allow on easy way edit text table, it allow:
+- add/delete row
+- add/delete column
+- navigate with tab/shift tab
+- auto align number and text cells
+- move column left/right
+- specify alignment
+
+SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. 
+
 
 Type 
 ::
@@ -29,7 +38,11 @@ Installation
 Using Sublime Package Control
 =============================
 
-Not available
+Through Package Control http://wbond.net/sublime_packages/package_control
+
+- Open Package Control
+- Select 'Install Package'
+- Find and select 'Table Editor'
 
 Using Git
 =========
@@ -50,11 +63,13 @@ Download Manually
 Settings
 --------
 
-For disable table auto format you should set **disable_auto_table_edit=true**. 
+For disable table auto format you should set **disable_auto_table_edit=true**. The main case is 
+use this setting for some language. For example you can disable SublimeTableEditor for python language if add
+this setting to Python.sublime-settings.
 
------------------
-License and Price
------------------
+-------
+License
+-------
 Package is distributed by GPL v3.0 License.
 
 -------
