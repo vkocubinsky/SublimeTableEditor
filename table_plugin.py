@@ -227,7 +227,7 @@ class TableNextRow(AbstractTableMultiSelect):
 class TableBeginningOfField(AbstractTableMultiSelect):
     """
     Command: table_beginning_of_field
-    Key: home
+    Key: ctrl+left
     Move to beginning of the current table field.
     """
 
@@ -244,7 +244,7 @@ class TableBeginningOfField(AbstractTableMultiSelect):
 class TableEndOfField(AbstractTableMultiSelect):
     """
     Command: table_end_of_field
-    Key: end
+    Key: ctrl+right
     Move to end of the current table field.
     """
 

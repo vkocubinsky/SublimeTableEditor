@@ -158,10 +158,10 @@ alt + enter or enter
     At the beginning or end of a line, "enter" still does NEWLINE,
     so it can be used to split a table.
 
-home
+ctrl+left
     Re-align the table and move to beginning of the current table field.
 
-end
+ctrl+right
     Re-align the table and move to end of the current table field.
 
 alt+left
