@@ -2,8 +2,8 @@ import sublime, sublime_plugin
 import tablelib
 import re
 
-#TODO: val namesace for command names
-#TODO: use '+' as header separator
+#TODO: fix namesace for command names to avoid conflict with other plugins
+#TODO: check multiple selection in scope one table
 
 def find(text, sep, num):
     found = -1
@@ -120,7 +120,7 @@ class TableAlignCommand(AbstractTableMultiSelect):
     """
     Command: table_align
     Key: ctrl+c, ctrl+c
-    Re-align the table without moving the cursor.
+    Re-align the table without change the current table field. Move cursor to begin of the current table field.
     """
 
     def run_one_sel(self, edit,sel):
@@ -201,8 +201,6 @@ class TableNextRow(AbstractTableMultiSelect):
     Command: table_next_row
     Key: alt + enter, enter
     Re-align the table and move down to next row. Creates a new row if necessary.
-    At the beginning or end of a line, "enter" still does NEWLINE,
-    so it can be used to split a table.
     """
 
     def run_before(self,edit):
@@ -263,7 +261,7 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
     """
     Command: table_move_column_left
     Key: alt+left
-    Move the current column left/right.
+    Move the current column right.
     """
 
     def run_before(self,edit):
@@ -452,8 +450,7 @@ class TableInsertRow(AbstractTableMultiSelect):
     """
     Command: table_insert_row
     Key: alt+shift+down
-    Insert a new row above the current row. With a prefix argument, the line is
-    created below the current one.
+    Insert a new row above the current row.
     """
 
     def run_before(self,edit):

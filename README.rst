@@ -10,9 +10,9 @@ SublimeTableEditor is a package for everyone who uses Sublime Editor for edit si
 - add/delete row
 - add/delete column
 - navigate with tab/shift tab
-- auto align number and text cells
+- auto align number cells and text cells
 - move column left/right
-- specify alignment
+- specify column alignment
 
 SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. 
 
@@ -28,7 +28,6 @@ Then use "tab" key for switch between cells and add new line you can easy popula
     |----------|----------|
     |        1 | foo      |
     |        2 | bar      |
-
 
 ------------
 Installation
@@ -64,7 +63,7 @@ Settings
 --------
 
 For disable table auto format you should set **disable_auto_table_edit=true**. The main case is 
-use this setting for some language. For example you can disable SublimeTableEditor for python language if add
+use this setting for some languages. For example you can disable SublimeTableEditor for python language if you add
 this setting to Python.sublime-settings.
 
 -------
@@ -133,11 +132,12 @@ Difference from emacs org-mode table editor
     |--------|--------|--------|
     | data 1 | data 2 | data 3 |
 
+I am more interested add support reStructured grid tables than get rid from this difference.
+
 2. Commands next field, previous filed in emacs skip separator lines, sublime table editor doesn't skip.
+These difference is for current version and I am going to get rid from this difference.
 
-
-These difference is for current version and I am going to get rid from some of them.
-
+3. Move to beginning of the current table field and move to end of the current table field has differnt keybinding and emacs has additional feature move to previous/next table field if cursor already in begin/end of the table column.
 
 -----------
 Key binding
@@ -145,18 +145,16 @@ Key binding
 
 
 ctrl+c, ctrl+c
-    Re-align the table without moving the cursor.
+    Re-align the table without change the current table field. Move cursor to begin of the current table field.
 
 tab
-    Re-align the table, move to the next field. Creates a new row if necessary.
+    Re-align the table, move to the next field. Creates a new row if necessary. 
 
 shift+tab
     Re-align, move to previous field.
 
 alt + enter or enter
     Re-align the table and move down to next row. Creates a new row if necessary.
-    At the beginning or end of a line, "enter" still does NEWLINE,
-    so it can be used to split a table.
 
 ctrl+left
     Re-align the table and move to beginning of the current table field.
@@ -165,7 +163,7 @@ ctrl+right
     Re-align the table and move to end of the current table field.
 
 alt+left
-    Move the current column left/right.
+    Move the current column left.
 
 alt+right
     Move the current column right.
@@ -186,5 +184,4 @@ alt+shift+up
     Kill the current row or horizontal line.
 
 alt+shift+down
-    Insert a new row above the current row. With a prefix argument, the line is
-    created below the current one.
+    Insert a new row above the current row. 
