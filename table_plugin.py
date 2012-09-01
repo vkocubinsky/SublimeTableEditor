@@ -53,6 +53,24 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         col = find(self.get_text(row), '|', field_num +1 ) + 2
         return self.view.text_point(row,col)
 
+    def nav_field_end_point(self, row, field_num):
+        i1 = find(self.get_text(row), '|', field_num +1 )
+        i2 = find(self.get_text(row), '|', field_num +2 )
+        match = re.compile(r"([^\s])\s+$").search(self.get_text(row),i1 + 1,i2)
+        if match:
+            return self.view.text_point(row,match.start(1) + 1)
+        else:
+            return self.view.text_point(row,i2 - 1)
+
+    def nav_field_begin_point(self, row, field_num):
+        i1 = find(self.get_text(row), '|', field_num +1 )
+        i2 = find(self.get_text(row), '|', field_num +2 )
+        match = re.compile(r"([^\s]).*").search(self.get_text(row),i1 + 1,i2)
+        if match:
+            return self.view.text_point(row,match.start(1))
+        else:
+            return self.view.text_point(row,i1 + 2)
+
     def last_table_line_num(self, row):
         assert self.is_table_line(row), "Expected table row"
         last_table_row = row
@@ -206,28 +224,39 @@ class TableNextRow(AbstractTableMultiSelect):
         return sublime.Region(pt,pt)
 
 
-class TableBeginningOfField(AbstractTableCommand):
+class TableBeginningOfField(AbstractTableMultiSelect):
     """
     Command: table_beginning_of_field
-    Key: alt+a
-    Move to beginning of the current table field, or on to the previous field.
+    Key: home
+    Move to beginning of the current table field.
     """
 
-    def run(self, edit):
-        print "Table Beginning Of Field"
+    def run_before(self,edit):
         self.view.run_command("table_align")
 
+    def run_one_sel(self, edit,sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.nav_field_begin_point(sel_row, field_num)
+        return sublime.Region(pt,pt)
 
-class TableEndOfField(AbstractTableCommand):
+
+class TableEndOfField(AbstractTableMultiSelect):
     """
     Command: table_end_of_field
-    Key: alt+e
-    Move to end of the current table field, or on to the next field.
+    Key: end
+    Move to end of the current table field.
     """
 
-    def run(self, edit):
-        print "Table End Of Field"
+    def run_before(self,edit):
         self.view.run_command("table_align")
+
+    def run_one_sel(self, edit,sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.nav_field_end_point(sel_row, field_num)
+        return sublime.Region(pt,pt)
+
 
 
 class TableMoveColumnLeft(AbstractTableMultiSelect):
