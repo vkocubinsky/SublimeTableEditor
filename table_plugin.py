@@ -33,7 +33,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def get_line_num(self, point):
         return self.view.rowcol(point)[0]
 
-    def is_header_line(self, row):
+    def is_separator_line(self, row):
         return re.match(r"^\s*\|([\-]+\|)+$",self.get_text(row)) is not None
 
     def is_table_line(self, row):
@@ -155,20 +155,36 @@ class TableNextField(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-
-        if field_num +1 < self.get_field_count(sel_row):
-            field_num += 1
-        elif sel_row < self.last_table_line_num(sel_row):
-            field_num = 0
-            sel_row += 1
-        else:
-            region = self.view.line(sel)
-            text = self.get_text(sel_row)
-            i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-            self.view.insert(edit, region.end(),new_text)
-            field_num = 0
-            sel_row += 1
+        last_line = self.last_table_line_num(sel_row)
+        moved = False
+        while True:
+            if self.is_separator_line(sel_row) and sel_row < last_line:
+                sel_row = sel_row + 1
+                field_num = 0
+                moved = True
+                continue
+            elif not self.is_separator_line(sel_row) and field_num + 1 < self.get_field_count(sel_row):
+                if not moved:
+                    field_num = field_num + 1
+                break
+            elif sel_row < last_line:
+                if not moved:
+                    field_num = 0
+                    sel_row = sel_row + 1
+                    if self.is_separator_line(sel_row):
+                        moved = True
+                        continue
+                break
+            else:
+                point = self.view.text_point(sel_row,0)
+                region = self.view.line(point)
+                text = self.view.substr(region)
+                i1 = find(text, '|', 1)
+                new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+                self.view.insert(edit, region.end(),new_text)
+                field_num = 0
+                sel_row += 1
+                break
         pt = self.get_field_begin_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
@@ -186,12 +202,31 @@ class TablePreviousField(AbstractTableMultiSelect):
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-
-        if field_num > 0:
-           field_num = field_num -1
-        elif sel_row > self.first_table_line_num(sel_row):
-            sel_row -= 1
-            field_num = self.get_field_count(sel_row) - 1
+        first_line = self.first_table_line_num(sel_row)
+        moved = False
+        while True:
+            if self.is_separator_line(sel_row) and sel_row == first_line:
+                field_num = 0
+                break
+            elif self.is_separator_line(sel_row) and sel_row > first_line:
+                sel_row = sel_row - 1
+                field_num = self.get_field_count(sel_row) - 1
+                moved = True
+                continue
+            elif field_num > 0:
+                if not moved:
+                    field_num = field_num -1
+                break
+            elif sel_row > first_line:
+                if not moved:
+                    sel_row = sel_row - 1
+                    field_num = self.get_field_count(sel_row) - 1
+                    if self.is_separator_line(sel_row):
+                        moved = True
+                        continue
+                break
+            else:
+                break
         pt = self.get_field_begin_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
@@ -385,7 +420,7 @@ class TableInsertColumn(AbstractTableMultiSelect):
         while row <= end_row:
             text = self.get_text(row)
             cell = "   "
-            if self.is_header_line(row):
+            if self.is_separator_line(row):
                 cell = "---"
             i1 = find(text, '|', field_num + 1)
             self.view.replace(edit,
@@ -395,33 +430,6 @@ class TableInsertColumn(AbstractTableMultiSelect):
             row += 1
         pt = self.get_field_begin_point(sel_row, field_num)
         return sublime.Region(pt,pt)
-
-
-class TableMoveRowUp(AbstractTableCommand):
-    """
-    Command: table_move_row_up
-    Key: alt+up
-    Move the current row up.
-    """
-    def run(self, edit):
-        for sel in self.view.sel():
-            line = self.get_line_num(sel.begin())
-            if line -1 >= 0 and self.is_table_line(line - 1):
-                self.view.run_command("swap_line_up")
-
-
-class TableMoveRowDown(AbstractTableCommand):
-    """
-    Command: table_move_row_down
-    Key: alt+down
-    Move the current row down.
-    """
-
-    def run(self, edit):
-        for sel in self.view.sel():
-            line = self.get_line_num(sel.begin())
-            if line + 1 <=  self.last_line_num() and self.is_table_line(line + 1):
-                self.view.run_command("swap_line_down")
 
 
 class TableKillRow(AbstractTableMultiSelect):

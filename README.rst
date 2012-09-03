@@ -139,6 +139,8 @@ These difference is for current version and I am going to get rid from this diff
 
 3. Move to beginning of the current table field and move to end of the current table field has differnt keybinding and emacs has additional feature move to previous/next table field if cursor already in begin/end of the table column.
 
+4. Move row up / Move row down is standard sublime feature and can be done with ctrl+shift+up, ctrl+shift+down.
+
 -----------
 Key binding
 -----------
@@ -173,12 +175,6 @@ alt+shift+left
 
 alt+shift+right
     Insert a new column to the left of the cursor position.
-
-alt+up
-    Move the current row up.
-
-alt+down
-    Move the current row down.
 
 alt+shift+up
     Kill the current row or horizontal line.

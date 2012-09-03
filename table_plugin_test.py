@@ -191,8 +191,6 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "three"}))
         self.commands.append(CommandDef("table_align"))
-        self.commands.append(CommandDef("table_move_row_up"))
-        self.commands.append(CommandDef("table_move_row_down"))
         self.commands.append(CommandDef("table_kill_row"))
         self.commands.append(CommandDef("table_kill_row"))
         self.commands.append(CommandDef("table_kill_row"))
@@ -217,8 +215,8 @@ class RowsTableTest(CallbackTest):
 
 
 class TableEditorTestCommand(sublime_plugin.TextCommand):
-    COMMAND_TIMEOUT = 1000
-    TEST_TIMEOUT = 2000
+    COMMAND_TIMEOUT = 250
+    TEST_TIMEOUT = 1000
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self,view)
