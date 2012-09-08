@@ -14,7 +14,7 @@ SublimeTableEditor is a package for everyone who uses Sublime Editor for edit si
 - move column left/right
 - specify column alignment
 
-SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. 
+SublimeTableEditor is very similar to emacs org-mode table editor. 
 
 
 Type 
@@ -120,7 +120,7 @@ You can change justification several times
 Difference from emacs org-mode table editor
 -------------------------------------------
 
-1. Emacs use character '+' in separator line, sublime text editor use character '|'.
+Emacs use character '+' in separator line, sublime text editor use character '|'.
 ::
     Emacs table:
     | col 1  | col2   | col3   |
@@ -134,9 +134,6 @@ Difference from emacs org-mode table editor
 
 I am more interested add support reStructured grid tables than get rid from this difference.
 
-2. Move to beginning of the current table field and move to end of the current table field has differnt keybinding and emacs has additional feature move to previous/next table field if cursor already in begin/end of the table column.
-
-3. Move row up / Move row down is standard sublime feature and can be done with ctrl+shift+up, ctrl+shift+down.
 
 -----------
 Key binding
@@ -154,12 +151,6 @@ shift+tab
 
 alt + enter or enter
     Re-align the table and move down to next row. Creates a new row if necessary.
-
-ctrl+left
-    Re-align the table and move to beginning of the current table field.
-
-ctrl+right
-    Re-align the table and move to end of the current table field.
 
 alt+left
     Move the current column left.
