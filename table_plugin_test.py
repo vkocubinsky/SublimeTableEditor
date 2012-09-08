@@ -29,7 +29,6 @@ class SimpleTableTest(CallbackTest):
 | column A | column B |
 |-"""}))
         self.commands.append(CommandDef("table_next_field"))
-        self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "1"}))
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "one"}))
@@ -67,8 +66,6 @@ class MoveColumnTest(CallbackTest):
         self.commands.append(CommandDef("insert", {"characters": """
 | column A | column B | column C |
 |-"""}))
-        self.commands.append(CommandDef("table_next_field"))
-        self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "row A"}))
         self.commands.append(CommandDef("table_next_field"))
@@ -109,8 +106,6 @@ class CustomAlignTest(CallbackTest):
 | column A | column B | column C |
 | < | > | # |
 |-"""}))
-        self.commands.append(CommandDef("table_next_field"))
-        self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "1"}))
         self.commands.append(CommandDef("table_next_field"))
@@ -177,7 +172,6 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("insert", {"characters": """
 | column A | column B |
 |-"""}))
-        self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "1"}))
         self.commands.append(CommandDef("table_next_field"))
