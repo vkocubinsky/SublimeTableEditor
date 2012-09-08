@@ -97,10 +97,7 @@ But you can explicit set justification with format characters '<','>','#'.
     | 1        |    row 1 |    c1    |
     | 2        |    row 2 |    c2    |
     | 3        |    row 3 |    c3    |
-    | ######## | <<<<<<<< | >>>>>>>> |
-    |    1     | row 1    |       c1 |
-    |    2     | row 2    |       c2 |
-    |    3     | row 3    |       c3 |
+
 
 You can change justification several times
 ::
