@@ -165,7 +165,7 @@ class CustomAlignTest(CallbackTest):
 
 class RowsTableTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Simple table test")
+        CallbackTest.__init__(self, "Row table test")
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -185,10 +185,9 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "three"}))
         self.commands.append(CommandDef("table_align"))
+        self.commands.append(CommandDef("table_previous_field"))
+        self.commands.append(CommandDef("table_previous_field"))
         self.commands.append(CommandDef("table_kill_row"))
-        self.commands.append(CommandDef("table_kill_row"))
-        self.commands.append(CommandDef("table_kill_row"))
-        self.commands.append(CommandDef("table_align"))
         self.commands.append(CommandDef("table_insert_row"))
 
 
@@ -196,21 +195,22 @@ class RowsTableTest(CallbackTest):
         return """{0}
 | column A | column B |
 |----------|----------|
-|          |          |""".format(self.description)
+|          |          |
+|        1 | one      |
+|        3 | three    |""".format(self.description)
 
     @property
     def description(self):
         return """Test: {0}
 - create table with separator
 - navigate with tab key
-- move row up/down
 - insert/delete row
 """.format(self.name)
 
 
 class TableEditorTestCommand(sublime_plugin.TextCommand):
     COMMAND_TIMEOUT = 250
-    TEST_TIMEOUT = 1000
+    TEST_TIMEOUT = 500
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self,view)
@@ -221,7 +221,7 @@ class TableEditorTestCommand(sublime_plugin.TextCommand):
         tests.append(SimpleTableTest())
         tests.append(MoveColumnTest())
         tests.append(CustomAlignTest())
-#        tests.append(RowsTableTest())
+        tests.append(RowsTableTest())
         self.run_tests(tests, 0 , 0)
         # self.view.set_scratch(False)
 
@@ -243,13 +243,16 @@ class TableEditorTestCommand(sublime_plugin.TextCommand):
         else:
             text = self.get_buffer_text()
             if  text != tests[test_ind].expected_value():
-                self.view.run_command("move_to", {"extend": False, "to": "eol"})
+                self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
 Test {0} failed:
-Expected: {1}
-Actual: {2}""".format(tests[test_ind].name,tests[test_ind].expected_value(), text)})
+Expected:
+{1}<<<
+Actual:
+{2}<<<
+""".format(tests[test_ind].name,tests[test_ind].expected_value(), text)})
             else:
-                self.view.run_command("move_to", {"extend": False, "to": "eol"})
+                self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
 Test {0} sucess:
 """.format(tests[test_ind].name)})
@@ -262,5 +265,6 @@ Test {0} sucess:
 
 
     def get_buffer_text(self):
+        print "buffer", self.view.substr(sublime.Region(0,self.view.size()))
         return self.view.substr(sublime.Region(0,self.view.size()))
 
