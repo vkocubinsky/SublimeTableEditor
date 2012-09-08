@@ -46,11 +46,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def get_last_buffer_row(self):
         return self.view.rowcol(self.view.size())[0]
 
-    def get_field_begin_point(self, row, field_num):
-        col = find(self.get_text(row), '|', field_num +1) + 2
-        return self.view.text_point(row, col)
-
-    def get_data_field_end_point(self, row, field_num):
+    def get_field_default_point(self, row, field_num):
         text = self.get_text(row)
         i1 = find(text, '|', field_num +1)
         i2 = find(text, '|', field_num +2)
@@ -58,17 +54,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if match:
             return self.view.text_point(row,match.start(1) + 1)
         else:
-            return self.view.text_point(row,i2 - 1)
-
-    def get_data_field_begin_point(self, row, field_num):
-        text = self.get_text(row)
-        i1 = find(text, '|', field_num +1 )
-        i2 = find(text, '|', field_num +2 )
-        match = re.compile(r"([^\s]).*").search(text, i1 + 1, i2)
-        if match:
-            return self.view.text_point(row, match.start(1))
-        else:
-            return self.view.text_point(row, i1 + 2)
+            return self.view.text_point(row,i1 + 2)
 
     def get_last_table_row(self, row):
         last_table_row = row
@@ -135,7 +121,7 @@ class TableAlignCommand(AbstractTableMultiSelect):
         self.view.replace(edit, table_region, tablelib.format_table(text))
         if sel_field_num >= self.get_field_count(sel_row):
             sel_field_num = 0
-        pt = self.get_field_begin_point(sel_row, sel_field_num)
+        pt = self.get_field_default_point(sel_row, sel_field_num)
         return sublime.Region(pt,pt)
 
 
@@ -183,7 +169,7 @@ class TableNextField(AbstractTableMultiSelect):
                     field_num = 0
                     sel_row += 1
                 break
-        pt = self.get_field_begin_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
 
@@ -225,7 +211,7 @@ class TablePreviousField(AbstractTableMultiSelect):
                 break
             else:
                 break
-        pt = self.get_field_begin_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
 
@@ -251,43 +237,8 @@ class TableNextRow(AbstractTableMultiSelect):
             new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
             self.view.insert(edit, line_region.end(),new_text)
             sel_row += 1
-        pt = self.get_field_begin_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt,pt)
-
-
-class TableBeginningOfField(AbstractTableMultiSelect):
-    """
-    Command: table_beginning_of_field
-    Key: ctrl+left
-    Move to beginning of the current table field.
-    """
-
-    def run_before(self,edit):
-        self.view.run_command("table_align")
-
-    def run_one_sel(self, edit,sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-        pt = self.get_data_field_begin_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
-
-
-class TableEndOfField(AbstractTableMultiSelect):
-    """
-    Command: table_end_of_field
-    Key: ctrl+right
-    Move to end of the current table field.
-    """
-
-    def run_before(self,edit):
-        self.view.run_command("table_align")
-
-    def run_one_sel(self, edit,sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-        pt = self.get_data_field_end_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
-
 
 
 class TableMoveColumnLeft(AbstractTableMultiSelect):
@@ -319,7 +270,7 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
                             new_text
                             )
             row += 1
-        pt = self.get_field_begin_point(sel_row, field_num - 1)
+        pt = self.get_field_default_point(sel_row, field_num - 1)
         return sublime.Region(pt,pt)
 
 
@@ -354,7 +305,7 @@ class TableMoveColumnRight(AbstractTableMultiSelect):
                             new_text
                             )
             row += 1
-        pt = self.get_field_begin_point(sel_row, field_num + 1)
+        pt = self.get_field_default_point(sel_row, field_num + 1)
         return sublime.Region(pt,pt)
 
 
@@ -393,7 +344,7 @@ class TableDeleteColumn(AbstractTableMultiSelect):
             row += 1
         if field_num == self.get_field_count(sel_row):
             field_num -= 1
-        pt = self.get_field_begin_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
 
@@ -426,7 +377,7 @@ class TableInsertColumn(AbstractTableMultiSelect):
                             text[0:i1] + "|" + cell + text[i1:])
 
             row += 1
-        pt = self.get_field_begin_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt,pt)
 
 
