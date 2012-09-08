@@ -2,6 +2,8 @@ import sublime, sublime_plugin
 import tablelib
 import re
 
+#todo: handle cursor after last column
+
 def find(text, sep, num):
     found = -1
     index = 0
@@ -117,7 +119,10 @@ class TableAlignCommand(AbstractTableMultiSelect):
         table_region = sublime.Region(begin_point,end_point)
         text = self.view.substr(table_region)
 
-        sel_field_num = self.get_field_num(sel_row, sel_col)
+        sel_field_num = self.get_text(sel_row).count("|", 0, sel_col) - 1
+        if len(self.get_text(sel_row)[sel_col:].strip()) == 0 and sel_field_num > 0:
+            sel_field_num = sel_field_num - 1
+
         self.view.replace(edit, table_region, tablelib.format_table(text))
         if sel_field_num >= self.get_field_count(sel_row):
             sel_field_num = 0
