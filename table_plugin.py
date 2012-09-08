@@ -173,14 +173,15 @@ class TableNextField(AbstractTableMultiSelect):
                         continue
                 break
             else:
-                point = self.view.text_point(sel_row,0)
-                region = self.view.line(point)
-                text = self.view.substr(region)
-                i1 = find(text, '|', 1)
-                new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-                self.view.insert(edit, region.end(),new_text)
-                field_num = 0
-                sel_row += 1
+                if self.is_separator_row(sel_row) or not moved:
+                    point = self.view.text_point(sel_row,0)
+                    region = self.view.line(point)
+                    text = self.view.substr(region)
+                    i1 = find(text, '|', 1)
+                    new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+                    self.view.insert(edit, region.end(),new_text)
+                    field_num = 0
+                    sel_row += 1
                 break
         pt = self.get_field_begin_point(sel_row, field_num)
         return sublime.Region(pt,pt)

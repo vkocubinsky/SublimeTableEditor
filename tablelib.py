@@ -110,7 +110,7 @@ class TextTable:
 
     def _merge(self, new_row):
         if self._is_row_separator(new_row):
-            new_row = ['-' for col in new_row]
+            new_row = ['---' for col in new_row]
             self._row_types.append(TextTable.ROW_SEPARATOR)
             if not self._header_found and TextTable.ROW_DATA in self._row_types:
                 for i,x in enumerate(self._row_types):
