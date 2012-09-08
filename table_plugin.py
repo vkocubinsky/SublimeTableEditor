@@ -2,7 +2,7 @@ import sublime, sublime_plugin
 import tablelib
 import re
 
-#todo: handle cursor after last column
+
 
 def find(text, sep, num):
     found = -1
