@@ -134,12 +134,9 @@ Difference from emacs org-mode table editor
 
 I am more interested add support reStructured grid tables than get rid from this difference.
 
-2. Commands next field, previous filed in emacs skip separator lines, sublime table editor doesn't skip.
-These difference is for current version and I am going to get rid from this difference.
+2. Move to beginning of the current table field and move to end of the current table field has differnt keybinding and emacs has additional feature move to previous/next table field if cursor already in begin/end of the table column.
 
-3. Move to beginning of the current table field and move to end of the current table field has differnt keybinding and emacs has additional feature move to previous/next table field if cursor already in begin/end of the table column.
-
-4. Move row up / Move row down is standard sublime feature and can be done with ctrl+shift+up, ctrl+shift+down.
+3. Move row up / Move row down is standard sublime feature and can be done with ctrl+shift+up, ctrl+shift+down.
 
 -----------
 Key binding

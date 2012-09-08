@@ -189,6 +189,9 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("table_previous_field"))
         self.commands.append(CommandDef("table_kill_row"))
         self.commands.append(CommandDef("table_insert_row"))
+        self.commands.append(CommandDef("table_next_row"))
+        self.commands.append(CommandDef("table_next_row"))
+        self.commands.append(CommandDef("table_next_row"))
 
 
     def expected_value(self):
@@ -197,7 +200,8 @@ class RowsTableTest(CallbackTest):
 |----------|----------|
 |          |          |
 |        1 | one      |
-|        3 | three    |""".format(self.description)
+|        3 | three    |
+|          |          |""".format(self.description)
 
     @property
     def description(self):
