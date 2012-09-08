@@ -135,6 +135,8 @@ Emacs use character '+' in separator line, sublime text editor use character '|'
 I am more interested add support reStructured grid tables than get rid from this difference.
 
 
+4. Move row up / Move row down is standard sublime feature and can be done with ctrl+shift+up, ctrl+shift+down.
+
 -----------
 Key binding
 -----------
