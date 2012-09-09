@@ -185,13 +185,8 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("table_next_field"))
         self.commands.append(CommandDef("insert", {"characters": "three"}))
         self.commands.append(CommandDef("table_align"))
-<<<<<<< HEAD
         self.commands.append(CommandDef("table_previous_field"))
         self.commands.append(CommandDef("table_previous_field"))
-=======
-        self.commands.append(CommandDef("table_kill_row"))
-        self.commands.append(CommandDef("table_kill_row"))
->>>>>>> 84ca10f9dfa704e4df420eca482f2daff55c1843
         self.commands.append(CommandDef("table_kill_row"))
         self.commands.append(CommandDef("table_insert_row"))
         self.commands.append(CommandDef("table_next_row"))
@@ -218,13 +213,8 @@ class RowsTableTest(CallbackTest):
 
 
 class TableEditorTestCommand(sublime_plugin.TextCommand):
-<<<<<<< HEAD
     COMMAND_TIMEOUT = 250
     TEST_TIMEOUT = 500
-=======
-    COMMAND_TIMEOUT = 500
-    TEST_TIMEOUT = 1000
->>>>>>> 84ca10f9dfa704e4df420eca482f2daff55c1843
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self,view)

@@ -51,7 +51,7 @@ While inside the Packages directory, clone the theme repository using the comman
 git clone https://github.com/vkocubinsky/SublimeTableEditor.git SublimeTableEditor
 
 Download Manually
-==========================
+=================
 
 - Download the files using the GitHub .zip download option.
 - Unzip the files and rename the folder to SublimeTableEditor.
@@ -75,7 +75,7 @@ Package is distributed by GPL v3.0 License.
 Testing
 -------
 
-I tested **SublimeTextEditor** package only for windows. It should work under Linux and Mac, but I did not test.
+I tested **SublimeTextEditor** package for windows and quckly tested under linux. It should work under Mac, but I did not test.
 
 ---------
 Alignment
