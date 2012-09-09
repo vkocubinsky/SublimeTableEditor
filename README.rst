@@ -75,7 +75,7 @@ Package is distributed by GPL v3.0 License.
 Testing
 -------
 
-I tested **SublimeTextEditor** package for windows and quckly tested under linux. It should work under Mac, but I did not test.
+I tested **SublimeTextEditor** package under windows and quckly tested under linux. It should work under Mac, but I did not test, because I do not have mac.
 
 ---------
 Alignment
