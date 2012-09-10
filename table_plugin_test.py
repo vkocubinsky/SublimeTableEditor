@@ -235,29 +235,29 @@ class RowsTableTest(CallbackTest):
 """.format(self.name)
 
 
-class TableEditorTestCommand(sublime_plugin.TextCommand):
+class TableEditorTestSuite(sublime_plugin.TextCommand):
     COMMAND_TIMEOUT = 250
     TEST_TIMEOUT = 500
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self,view)
 
-    def run(self, edit):
-        # self.view.set_scratch(True)
+    def run(self):
         tests = []
         tests.append(SimpleTableTest())
         tests.append(MoveColumnTest())
         tests.append(CustomAlignTest())
         tests.append(RowsTableTest())
         self.run_tests(tests, 0 , 0)
-        # self.view.set_scratch(False)
-
 
     def run_tests(self, tests, test_ind, command_ind):
         if test_ind >= len(tests):
             self.view.run_command("select_all")
             self.view.run_command("cut")
-            self.view.run_command("insert", {"characters": "{0} tests sucess".format(len(tests))})
+            self.view.run_command("insert", {"characters": """
+{0} tests ran sucessfully
+
+Click ctrl+w to close this window""".format(len(tests))})
             return
         test = tests[test_ind]
         if command_ind == 0:
@@ -281,7 +281,7 @@ Actual:
             else:
                 self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
-Test {0} sucess:
+Test {0} executed sucessfully
 """.format(tests[test_ind].name)})
 
                 sublime.set_timeout(lambda: self.run_tests(tests, test_ind + 1, 0),
@@ -292,6 +292,17 @@ Test {0} sucess:
 
 
     def get_buffer_text(self):
-        print "buffer", self.view.substr(sublime.Region(0,self.view.size()))
         return self.view.substr(sublime.Region(0,self.view.size()))
+
+
+
+class TableEditorFilmCommand(sublime_plugin.WindowCommand):
+
+    def run(self):
+        view = self.window.new_file()
+        view.set_scratch(True)
+        view.set_name("Sublime Table Editor Film")
+        suite = TableEditorTestSuite(view)
+        suite.run()
+
 

@@ -1,4 +1,5 @@
 [
+    { "keys": ["ctrl+x", "ctrl+t"], "command": "table_editor_film" },
     { "keys": ["ctrl+c", "ctrl+c"], "command": "table_align", "context":
         [
             { "key": "setting.disable_auto_table_edit", "operator": "not_equal", "operand": true },

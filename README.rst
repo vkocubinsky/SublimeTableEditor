@@ -13,6 +13,7 @@ SublimeTableEditor is a package for everyone who uses Sublime Editor for edit si
 - auto align number cells and text cells
 - move column left/right
 - specify column alignment
+- integration tests film
 
 SublimeTableEditor is very similar to emacs org-mode table editor. 
 
@@ -76,6 +77,11 @@ Testing
 -------
 
 I tested **SublimeTextEditor** package under windows and quckly tested under linux. It should work under Mac, but I did not test, because I do not have mac.
+
+----
+Film
+----
+Press ctrl+x, ctrl+t and sublime show for you demo in new scratch view(just close this view after finish). It is integration test and demo at the same time. 
 
 ---------
 Alignment
@@ -166,3 +172,8 @@ alt+shift+up
 
 alt+shift+down
     Insert a new row above the current row. 
+
+ctrl+x, ctrl+t
+    Show Table Editor film in new scratch view
+
+
