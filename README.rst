@@ -43,26 +43,26 @@ Using Sublime Package Control
 =============================
 
 It is preferred and simplest way for most users. 
-- Install Package Control http://wbond.net/sublime_packages/package_control
-- Open Package Control
-- Select 'Install Package'
-- Find and select 'Table Editor'
+    - Install Package Control http://wbond.net/sublime_packages/package_control
+    - Open Package Control
+    - Select 'Install Package'
+    - Find and select 'Table Editor'
 
 Using Git
 =========
 
 If you like work with HEAD you can locate SublimeTableEditor in your packages directory.
-- Go to your Packages directory, you can locate to your Packages directory by using the menu item "Preferences -> Browse Packages...""
-- Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
+    - Go to your Packages directory, you can locate to your Packages directory by using the menu item "Preferences -> Browse Packages...""
+    - Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
 ::
     git clone https://github.com/vkocubinsky/SublimeTableEditor.git SublimeTableEditor
 
 Download Manually
 =================
 
-- Download the files using the GitHub .zip download option.
-- Unzip the files and rename the folder to something like SublimeTableEditor.
-- Copy the folder to your Sublime Text 2 Packages directory.
+    - Download the files using the GitHub .zip download option.
+    - Unzip the files and rename the folder to something like SublimeTableEditor.
+    - Copy the folder to your Sublime Text 2 Packages directory.
 
 --------
 Settings
@@ -183,6 +183,7 @@ Bellow syntaxes is not supported by table editor
     * | cell 21  | cell 22  |
     */
 The workaround is use
+::
     /*
      | column 1 | column 2 |
      |----------|----------|
