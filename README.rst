@@ -151,16 +151,19 @@ You can change justification several times
 Difference from emacs org-mode table editor
 -------------------------------------------
 
-SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. 
+SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. In fact I always run emacs and compare with Sublime Text Editor to get the same behavior.
 
 But exists some differences. Most significant is Emacs use character '+' in separator line, sublime text editor use character '|'.
+
+Emacs table:
 ::
-    Emacs table:
+    
     | col 1  | col2   | col3   |
     |--------+--------+--------|
     | data 1 | data 2 | data 3 |
 
-    Sublime text editor table:
+Sublime text editor table:
+::
     | col 1  |  col2  |  col3  |
     |--------|--------|--------|
     | data 1 | data 2 | data 3 |
