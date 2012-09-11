@@ -53,6 +53,7 @@ Using Git
 =========
 
 If you like work with HEAD you can locate SublimeTableEditor in your packages directory.
+
 - Go to your Packages directory, you can locate to your Packages directory by using the menu item 
   Preferences ->   Browse Packages...
 - Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
