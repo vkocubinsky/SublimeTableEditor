@@ -236,10 +236,10 @@ alt+shift+up
 alt+shift+down
     Insert a new row above the current row. 
 
-ctrl+up
+alt+up
     Move current row up
 
-ctrl+down 
+alt+down 
     Move current row down
 
 ctrl+x, ctrl+t
