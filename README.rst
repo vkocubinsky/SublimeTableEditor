@@ -6,7 +6,7 @@ SublimeTableEditor
 Overview
 --------
 
-**SublimeTableEditor** is a package for everyone who uses Sublime Editor for edit simple text tables in text mode, markdown mode, textile mode etc. SublimeTableEditor is very similar to emacs org-mode table editor. SublimeTableEditor allow on easy way edit text table, it allows:
+**SublimeTableEditor** is a package for everyone who uses Sublime Editor for edit simple text tables in text mode, markdown mode, textile mode etc. SublimeTableEditor allow on easy way edit text table, it allows:
 - insert/delete row
 - insert/delete column
 - navigate with tab/shift tab 
@@ -17,22 +17,22 @@ Overview
 
 For simple start type 
 ::
-    | column 1 | column 2 |
+    | Name | Age |
     |-
 
 Then press *Tab* key, you will get
 ::
-    | column 1 | column 2 |
-    |----------|----------|
-    | _        |          |
+    | Name | Age |
+    |------|-----|
+    | _    |     |
 
 Then fill data and press *Tab* key to next field or add new row
 ::
-    | column 1 | column 2 |
-    |----------|----------|
-    | row 1    |        1 |
-    | row 2    |        2 |
-    | _        |          |
+    |    Name   | Age |
+    |-----------|-----|
+    | Anna      |  20 |
+    | Alexander |  27 |
+    | _         |     |
 
 
 ------------
@@ -55,7 +55,7 @@ If you like work with HEAD you can locate SublimeTableEditor in your packages di
 - Go to your Packages directory, you can locate to your Packages directory by using the menu item "Preferences -> Browse Packages...""
 - Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
 ::
-    git clone https://github.com/vkocubinsky/SublimeTableEditor.git SublimeTableEditor*
+    git clone https://github.com/vkocubinsky/SublimeTableEditor.git SublimeTableEditor
 
 Download Manually
 =================
@@ -68,9 +68,9 @@ Download Manually
 Settings
 --------
 
-By default table recognition is on for all syntaxes and some keys override by SublimeTextEditor. In most cases it is what you want, but for some cases it is not that you want. There are 2 approach to fix this
+By default table editor is available for all syntaxes. In most cases it is what you want, but for some cases it is not that you want. There are 2 approach to fix this
 - disable table editor for some specific syntaxes
-- disable table editor for all syntaxes and enable for some specific
+- disable table editor for all syntaxes and enable for some specific syntaxes
 
 **Disable table editor for some specific syntaxes**
 
@@ -84,7 +84,7 @@ And then click *Tab* key you get unexpected code
         |   |
 That happens, because SublimeTableEditor think about single character '|' as about a table.
 You can get rid from this if set *disable_auto_table_edit=True* for Java syntax specific setting - Java.sublime-setting. For create Java.sublime-settings just click *Preferences -> Setting - More -> Syntax Specific - User*,
-when you edit java file. This example of content Java.sublime-settings
+when you edit Java file. This example of content Java.sublime-settings
 ::
     {
         disable_auto_table_edit:true 
@@ -104,7 +104,7 @@ Package is distributed by GPL v3.0 License.
 Testing
 -------
 
-I tested **SublimeTextEditor** package under windows and quckly tested under linux. It should work under Mac, but I did not test, because I do not have a mac.
+I tested **SublimeTextEditor** package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
 
 ----
 Film
@@ -151,7 +151,9 @@ You can change justification several times
 Difference from emacs org-mode table editor
 -------------------------------------------
 
-Emacs use character '+' in separator line, sublime text editor use character '|'.
+SublimeTableEditor is very similar to emacs org-mode table editor with the same key binding. 
+
+But exists some differences. Most significant is Emacs use character '+' in separator line, sublime text editor use character '|'.
 ::
     Emacs table:
     | col 1  | col2   | col3   |
@@ -163,8 +165,35 @@ Emacs use character '+' in separator line, sublime text editor use character '|'
     |--------|--------|--------|
     | data 1 | data 2 | data 3 |
 
-I am more interested add support reStructured grid tables than get rid from this difference.
+I am more interested add support markup specific syntaxes, for example reStructured grid tables than get rid from this difference.
 
+---------------
+Missed features
+---------------
+
+Bellow syntaxes is not supported by table editor
+::
+    /*
+    * | column 1 | column 2 |
+    * |----------|----------|
+    * | cell 11  | cell 12  |
+    * | cell 21  | cell 22  |
+    */
+The workaround is use
+    /*
+     | column 1 | column 2 |
+     |----------|----------|
+     | cell 11  | cell 12  |
+     | cell 21  | cell 22  |
+    */
+But it is nice to have direct support language specific comments.
+
+-----------
+Know Issues
+-----------
+
+Move row up , move row down work correct only for single selection and doesn't work properly for multiple selection.
+This will be fixed for GA version. 
 
 -----------
 Key binding
@@ -200,6 +229,12 @@ alt+shift+up
 
 alt+shift+down
     Insert a new row above the current row. 
+
+ctrl+up
+    Move current row up
+
+ctrl+down 
+    Move current row down
 
 ctrl+x, ctrl+t
     Show Table Editor film in new scratch view

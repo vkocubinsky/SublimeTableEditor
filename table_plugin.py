@@ -448,3 +448,33 @@ class TableInsertRow(AbstractTableMultiSelect):
         pt = self.view.text_point(sel_row, sel_col)
         return sublime.Region(pt,pt)
 
+
+
+
+class TableMoveRowUp(AbstractTableCommand):
+    """
+    Command: table_move_row_up
+    Key: alt+up
+    Move the current row up.
+    """
+    def run(self, edit):
+        for sel in self.view.sel():
+            row = self.get_row(sel.begin())
+            if row - 1 >= self.get_first_table_row(row):
+                self.view.run_command("swap_line_up")
+
+
+class TableMoveRowDown(AbstractTableCommand):
+    """
+    Command: table_move_row_down
+    Key: alt+down
+    Move the current row down.
+    """
+
+    def run(self, edit):
+        for sel in self.view.sel():
+            row = self.get_row(sel.begin())
+            if row + 1 <=  self.get_last_table_row(row):
+                self.view.run_command("swap_line_down")
+
+
