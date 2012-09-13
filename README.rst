@@ -154,6 +154,11 @@ alt+up
 alt+down 
     Move current row down
 
+ctrl+c, -
+    Insert a horizontal line below current row. 
+ctrl+c, enter
+    Insert a horizontal line below current row, and move the cursor into the row below that line. 
+
 ctrl+x, ctrl+t
     Show Table Editor film in new scratch view
 
