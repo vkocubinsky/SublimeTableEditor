@@ -90,5 +90,19 @@
            { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
             { "key": "following_text", "operator": "regex_contains", "operand": "$", "match_all": true }
         ]
+    },
+    { "keys": ["ctrl+c","-"], "command": "table_insert_hline", "context":
+        [
+            { "key": "setting.disable_auto_table_edit", "operator": "not_equal", "operand": true },                
+            { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
+            { "key": "following_text", "operator": "regex_contains", "operand": "$", "match_all": true }
+        ]
+    },
+    { "keys": ["ctrl+c","enter"], "command": "table_hline_and_move", "context":
+        [
+            { "key": "setting.disable_auto_table_edit", "operator": "not_equal", "operand": true },                
+            { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
+            { "key": "following_text", "operator": "regex_contains", "operand": "$", "match_all": true }
+        ]
     }
 ]

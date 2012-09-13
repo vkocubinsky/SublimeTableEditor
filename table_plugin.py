@@ -477,4 +477,47 @@ class TableMoveRowDown(AbstractTableCommand):
             if row + 1 <=  self.get_last_table_row(row):
                 self.view.run_command("swap_line_down")
 
+class TableInsertHline(AbstractTableMultiSelect):
+    """
+    Command: table_insert_hline
+    Key: ctrl+c,-
+    Insert a horizontal line below current row.
+    """
+    def run_one_sel(self, edit,sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        line_region = self.view.line(sel)
+        text = self.view.substr(line_region)
+        i1 = find(text, '|', 1)
+        new_text = "\n" + text[:i1] + re.sub(r"[^\|]",'-',text[i1:])
+        self.view.insert(edit, line_region.end(),new_text)
+        pt = self.view.text_point(sel_row, sel_col)
+        return sublime.Region(pt,pt)
+
+
+
+class TableHlineAndMove(AbstractTableMultiSelect):
+    """
+    Command:  table_hline_and_move
+    Key: ctrl+c, enter
+    Insert a horizontal line below current row, and move the cursor into the row below that line.
+    """
+    def run_one_sel(self, edit,sel):
+        print "hline and move"
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        line_region = self.view.line(sel)
+        text = self.view.substr(line_region)
+        i1 = find(text, '|', 1)
+        new_text = "\n" + text[:i1] + re.sub(r"[^\|]",'-',text[i1:])
+        self.view.insert(edit, line_region.end(),new_text)
+        print sel_row, self.get_last_table_row(sel_row)
+        if sel_row + 2 < self.get_last_table_row(sel_row):
+            sel_row = sel_row + 2
+            #if is_separator_row insert empty row
+        else:
+            passs
+            #insert empty row
+        pt = self.view.text_point(sel_row, sel_col)
+        return sublime.Region(pt,pt)
+
+
 
