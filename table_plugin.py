@@ -523,7 +523,7 @@ class TableHlineAndMove(AbstractTableMultiSelect):
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
     def run(self, args):
-        self.view.settings().set("enable_table_editor",False)
+        self.view.settings().erase("enable_table_editor")
 
 
 class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
@@ -542,7 +542,7 @@ class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
             if m:
                 base_name = m.group(1) + ".sublime-settings"
                 settings = sublime.load_settings(base_name)
-                settings.set("enable_table_editor", False)
+                settings.erase("enable_table_editor")
                 sublime.save_settings(base_name)
 
 

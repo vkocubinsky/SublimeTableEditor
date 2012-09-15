@@ -15,8 +15,15 @@ Overview
 - move row up/down
 - specify column alignment
 - show integration tests film
+- temporary disable/enable table editor
 
-For simple start type
+For first time you should enable table editor with command palette 
+
+* click Ctrl+Shift+P
+* select Table Editor: Enable for current syntax or Table Editor: Enable for current view
+
+Then when Table Editor is eabled just type
+
 ::
     | Name | Age |
     |-
@@ -101,6 +108,57 @@ Download Manually
 - Unzip the files and rename the folder to something like SublimeTableEditor.
 - Copy the folder to your Sublime Text 2 Packages directory.
 
+-----
+Setup
+-----
+
+By default Table Editor is disable. You be able enable Table Editor for:
+
+* specific synax
+* specific view 
+* all files scope
+
+**Enable for syntax scope**
+
+It is most usable option. Usually you like to enable Table Editor for Plain text, Markdown, Textile, reStructuredText syntax. 
+
+For enable Table Editor for specific syntax
+
+* Open file with specific syntax(for example .txt for Plain text)
+* Click Ctrl+Shift+P for show command palette
+* Select 'Table Editor: Enable for current syntax'
+
+For disable Table Editor for specific syntax
+
+* Open file with specific syntax(for example .txt for Plain text)
+* Click Ctrl+Shift+P for show command palette
+* Select 'Table Editor: Disable for current syntax'
+
+You can do the same manually by
+
+* Open file with specific syntax(for example .txt for Plain text)
+* Click Preferences -> Settings - More -> Syntax Specific User
+* put setting "enable_table_editor": true or put setting "enable_table_editor": false
+* save Syntax Specific File
+
+**Enable for view**
+
+Some time you like temporary enable table editor and then disable it. It is usefull if you edit python or java code
+and like to pretty print table
+
+For do this you should:
+* Click Ctrl+Shift+P for show command palette
+* Select "Table Editor: Enable for current view"
+
+Then after you edit table you can disable Table Editor
+* Click Ctrl+Shift+P for show command palette
+* Select "Table Editor: Disable for current view"
+
+**Enable for all files**
+
+* Click Preferences -> Settings - User
+* put setting "enable_table_editor": true
+
 -------
 License
 -------
@@ -156,42 +214,13 @@ alt+down
 
 ctrl+c, -
     Insert a horizontal line below current row. 
-ctrl+c, enter
-    Insert a horizontal line below current row, and move the cursor into the row below that line. 
+
+..ctrl+c, enter
+..    Insert a horizontal line below current row, and move the cursor into the row below that line. 
 
 ctrl+x, ctrl+t
     Show Table Editor film in new scratch view
 
-
---------
-Settings
---------
-
-By default table editor is available for all syntaxes. In most cases it is what you want, but for some cases it is not that you want. There are 2 approach to fix this
-- disable table editor for some specific syntaxes
-- disable table editor for all syntaxes and enable for some specific syntaxes
-
-**Disable table editor for some specific syntaxes**
-
-The example of unwanted table recognition is if you are typing next Java code
-::
-    if ( long condition
-        |
-And then click *Tab* key you get unexpected code
-::
-    if ( long condition
-        |   |
-That happens, because SublimeTableEditor think about single character '|' as about a table.
-You can get rid from this if set *disable_auto_table_edit=True* for Java syntax specific setting - Java.sublime-setting. For create Java.sublime-settings just click *Preferences -> Setting - More -> Syntax Specific - User*,
-when you edit Java file. This example of content Java.sublime-settings
-::
-    {
-        disable_auto_table_edit:true 
-    }
-
-**Disable table editor for all syntaxes and enable for some specific**
-
-Other approach is set disable_auto_table_edit=true for user settings, click *Setting - User* to open user setings. Then enable only for specific syntax like Markdown, Textiles, Text etc. 
 
 -------------------------------------------
 Difference from emacs org-mode table editor
@@ -215,28 +244,6 @@ Sublime text editor table:
     | data 1 | data 2 | data 3 |
 
 I am more interested add support markup specific syntaxes, for example reStructured grid tables than get rid from this difference.
-
----------------
-Missed features
----------------
-
-Bellow syntaxes is not supported by table editor
-::
-    /*
-    * | column 1 | column 2 |
-    * |----------|----------|
-    * | cell 11  | cell 12  |
-    * | cell 21  | cell 22  |
-    */
-The workaround is use
-::
-    /*
-     | column 1 | column 2 |
-     |----------|----------|
-     | cell 11  | cell 12  |
-     | cell 21  | cell 22  |
-    */
-But it is nice to have direct support language specific comments.
 
 -----------
 Know Issues
