@@ -1,0 +1,7 @@
+[
+    { "caption": "Table Editor: Enable for current view", "command": "table_editor_enable_for_current_view" },
+    { "caption": "Table Editor: Disable for current view", "command": "table_editor_disable_for_current_view" },
+    { "caption": "Table Editor: Enable for current syntax", "command": "table_editor_enable_for_current_syntax" },
+    { "caption": "Table Editor: Disable for current syntax", "command": "table_editor_disable_for_current_syntax" }
+
+]

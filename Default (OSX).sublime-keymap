@@ -1,5 +1,6 @@
 [
     { "keys": ["ctrl+x", "ctrl+t"], "command": "table_editor_film" },
+    //basic keybinding
     { "keys": ["ctrl+c", "ctrl+c"], "command": "table_align", "context":
         [
             { "key": "setting.enable_table_editor", "operator": "equal", "operand": true, "match_all": true },

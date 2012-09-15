@@ -266,7 +266,7 @@ Click ctrl+w to close this window""".format(len(tests))})
         self.view.run_command(command.name,command.args)
         if command_ind + 1 < len(test.commands):
             sublime.set_timeout(lambda: self.run_tests(tests, test_ind, command_ind + 1),
-                        TableEditorTestCommand.COMMAND_TIMEOUT)
+                        TableEditorTestSuite.COMMAND_TIMEOUT)
         else:
             text = self.get_buffer_text()
             if  text != tests[test_ind].expected_value():
@@ -285,7 +285,7 @@ Test {0} executed sucessfully
 """.format(tests[test_ind].name)})
 
                 sublime.set_timeout(lambda: self.run_tests(tests, test_ind + 1, 0),
-                    TableEditorTestCommand.TEST_TIMEOUT)
+                    TableEditorTestSuite.TEST_TIMEOUT)
 
 
 
@@ -301,6 +301,7 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.new_file()
         view.set_scratch(True)
+        view.run_command("table_editor_enable_for_current_view")
         view.set_name("Sublime Table Editor Film")
         suite = TableEditorTestSuite(view)
         suite.run()

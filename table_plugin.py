@@ -520,4 +520,50 @@ class TableHlineAndMove(AbstractTableMultiSelect):
         return sublime.Region(pt,pt)
 
 
+class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
+
+    def run(self, args):
+        self.view.settings().set("enable_table_editor",False)
+
+
+class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
+
+    def run(self, args):
+        self.view.settings().set("enable_table_editor",True)
+
+
+
+class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
+
+    def run(self,edit):
+        syntax = self.view.settings().get('syntax')
+        if syntax is not None:
+            m = re.search("([^/]+)[.]tmLanguage$", syntax)
+            if m:
+                base_name = m.group(1) + ".sublime-settings"
+                settings = sublime.load_settings(base_name)
+                settings.set("enable_table_editor", False)
+                sublime.save_settings(base_name)
+
+
+class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
+
+    def run(self,edit):
+        syntax = self.view.settings().get('syntax')
+        if syntax is not None:
+            m = re.search("([^/]+)[.]tmLanguage$", syntax)
+            if m:
+                base_name = m.group(1) + ".sublime-settings"
+                settings = sublime.load_settings(base_name)
+                settings.set("enable_table_editor", True)
+                sublime.save_settings(base_name)
+
+
+
+
+
+
+
+
+
 
