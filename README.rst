@@ -115,10 +115,10 @@ Setup
 By default Table Editor is disable. You be able enable Table Editor for:
 
 * specific synax
-* specific view 
-* all files scope
+* current view 
+* all files
 
-**Enable for syntax scope**
+**Enable for specific syntax**
 
 It is most usable option. Usually you like to enable Table Editor for Plain text, Markdown, Textile, reStructuredText syntax. 
 
@@ -141,7 +141,7 @@ You can do the same manually by
 * put setting "enable_table_editor": true or put setting "enable_table_editor": false
 * save Syntax Specific File
 
-**Enable for view**
+**Enable for current view**
 
 Some time you like temporary enable table editor and then disable it. It is usefull if you edit python or java code
 and like to pretty print table
@@ -155,6 +155,8 @@ Then after you edit table you can disable Table Editor
 * Select "Table Editor: Disable for current view"
 
 **Enable for all files**
+
+Probably this option is usable if you work only with text or wiki markup files
 
 * Click Preferences -> Settings - User
 * put setting "enable_table_editor": true
