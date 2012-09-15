@@ -7,6 +7,7 @@ Overview
 --------
 
 **SublimeTableEditor** is a package for everyone who uses Sublime Editor for edit simple text tables in text mode, markdown mode, textile mode etc. SublimeTableEditor allow on easy way edit text table, it allows:
+
 - insert/delete row
 - insert/delete column
 - navigate with tab/shift tab 
@@ -23,7 +24,6 @@ For first time you should enable table editor with command palette
 * select Table Editor: Enable for current syntax or Table Editor: Enable for current view
 
 Then when Table Editor is eabled just type
-
 ::
     | Name | Age |
     |-
@@ -215,8 +215,8 @@ alt+down
 ctrl+c, -
     Insert a horizontal line below current row. 
 
-..ctrl+c, enter
-..    Insert a horizontal line below current row, and move the cursor into the row below that line. 
+ctrl+c, enter
+    Insert a horizontal line below current row, and move the cursor into the row below that line. 
 
 ctrl+x, ctrl+t
     Show Table Editor film in new scratch view
@@ -249,6 +249,10 @@ I am more interested add support markup specific syntaxes, for example reStructu
 Know Issues
 -----------
 
-Move row up , move row down work correct only for single selection and doesn't work properly for multiple selection.
-This will be fixed for GA version. 
+1. Move row up , move row down work correct only for single selection and doesn't work properly for multiple selection.
+2. Ctrl+c, enter is doesn't work as expeted
+
+These will be fixed for GA version. 
+
+
 
