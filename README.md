@@ -70,7 +70,7 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
-Press *ctrl+x, ctrl+t* and sublime show for you demo in new scratch view. It is integration test and demo at the same time. 
+Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view* . It is integration test and demo at the same time. 
 
 ## Installation
 
@@ -165,7 +165,7 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 
 ## Key binding
 
-**ctrl+k, ctrl+k**
+**ctrl+shift+f**
 
         Re-align the table without change the current table field. Move cursor to begin of the current table field.
 
@@ -220,11 +220,6 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 **ctrl+k, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
-
-**ctrl+k, ctrl+t**
-
-        Show Table Editor film in new scratch view
-
 
 ## Difference from emacs org-mode table editor
 

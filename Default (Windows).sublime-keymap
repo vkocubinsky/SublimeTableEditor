@@ -1,7 +1,5 @@
 [
-    { "keys": ["ctrl+k", "ctrl+t"], "command": "table_editor_film" },
-    //basic keybinding
-    { "keys": ["ctrl+k", "ctrl+k"], "command": "table_align", "context":
+    { "keys": ["ctrl+shift+f"], "command": "table_align", "context":
         [
             { "key": "setting.enable_table_editor", "operator": "equal", "operand": true, "match_all": true },
             { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
