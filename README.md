@@ -165,7 +165,7 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 
 ## Key binding
 
-**ctrl+shift+f**
+**ctrl+shift+a**
 
         Re-align the table without change the current table field. Move cursor to begin of the current table field.
 
