@@ -53,6 +53,8 @@ But you can explicit set justification with format characters
 * '>' - right
 * '#' - center
 
+as in next example
+
     | column 1 | column 2 | column 3 |
     | <<<<<<<< | >>>>>>>> | ######## |
     |----------|----------|----------|
