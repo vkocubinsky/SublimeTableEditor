@@ -457,6 +457,7 @@ class TableMoveRowUp(AbstractTableCommand):
     Key: alt+up
     Move the current row up.
     """
+
     def run(self, edit):
         for sel in self.view.sel():
             row = self.get_row(sel.begin())
@@ -483,8 +484,10 @@ class TableInsertHline(AbstractTableMultiSelect):
     Key: ctrl+c,-
     Insert a horizontal line below current row.
     """
+
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
@@ -501,21 +504,30 @@ class TableHlineAndMove(AbstractTableMultiSelect):
     Key: ctrl+c, enter
     Insert a horizontal line below current row, and move the cursor into the row below that line.
     """
+    def run_before(self,edit):
+        self.view.run_command("table_align")
+
     def run_one_sel(self, edit,sel):
-        print "hline and move"
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
         new_text = "\n" + text[:i1] + re.sub(r"[^\|]",'-',text[i1:])
+
         self.view.insert(edit, line_region.end(),new_text)
-        print sel_row, self.get_last_table_row(sel_row)
-        if sel_row + 2 < self.get_last_table_row(sel_row):
+        if sel_row + 1 < self.get_last_table_row(sel_row):
             sel_row = sel_row + 2
-            #if is_separator_row insert empty row
+            if self.is_separator_row(sel_row):
+                empty_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+                point = self.view.text_point(sel_row -1 , 0)
+                region = self.view.line(point)
+                self.view.insert(edit, region.end(),empty_text)
         else:
-            passs
-            #insert empty row
+            empty_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+            point = self.view.text_point(sel_row + 1, 0)
+            region = self.view.line(point)
+            self.view.insert(edit, region.end(),empty_text)
+            sel_row = sel_row + 2
         pt = self.view.text_point(sel_row, sel_col)
         return sublime.Region(pt,pt)
 

@@ -220,7 +220,6 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 **ctrl+c, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
-        This feature is not implemented
 
 **ctrl+x, ctrl+t**
 
