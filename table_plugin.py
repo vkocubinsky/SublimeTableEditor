@@ -485,6 +485,10 @@ class TableInsertHline(AbstractTableMultiSelect):
     Insert a horizontal line below current row.
     """
 
+    def run_before(self,edit):
+        self.view.run_command("table_align")
+
+
     def run_one_sel(self, edit,sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
