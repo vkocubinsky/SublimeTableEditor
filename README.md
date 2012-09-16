@@ -165,7 +165,7 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 
 ## Key binding
 
-**ctrl+c, ctrl+c**
+**ctrl+k, ctrl+k**
 
         Re-align the table without change the current table field. Move cursor to begin of the current table field.
 
@@ -213,15 +213,15 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 
         Move current row down
 
-**ctrl+c, -**
+**ctrl+k, -**
 
         Insert a horizontal line below current row. 
 
-**ctrl+c, enter**
+**ctrl+k, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
 
-**ctrl+x, ctrl+t**
+**ctrl+k, ctrl+t**
 
         Show Table Editor film in new scratch view
 
@@ -254,7 +254,6 @@ Second one is navigation between field. Emacs set pointer to begin of field inde
 ## Know Issues
 
 1. Move row up , move row down work correct only for single selection and doesn't work properly for multiple selection.
-2. Ctrl+c, enter is doesn't work as expeted
 
 These will be fixed for GA version. 
 

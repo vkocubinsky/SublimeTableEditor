@@ -1,7 +1,7 @@
 [
-    { "keys": ["ctrl+x", "ctrl+t"], "command": "table_editor_film" },
+    { "keys": ["ctrl+k", "ctrl+t"], "command": "table_editor_film" },
     //basic keybinding
-    { "keys": ["ctrl+c", "ctrl+c"], "command": "table_align", "context":
+    { "keys": ["ctrl+k", "ctrl+k"], "command": "table_align", "context":
         [
             { "key": "setting.enable_table_editor", "operator": "equal", "operand": true, "match_all": true },
             { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
@@ -92,14 +92,14 @@
             { "key": "following_text", "operator": "regex_contains", "operand": "$", "match_all": true }
         ]
     },
-    { "keys": ["ctrl+c","-"], "command": "table_insert_hline", "context":
+    { "keys": ["ctrl+k","-"], "command": "table_insert_hline", "context":
         [
             { "key": "setting.enable_table_editor", "operator": "equal", "operand": true, "match_all": true },
             { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
             { "key": "following_text", "operator": "regex_contains", "operand": "$", "match_all": true }
         ]
     },
-    { "keys": ["ctrl+c","enter"], "command": "table_hline_and_move", "context":
+    { "keys": ["ctrl+k","enter"], "command": "table_hline_and_move", "context":
         [
             { "key": "setting.enable_table_editor", "operator": "equal", "operand": true, "match_all": true },
             { "key": "preceding_text", "operator": "regex_contains", "operand": "^\\s*\\|", "match_all": true },
