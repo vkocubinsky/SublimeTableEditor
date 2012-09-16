@@ -160,15 +160,6 @@ Probably this option is usable if you work only with text or wiki markup files
 * Click *Preferences -> Settings - User*
 * put setting *"enable_table_editor": true*
 
-
-## License
-
-Package is distributed by GNU General Public License v3.0.
-
-## Testing
-
-I tested *Table Editor* package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
-
 ## Key binding
 
 **ctrl+shift+a**
@@ -226,6 +217,16 @@ I tested *Table Editor* package under Windows and quickly tested under Linux. It
 **ctrl+k, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
+
+
+## License
+
+Package is distributed by GNU General Public License v3.0.
+
+## Testing
+
+I tested *Table Editor* package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
+
 
 ## Difference from emacs org-mode table editor
 
