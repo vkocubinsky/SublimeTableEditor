@@ -2,7 +2,7 @@
 
 ## Overview
 
-*Table Editor* is a package for everyone who uses *Sublime Editor* for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
 - insert/delete row
 - insert/delete column
