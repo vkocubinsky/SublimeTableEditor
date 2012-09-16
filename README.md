@@ -47,7 +47,11 @@ By default text data is left justified, numeric data is right justified, column 
     | text value row 1 | 0.9999999999999999 |
     | tv row 2         |                 99 |
 
-But you can explicit set justification with format characters '<' - left,'>' - right,'#' - center. 
+But you can explicit set justification with format characters 
+
+* '<' - left 
+* '>' - right
+* '#' - center
 
     | column 1 | column 2 | column 3 |
     | <<<<<<<< | >>>>>>>> | ######## |
