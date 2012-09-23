@@ -500,7 +500,8 @@ class TableInsertHline(AbstractTableMultiSelect):
         i1 = find(text, '|', 1)
         new_text = "\n" + text[:i1] + re.sub(r"[^\|]", '-', text[i1:])
         self.view.insert(edit, line_region.end(), new_text)
-        pt = self.view.text_point(sel_row, sel_col)
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
 
@@ -534,7 +535,8 @@ class TableHlineAndMove(AbstractTableMultiSelect):
             region = self.view.line(point)
             self.view.insert(edit, region.end(), empty_text)
             sel_row = sel_row + 2
-        pt = self.view.text_point(sel_row, sel_col)
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
 
