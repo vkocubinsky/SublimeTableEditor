@@ -27,12 +27,11 @@ import tablelib
 
 class TestFuntions(unittest.TestCase):
 
-
     def test_auto_complete(self):
-        self.assertEquals("|   |",tablelib.format_table("|"))
+        self.assertEquals("|   |", tablelib.format_table("|"))
 
     def test_auto_complete_multi_line(self):
-        raw_text ="""\
+        raw_text = """\
 |
 |
 """.rstrip()
@@ -40,7 +39,7 @@ class TestFuntions(unittest.TestCase):
 |   |
 |   |
 """.rstrip()
-        self.assertMultiLineEqual(expected,tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
 
     def test_simple_format(self):
         raw_text = """\

@@ -21,17 +21,17 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 import tablelib
 import re
-
 
 
 def find(text, sep, num):
     found = -1
     index = 0
     for i in range(num):
-        found = text.find(sep,index)
+        found = text.find(sep, index)
         if index == -1:
             return -1
         index = found + 1
@@ -73,13 +73,13 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_default_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, '|', field_num +1)
-        i2 = find(text, '|', field_num +2)
+        i1 = find(text, '|', field_num + 1)
+        i2 = find(text, '|', field_num + 2)
         match = re.compile(r"([^\s])\s+$").search(text, i1 + 1, i2)
         if match:
-            return self.view.text_point(row,match.start(1) + 1)
+            return self.view.text_point(row, match.start(1) + 1)
         else:
-            return self.view.text_point(row,i1 + 2)
+            return self.view.text_point(row, i1 + 2)
 
     def get_last_table_row(self, row):
         last_table_row = row
@@ -106,7 +106,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             if not self.is_table_row(self.get_row(sel.begin())):
                 new_sels.append(sel)
                 continue
-            new_sel = self.run_one_sel(edit,sel)
+            new_sel = self.run_one_sel(edit, sel)
             new_sels.append(new_sel)
 
         self.view.sel().clear()
@@ -120,7 +120,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
     def run_after(self, edit):
         pass
 
-    def run_one_sel(self,edit,sel):
+    def run_one_sel(self, edit, sel):
         return sel
 
 
@@ -131,25 +131,25 @@ class TableAlignCommand(AbstractTableMultiSelect):
     Re-align the table without change the current table field. Move cursor to begin of the current table field.
     """
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         first_table_row = self.get_first_table_row(self.get_row(sel.begin()))
         last_table_row = self.get_last_table_row(self.get_row(sel.begin()))
 
-        begin_point = self.view.line(self.view.text_point(first_table_row,0)).begin()
-        end_point = self.view.line(self.view.text_point(last_table_row,0)).end()
+        begin_point = self.view.line(self.view.text_point(first_table_row, 0)).begin()
+        end_point = self.view.line(self.view.text_point(last_table_row, 0)).end()
 
-        table_region = sublime.Region(begin_point,end_point)
+        table_region = sublime.Region(begin_point, end_point)
         text = self.view.substr(table_region)
 
         line_text = self.get_text(sel_row)
         sel_field_num = line_text.count("|", 0, sel_col) - 1
         i1 = line_text.rfind("|", 0, sel_col)
-        if len(line_text[i1+1:].strip()) == 0 and sel_field_num > 0:
+        if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
             sel_field_num = sel_field_num - 1
         self.view.replace(edit, table_region, tablelib.format_table(text))
         pt = self.get_field_default_point(sel_row, sel_field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableNextField(AbstractTableMultiSelect):
@@ -159,10 +159,10 @@ class TableNextField(AbstractTableMultiSelect):
     Re-align the table, move to the next field. Creates a new row if necessary.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         last_table_row = self.get_last_table_row(sel_row)
@@ -187,17 +187,17 @@ class TableNextField(AbstractTableMultiSelect):
                 break
             else:
                 if self.is_separator_row(sel_row) or not moved:
-                    point = self.view.text_point(sel_row,0)
+                    point = self.view.text_point(sel_row, 0)
                     region = self.view.line(point)
                     text = self.view.substr(region)
                     i1 = find(text, '|', 1)
-                    new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-                    self.view.insert(edit, region.end(),new_text)
+                    new_text = "\n" + text[:i1] + re.sub(r"[^\|]", ' ', text[i1:])
+                    self.view.insert(edit, region.end(), new_text)
                     field_num = 0
                     sel_row += 1
                 break
         pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TablePreviousField(AbstractTableMultiSelect):
@@ -207,10 +207,10 @@ class TablePreviousField(AbstractTableMultiSelect):
     Re-align, move to previous field.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         first_table_row = self.get_first_table_row(sel_row)
@@ -226,7 +226,7 @@ class TablePreviousField(AbstractTableMultiSelect):
                 continue
             elif field_num > 0:
                 if not moved:
-                    field_num = field_num -1
+                    field_num = field_num - 1
                 break
             elif sel_row > first_table_row:
                 if not moved:
@@ -239,7 +239,7 @@ class TablePreviousField(AbstractTableMultiSelect):
             else:
                 break
         pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableNextRow(AbstractTableMultiSelect):
@@ -249,10 +249,10 @@ class TableNextRow(AbstractTableMultiSelect):
     Re-align the table and move down to next row. Creates a new row if necessary.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         if sel_row < self.get_last_table_row(sel_row):
@@ -261,11 +261,11 @@ class TableNextRow(AbstractTableMultiSelect):
             line_region = self.view.line(sel)
             text = self.get_text(sel_row)
             i1 = find(text, '|', 1)
-            new_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-            self.view.insert(edit, line_region.end(),new_text)
+            new_text = "\n" + text[:i1] + re.sub(r"[^\|]", ' ', text[i1:])
+            self.view.insert(edit, line_region.end(), new_text)
             sel_row += 1
         pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableMoveColumnLeft(AbstractTableMultiSelect):
@@ -275,10 +275,10 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
     Move the current column right.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         if field_num == 0:
@@ -298,8 +298,7 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
                             )
             row += 1
         pt = self.get_field_default_point(sel_row, field_num - 1)
-        return sublime.Region(pt,pt)
-
+        return sublime.Region(pt, pt)
 
 
 class TableMoveColumnRight(AbstractTableMultiSelect):
@@ -309,10 +308,10 @@ class TableMoveColumnRight(AbstractTableMultiSelect):
     Move the current column right.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         if field_num == self.get_field_count(sel_row) - 1:
@@ -333,8 +332,7 @@ class TableMoveColumnRight(AbstractTableMultiSelect):
                             )
             row += 1
         pt = self.get_field_default_point(sel_row, field_num + 1)
-        return sublime.Region(pt,pt)
-
+        return sublime.Region(pt, pt)
 
 
 class TableDeleteColumn(AbstractTableMultiSelect):
@@ -344,10 +342,10 @@ class TableDeleteColumn(AbstractTableMultiSelect):
     Kill the current column.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
 
@@ -366,13 +364,13 @@ class TableDeleteColumn(AbstractTableMultiSelect):
             else:
                 self.view.replace(edit,
                                 self.view.line(self.view.text_point(row, sel_col)),
-                                text[0:i1] + text[i2+1:])
+                                text[0:i1] + text[i2 + 1:])
 
             row += 1
         if field_num == self.get_field_count(sel_row):
             field_num -= 1
         pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableInsertColumn(AbstractTableMultiSelect):
@@ -382,17 +380,16 @@ class TableInsertColumn(AbstractTableMultiSelect):
     Insert a new column to the left of the cursor position.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
 
         first_table_row = self.get_first_table_row(sel_row)
         last_table_row = self.get_last_table_row(sel_row)
         row = first_table_row
-        field_count = self.get_field_count(sel_row)
         while row <= last_table_row:
             text = self.get_text(row)
             cell = "   "
@@ -405,7 +402,7 @@ class TableInsertColumn(AbstractTableMultiSelect):
 
             row += 1
         pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableKillRow(AbstractTableMultiSelect):
@@ -415,10 +412,10 @@ class TableKillRow(AbstractTableMultiSelect):
     Kill the current row or horizontal line.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.view.erase(edit, self.view.full_line(sel))
         if sel_row == self.get_last_table_row(sel_row):
@@ -426,7 +423,8 @@ class TableKillRow(AbstractTableMultiSelect):
         if not self.is_table_row(sel_row):
             sel_col = 0
         pt = self.view.text_point(sel_row, sel_col)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
+
 
 class TableInsertRow(AbstractTableMultiSelect):
     """
@@ -435,18 +433,18 @@ class TableInsertRow(AbstractTableMultiSelect):
     Insert a new row above the current row.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
-        new_text = text[:i1] + re.sub(r"[^\|]",' ',text[i1:]) + "\n"
-        self.view.insert(edit, line_region.begin(),new_text)
+        new_text = text[:i1] + re.sub(r"[^\|]", ' ', text[i1:]) + "\n"
+        self.view.insert(edit, line_region.begin(), new_text)
         pt = self.view.text_point(sel_row, sel_col)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableMoveRowUp(AbstractTableCommand):
@@ -478,7 +476,7 @@ class TableMoveRowDown(AbstractTableCommand):
         allow = True
         for sel in self.view.sel():
             row = self.get_row(sel.begin())
-            if row ==  self.get_last_table_row(row):
+            if row == self.get_last_table_row(row):
                 allow = False
                 break
         if allow:
@@ -492,21 +490,18 @@ class TableInsertHline(AbstractTableMultiSelect):
     Insert a horizontal line below current row.
     """
 
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
-        new_text = "\n" + text[:i1] + re.sub(r"[^\|]",'-',text[i1:])
-        self.view.insert(edit, line_region.end(),new_text)
+        new_text = "\n" + text[:i1] + re.sub(r"[^\|]", '-', text[i1:])
+        self.view.insert(edit, line_region.end(), new_text)
         pt = self.view.text_point(sel_row, sel_col)
-        return sublime.Region(pt,pt)
-
+        return sublime.Region(pt, pt)
 
 
 class TableHlineAndMove(AbstractTableMultiSelect):
@@ -515,32 +510,32 @@ class TableHlineAndMove(AbstractTableMultiSelect):
     Key: ctrl+k, enter
     Insert a horizontal line below current row, and move the cursor into the row below that line.
     """
-    def run_before(self,edit):
+    def run_before(self, edit):
         self.view.run_command("table_align")
 
-    def run_one_sel(self, edit,sel):
+    def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
         i1 = find(text, '|', 1)
-        new_text = "\n" + text[:i1] + re.sub(r"[^\|]",'-',text[i1:])
+        new_text = "\n" + text[:i1] + re.sub(r"[^\|]", '-', text[i1:])
 
-        self.view.insert(edit, line_region.end(),new_text)
+        self.view.insert(edit, line_region.end(), new_text)
         if sel_row + 1 < self.get_last_table_row(sel_row):
             sel_row = sel_row + 2
             if self.is_separator_row(sel_row):
-                empty_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
-                point = self.view.text_point(sel_row -1 , 0)
+                empty_text = "\n" + text[:i1] + re.sub(r"[^\|]", ' ', text[i1:])
+                point = self.view.text_point(sel_row - 1, 0)
                 region = self.view.line(point)
-                self.view.insert(edit, region.end(),empty_text)
+                self.view.insert(edit, region.end(), empty_text)
         else:
-            empty_text = "\n" + text[:i1] + re.sub(r"[^\|]",' ',text[i1:])
+            empty_text = "\n" + text[:i1] + re.sub(r"[^\|]", ' ', text[i1:])
             point = self.view.text_point(sel_row + 1, 0)
             region = self.view.line(point)
-            self.view.insert(edit, region.end(),empty_text)
+            self.view.insert(edit, region.end(), empty_text)
             sel_row = sel_row + 2
         pt = self.view.text_point(sel_row, sel_col)
-        return sublime.Region(pt,pt)
+        return sublime.Region(pt, pt)
 
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
@@ -552,13 +547,12 @@ class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
 
     def run(self, args):
-        self.view.settings().set("enable_table_editor",True)
-
+        self.view.settings().set("enable_table_editor", True)
 
 
 class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
 
-    def run(self,edit):
+    def run(self, edit):
         syntax = self.view.settings().get('syntax')
         if syntax is not None:
             m = re.search("([^/]+)[.]tmLanguage$", syntax)
@@ -571,7 +565,7 @@ class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
 
 class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
 
-    def run(self,edit):
+    def run(self, edit):
         syntax = self.view.settings().get('syntax')
         if syntax is not None:
             m = re.search("([^/]+)[.]tmLanguage$", syntax)
@@ -580,4 +574,3 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 settings = sublime.load_settings(base_name)
                 settings.set("enable_table_editor", True)
                 sublime.save_settings(base_name)
-

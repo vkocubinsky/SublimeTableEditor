@@ -21,17 +21,19 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 
 
 class CommandDef:
 
-    def __init__(self, name, args = None):
+    def __init__(self, name, args=None):
         self.name = name
         self.args = args
 
+
 class CallbackTest:
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
         self.commands = []
 
@@ -78,7 +80,6 @@ class SimpleTableTest(CallbackTest):
 """.format(self.name)
 
 
-
 class MoveColumnTest(CallbackTest):
 
     def __init__(self):
@@ -109,13 +110,11 @@ class MoveColumnTest(CallbackTest):
 - insert/delete column
 """.format(self.name)
 
-
     def expected_value(self):
         return """{0}
 | column A | column B | column C |
 |----------|----------|----------|
 | row A    | row B    | row C    |""".format(self.description)
-
 
 
 class CustomAlignTest(CallbackTest):
@@ -161,9 +160,6 @@ class CustomAlignTest(CallbackTest):
         self.commands.append(CommandDef("insert", {"characters": "'2'"}))
         self.commands.append(CommandDef("table_next_field"))
 
-
-
-
     @property
     def description(self):
         return """Test: {0}
@@ -171,7 +167,6 @@ class CustomAlignTest(CallbackTest):
 - navigate with tab key
 - custom align
 """.format(self.name)
-
 
     def expected_value(self):
         return """{0}
@@ -216,7 +211,6 @@ class RowsTableTest(CallbackTest):
         self.commands.append(CommandDef("table_next_row"))
         self.commands.append(CommandDef("table_next_row"))
 
-
     def expected_value(self):
         return """{0}
 | column A | column B |
@@ -240,7 +234,7 @@ class TableEditorTestSuite(sublime_plugin.TextCommand):
     TEST_TIMEOUT = 500
 
     def __init__(self, view):
-        sublime_plugin.TextCommand.__init__(self,view)
+        sublime_plugin.TextCommand.__init__(self, view)
 
     def run(self):
         tests = []
@@ -248,7 +242,7 @@ class TableEditorTestSuite(sublime_plugin.TextCommand):
         tests.append(MoveColumnTest())
         tests.append(CustomAlignTest())
         tests.append(RowsTableTest())
-        self.run_tests(tests, 0 , 0)
+        self.run_tests(tests, 0, 0)
 
     def run_tests(self, tests, test_ind, command_ind):
         if test_ind >= len(tests):
@@ -263,13 +257,13 @@ Click ctrl+w to close this window""".format(len(tests))})
         if command_ind == 0:
             print "run test", test.name
         command = test.commands[command_ind]
-        self.view.run_command(command.name,command.args)
+        self.view.run_command(command.name, command.args)
         if command_ind + 1 < len(test.commands):
             sublime.set_timeout(lambda: self.run_tests(tests, test_ind, command_ind + 1),
                         TableEditorTestSuite.COMMAND_TIMEOUT)
         else:
             text = self.get_buffer_text()
-            if  text != tests[test_ind].expected_value():
+            if text != tests[test_ind].expected_value():
                 self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
 Test {0} failed:
@@ -277,7 +271,7 @@ Expected:
 {1}<<<
 Actual:
 {2}<<<
-""".format(tests[test_ind].name,tests[test_ind].expected_value(), text)})
+""".format(tests[test_ind].name, tests[test_ind].expected_value(), text)})
             else:
                 self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
@@ -287,13 +281,8 @@ Test {0} executed sucessfully
                 sublime.set_timeout(lambda: self.run_tests(tests, test_ind + 1, 0),
                     TableEditorTestSuite.TEST_TIMEOUT)
 
-
-
-
-
     def get_buffer_text(self):
-        return self.view.substr(sublime.Region(0,self.view.size()))
-
+        return self.view.substr(sublime.Region(0, self.view.size()))
 
 
 class TableEditorFilmCommand(sublime_plugin.WindowCommand):
@@ -305,5 +294,3 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
         view.set_name("Sublime Table Editor Film")
         suite = TableEditorTestSuite(view)
         suite.run()
-
-
