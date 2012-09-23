@@ -127,7 +127,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 class TableAlignCommand(AbstractTableMultiSelect):
     """
     Command: table_align
-    Key: ctrl+c, ctrl+c
+    Key: ctrl+shift+a
     Re-align the table without change the current table field. Move cursor to begin of the current table field.
     """
 
@@ -449,8 +449,6 @@ class TableInsertRow(AbstractTableMultiSelect):
         return sublime.Region(pt,pt)
 
 
-
-
 class TableMoveRowUp(AbstractTableCommand):
     """
     Command: table_move_row_up
@@ -459,10 +457,14 @@ class TableMoveRowUp(AbstractTableCommand):
     """
 
     def run(self, edit):
+        allow = True
         for sel in self.view.sel():
             row = self.get_row(sel.begin())
-            if row - 1 >= self.get_first_table_row(row):
-                self.view.run_command("swap_line_up")
+            if row == self.get_first_table_row(row):
+                allow = False
+                break
+        if allow:
+            self.view.run_command("swap_line_up")
 
 
 class TableMoveRowDown(AbstractTableCommand):
@@ -473,15 +475,20 @@ class TableMoveRowDown(AbstractTableCommand):
     """
 
     def run(self, edit):
+        allow = True
         for sel in self.view.sel():
             row = self.get_row(sel.begin())
-            if row + 1 <=  self.get_last_table_row(row):
-                self.view.run_command("swap_line_down")
+            if row ==  self.get_last_table_row(row):
+                allow = False
+                break
+        if allow:
+            self.view.run_command("swap_line_down")
+
 
 class TableInsertHline(AbstractTableMultiSelect):
     """
     Command: table_insert_hline
-    Key: ctrl+c,-
+    Key: ctrl+k,-
     Insert a horizontal line below current row.
     """
 
@@ -505,7 +512,7 @@ class TableInsertHline(AbstractTableMultiSelect):
 class TableHlineAndMove(AbstractTableMultiSelect):
     """
     Command:  table_hline_and_move
-    Key: ctrl+c, enter
+    Key: ctrl+k, enter
     Insert a horizontal line below current row, and move the cursor into the row below that line.
     """
     def run_before(self,edit):
@@ -573,13 +580,4 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 settings = sublime.load_settings(base_name)
                 settings.set("enable_table_editor", True)
                 sublime.save_settings(base_name)
-
-
-
-
-
-
-
-
-
 

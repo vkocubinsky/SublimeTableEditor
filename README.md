@@ -261,11 +261,3 @@ Second one is navigation between field. Emacs set pointer to begin of field inde
 *Emacs* has keys *alt-a* to navigate to the begin of field, *alt-e* to navigate to the end of field.
 *Table Editor* combine it into one and set point to the end of data in field. 
 
-## Know Issues
-
-1. Move row up , move row down work correct only for single selection and doesn't work properly for multiple selection.
-
-These will be fixed for GA version. 
-
-
-
