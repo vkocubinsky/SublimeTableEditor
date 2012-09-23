@@ -97,7 +97,9 @@ If you like work with HEAD you can locate *Table Editor* in your packages direct
 - Go to your Packages directory, you can locate to your Packages directory by using the menu item 
   *Preferences -> Browse Packages...*
 - Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
+
   *git clone https://github.com/vkocubinsky/SublimeTableEditor.git*
+  
 
 ### Download Manually
 
@@ -222,6 +224,15 @@ Probably this option is usable if you work only with text or wiki markup files
 ## License
 
 Package is distributed by GNU General Public License v3.0.
+
+## Donation
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="CBL373WUKNTZW">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
 
 ## Testing
 
