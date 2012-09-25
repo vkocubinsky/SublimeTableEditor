@@ -12,9 +12,7 @@
 - temporary disable/enable table editor
 - show integration tests film
 
-# For more information:
-
-Please take the time to read the documentation:
+For more information see
 
 * Online - https://github.com/vkocubinsky/SublimeTableEditor
 
