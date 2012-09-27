@@ -38,6 +38,15 @@ Then fill data and press *Tab* key to next field or add new row
     | Alexander |  27 |
     | _         |     |
 
+For make table faster type only
+
+    |Name|Age
+
+And then click **ctrl+k,enter**, you will get 
+
+    | Name | Age |
+    |------|-----|
+    | _    |     |
 
 By default text data is left justified, numeric data is right justified, column header is centered.
 

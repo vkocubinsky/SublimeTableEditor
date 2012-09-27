@@ -535,8 +535,7 @@ class TableHlineAndMove(AbstractTableMultiSelect):
             region = self.view.line(point)
             self.view.insert(edit, region.end(), empty_text)
             sel_row = sel_row + 2
-        field_num = self.get_field_num(sel_row, sel_col)
-        pt = self.get_field_default_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
 
 
