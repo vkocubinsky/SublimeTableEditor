@@ -23,8 +23,9 @@
 
 import sublime
 import sublime_plugin
-import tablelib
+import csv
 import re
+import tablelib
 
 
 def find(text, sep, num):
@@ -580,3 +581,41 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 settings = sublime.load_settings(base_name)
                 settings.set("enable_table_editor", True)
                 sublime.save_settings(base_name)
+
+
+def csv2table(text):
+    lines = []
+    try:
+        dialect = csv.Sniffer().sniff(text)
+        print "dialect is", dialect
+        table_reader = csv.reader(text.splitlines(), dialect)
+        for row in table_reader:
+            lines.append("|" + "|".join(row) + "|")
+    except csv.Error:
+        for row in text.splitlines():
+            lines.append("|" + row + "|")
+    return "\n".join(lines)
+
+
+class TableCsvToTable(AbstractTableCommand):
+    """
+    Command: table_csv_to_table
+    Key: ctrl+k, |
+    Convert selected CSV region into table
+    """
+    def run(self, edit):
+        new_sels = []
+        for sel in self.view.sel():
+            (sel_row, sel_col) = self.view.rowcol(sel.begin())
+            if sel.empty():
+                new_sels.append(sel)
+            else:
+                text = self.view.substr(sel)
+                new_text = csv2table(text)
+                self.view.replace(edit, sel, new_text)
+                pt = self.get_field_default_point(sel_row, 0)
+                new_sels.append(sublime.Region(pt, pt))
+        self.view.sel().clear()
+        for sel in new_sels:
+            self.view.sel().add(sel)
+        self.view.run_command("table_align")

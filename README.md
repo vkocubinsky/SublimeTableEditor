@@ -11,6 +11,7 @@
 - move column left/right
 - move row up/down
 - specify column alignment
+- convert selected CSV region into table
 - temporary disable/enable table editor
 - show integration tests film
 
@@ -86,6 +87,8 @@ You can change justification several times
 
 
 Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view* . It is integration test and demo at the same time. 
+
+Select some text with CSV data and click *ctrl+k, |* to convert CSV data into table.
 
 ## Installation
 
@@ -228,6 +231,9 @@ Probably this option is usable if you work only with text or wiki markup files
 **ctrl+k, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
+
+**ctrl+k, |**
+        Convert selected CSV region into table
 
 
 ## License
