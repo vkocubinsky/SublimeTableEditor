@@ -233,7 +233,10 @@ Probably this option is usable if you work only with text or wiki markup files
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
 
 **ctrl+k, |**
+
         Convert selected CSV region into table
+
+
 
 
 ## License
