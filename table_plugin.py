@@ -417,12 +417,17 @@ class TableKillRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.view.erase(edit, self.view.full_line(sel))
-        if sel_row == self.get_last_table_row(sel_row):
+        field_num = self.get_field_num(sel_row, sel_col)
+        if self.get_first_table_row(sel_row) == self.get_last_table_row(sel_row):
+            self.view.erase(edit, self.view.full_line(sel))
+            pt = self.view.text_point(sel_row, 0)
+        elif sel_row == self.get_last_table_row(sel_row):
+            self.view.erase(edit, self.view.full_line(sel))
             sel_row = sel_row - 1
-        if not self.is_table_row(sel_row):
-            sel_col = 0
-        pt = self.view.text_point(sel_row, sel_col)
+            pt = self.get_field_default_point(sel_row, field_num)
+        else:
+            self.view.erase(edit, self.view.full_line(sel))
+            pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
 
