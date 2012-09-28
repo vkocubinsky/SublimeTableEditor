@@ -47,7 +47,7 @@ For make table faster type only
 
     |Name|Age
 
-And then click **ctrl+k,enter**, you will get 
+And then click *ctrl+k,enter*, you will get 
 
     | Name | Age |
     |------|-----|
