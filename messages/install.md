@@ -9,12 +9,14 @@
 - move column left/right
 - move row up/down
 - specify column alignment
+- convert selected CSV region into table
 - temporary disable/enable table editor
 - show integration tests film
 
 For more information see
 
 * Online - https://github.com/vkocubinsky/SublimeTableEditor
+* Sublime Text - Select Preferences->Package Settings->Table Editor->README
 
 
 

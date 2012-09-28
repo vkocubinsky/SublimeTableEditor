@@ -15,6 +15,8 @@
 - temporary disable/enable table editor
 - show integration tests film
 
+## Create and edit table
+
 For first time you should enable table editor with command palette:
 
 * click *ctrl+shift+p*
@@ -48,6 +50,8 @@ And then click **ctrl+k,enter**, you will get
     | Name | Age |
     |------|-----|
     | _    |     |
+
+## Column alignment
 
 By default text data is left justified, numeric data is right justified, column header is centered.
 
@@ -86,9 +90,27 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
+## Convert CSV into table
+
+Select some text with CSV data
+
+    Name,Age
+    Anna,20
+    Alexander,27
+
+ and then click *ctrl+k, |* to convert CSV data into table, you will get
+
+    | Name      | Age |
+    | Anna      | 20  |
+    | Alexander | 27  |
+
+*Convert CSV into table* command aumatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not regonize CSV dialect you will get one row table where selected line is a row in the table.
+
+
+## Demo 
+
 Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view* . It is integration test and demo at the same time. 
 
-Select some text with CSV data and click *ctrl+k, |* to convert CSV data into table.
 
 ## Installation
 
@@ -110,13 +132,13 @@ If you like work with HEAD you can locate *Table Editor* in your packages direct
   *Preferences -> Browse Packages...*
 - Inside the Packages directory, clone the SublimeTableEditor repository using the command below: 
 
-  *git clone https://github.com/vkocubinsky/SublimeTableEditor.git*
+  *git clone https://github.com/vkocubinsky/SublimeTableEditor.git "Table Editor"*
   
 
 ### Download Manually
 
 - Download the files using the GitHub .zip download option.
-- Unzip the files and rename the folder to something like *Table Editor*.
+- Unzip the files and rename the folder to *Table Editor*.
 - Copy the folder to your Sublime Text 2 Packages directory.
 
 ## Settings
