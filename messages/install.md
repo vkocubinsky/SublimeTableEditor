@@ -15,8 +15,9 @@
 
 For more information see
 
-* Online - https://github.com/vkocubinsky/SublimeTableEditor
 * Sublime Text - Select Preferences->Package Settings->Table Editor->README
+* Online - https://github.com/vkocubinsky/SublimeTableEditor
+
 
 
 
