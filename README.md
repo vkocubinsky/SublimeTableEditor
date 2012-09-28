@@ -15,7 +15,9 @@
 - temporary disable/enable table editor
 - show integration tests film
 
-## Create and edit table
+## Usage
+
+### Create and edit table
 
 For first time you should enable table editor with command palette:
 
@@ -51,7 +53,7 @@ And then click **ctrl+k,enter**, you will get
     |------|-----|
     | _    |     |
 
-## Column alignment
+### Column alignment
 
 By default text data is left justified, numeric data is right justified, column header is centered.
 
@@ -90,7 +92,7 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
-## Convert CSV into table
+### Convert CSV into table
 
 Select some text with CSV data
 
@@ -107,7 +109,7 @@ Select some text with CSV data
 *Convert CSV into table* command aumatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not regonize CSV dialect you will get one row table where selected line is a row in the table.
 
 
-## Demo 
+### Demo 
 
 Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view* . It is integration test and demo at the same time. 
 
@@ -153,7 +155,7 @@ You can ebable *Table Editor* with setting *"enable_table_editor": true* on a st
 in http://docs.sublimetext.info/en/latest/customization/settings.html. But *Table Editor* out of the box contains
 feature for set this property on a more simple way.
 
-#### Enable for specific syntax
+### Enable for specific syntax
 
 It is most usable option. Usually you like to enable Table Editor for Plain text, Markdown, Textile, reStructuredText syntax. 
 
@@ -177,7 +179,7 @@ You can do the same manually by
   or delete line with propert *enable_table_editor*
 * save Syntax Specific File
 
-#### Enable for current view
+### Enable for current view
 
 Some time you like temporary enable table editor and then disable it. It is usefull if you edit *Python* or *Java* code and like to pretty print table, then contine edit your code. For do this you should:
 
@@ -189,7 +191,7 @@ Then after you edit table you can disable Table Editor
 * Click *ctrl+shift+p* for show command palette
 * Select *Table Editor: Disable for current view*
 
-#### Enable for all files
+### Enable for all files
 
 Probably this option is usable if you work only with text or wiki markup files
 
