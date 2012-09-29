@@ -126,13 +126,16 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
         table_region = sublime.Region(begin_point, end_point)
         text = self.view.substr(table_region)
-
+        new_text = tablelib.format_table(text)
         line_text = self.get_text(sel_row)
         sel_field_num = line_text.count("|", 0, sel_col) - 1
         i1 = line_text.rfind("|", 0, sel_col)
         if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
             sel_field_num = sel_field_num - 1
-        self.view.replace(edit, table_region, tablelib.format_table(text))
+        self.view.replace(edit, table_region, new_text)
+        #self.view.erase(edit, table_region)
+        #self.view.insert(edit, begin_point, new_text)
+
         pt = self.get_field_default_point(sel_row, sel_field_num)
         return sublime.Region(pt, pt)
 
@@ -146,10 +149,10 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             new_sels.append(new_sel)
         self.view.sel().clear()
         for sel in new_sels:
-            print "sel", sel, self.view.rowcol(sel.begin())
+            #print "sel", sel, self.view.rowcol(sel.begin())
             self.view.sel().add(sel)
-            #self.view.show_at_center(sel.begin())
-        self.view.show(self.view.sel(), False)
+            self.view.show(sel, False)
+        #self.view.show(self.view.sel(), True)
 
     def run_one_sel(self, edit, sel):
         return sel
