@@ -539,8 +539,10 @@ class TableHlineAndMove(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        print self.get_last_table_row(sel_row)
         self.duplicate_row_and_fill(edit, sel_row, '-')
-        if sel_row + 2 < self.get_last_table_row(sel_row):
+        print self.get_last_table_row(sel_row)
+        if sel_row + 1 < self.get_last_table_row(sel_row):
             if self.is_separator_row(sel_row + 2):
                 self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
         else:
