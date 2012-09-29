@@ -463,8 +463,13 @@ class TableInsertRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_row_and_fill(edit, sel_row, ' ')
-        pt = self.view.text_point(sel_row, sel_col)
+        field_num = self.get_field_num(sel_row, sel_col)
+        line_region = self.view.line(sel)
+        text = self.view.substr(line_region)
+        i1 = find(text, '|', 1)
+        new_text = text[:i1] + re.sub(r"[^\|]", ' ', text[i1:]) + "\n"
+        self.view.insert(edit, line_region.begin(), new_text)
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
 
