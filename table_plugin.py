@@ -531,8 +531,6 @@ class TableHlineAndMove(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-
-
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
     def run(self, args):
