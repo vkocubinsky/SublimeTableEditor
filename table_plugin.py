@@ -132,9 +132,19 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         i1 = line_text.rfind("|", 0, sel_col)
         if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
             sel_field_num = sel_field_num - 1
-        self.view.replace(edit, table_region, new_text)
-        #self.view.erase(edit, table_region)
-        #self.view.insert(edit, begin_point, new_text)
+
+        new_text_lines = new_text.splitlines()
+        row = first_table_row
+        while row <= last_table_row:
+            if row - first_table_row >= len(new_text_lines):
+                break
+            point = self.view.text_point(row, 0)
+            region = self.view.line(point)
+            line_text = self.view.substr(region)
+            new_line_text = new_text_lines[row - first_table_row]
+            if line_text != new_line_text:
+                self.view.replace(edit, region, new_line_text)
+            row = row + 1
 
         pt = self.get_field_default_point(sel_row, sel_field_num)
         return sublime.Region(pt, pt)
