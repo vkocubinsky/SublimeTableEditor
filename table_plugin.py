@@ -279,10 +279,10 @@ class TableNextRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         if sel_row < self.get_last_table_row(sel_row):
             if self.is_separator_row(sel_row + 1):
-                self.insert_empty_row_after(edit, sel_row)
+                self.duplicate_row_and_fill(edit, sel_row, ' ')
             sel_row += 1
         else:
-            self.insert_empty_row_after(edit, sel_row)
+            self.duplicate_row_and_fill(edit, sel_row, ' ')
             sel_row += 1
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -464,11 +464,7 @@ class TableInsertRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        line_region = self.view.line(sel)
-        text = self.view.substr(line_region)
-        i1 = find(text, '|', 1)
-        new_text = text[:i1] + re.sub(r"[^\|]", ' ', text[i1:]) + "\n"
-        self.view.insert(edit, line_region.begin(), new_text)
+        self.duplicate_row_and_fill(edit, sel_row, ' ')
         pt = self.view.text_point(sel_row, sel_col)
         return sublime.Region(pt, pt)
 
@@ -539,28 +535,13 @@ class TableHlineAndMove(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        line_region = self.view.line(sel)
-        text = self.view.substr(line_region)
-        i1 = find(text, '|', 1)
-        new_text = "\n" + text[:i1] + re.sub(r"[^\|]", '-', text[i1:])
-
-        self.view.insert(edit, line_region.end(), new_text)
-        if sel_row + 1 < self.get_last_table_row(sel_row):
-            sel_row = sel_row + 2
-            if self.is_separator_row(sel_row):
-                empty_text = ("\n"
-                            + text[:i1]
-                            + re.sub(r"[^\|]", ' ', text[i1:])
-                            )
-                point = self.view.text_point(sel_row - 1, 0)
-                region = self.view.line(point)
-                self.view.insert(edit, region.end(), empty_text)
+        self.duplicate_row_and_fill(edit, sel_row, '-')
+        if sel_row + 2 < self.get_last_table_row(sel_row):
+            if self.is_separator_row(sel_row + 2):
+                self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
         else:
-            empty_text = "\n" + text[:i1] + re.sub(r"[^\|]", ' ', text[i1:])
-            point = self.view.text_point(sel_row + 1, 0)
-            region = self.view.line(point)
-            self.view.insert(edit, region.end(), empty_text)
-            sel_row = sel_row + 2
+            self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
+        sel_row = sel_row + 2
         pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
 
