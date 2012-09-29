@@ -215,9 +215,10 @@ class RowsTableTest(CallbackTest):
         return """{0}
 | column A | column B |
 |----------|----------|
-|          |          |
 |        1 | one      |
+|          |          |
 |        3 | three    |
+|          |          |
 |          |          |""".format(self.description)
 
     @property
