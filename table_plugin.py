@@ -98,17 +98,16 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             row = row - 1
         return first_table_row
 
-    def insert_empty_row_after(self, edit, row):
+    def duplicate_row_and_fill(self, edit, row, fill_char):
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
         i1 = find(text, '|', 1)
         new_text = ("\n"
                     + text[:i1]
-                    + re.sub(r"[^\|]", ' ', text[i1:])
+                    + re.sub(r"[^\|]", fill_char, text[i1:])
                     )
         self.view.insert(edit, region.end(), new_text)
-
 
 
 class AbstractTableMultiSelect(AbstractTableCommand):
@@ -197,7 +196,7 @@ class TableNextField(AbstractTableMultiSelect):
                     continue
                 else:
                     #sel_row == last_table_row
-                    self.insert_empty_row_after(edit, sel_row)
+                    self.duplicate_row_and_fill(edit, sel_row, ' ')
                     field_num = 0
                     sel_row += 1
                     break
@@ -213,7 +212,7 @@ class TableNextField(AbstractTableMultiSelect):
                 continue
             else:
                 #sel_row == last_table_row
-                self.insert_empty_row_after(edit, sel_row)
+                self.duplicate_row_and_fill(edit, sel_row, ' ')
                 field_num = 0
                 sel_row += 1
                 break
@@ -522,11 +521,7 @@ class TableInsertHline(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        line_region = self.view.line(sel)
-        text = self.view.substr(line_region)
-        i1 = find(text, '|', 1)
-        new_text = "\n" + text[:i1] + re.sub(r"[^\|]", '-', text[i1:])
-        self.view.insert(edit, line_region.end(), new_text)
+        self.duplicate_row_and_fill(edit, sel_row, '-')
         field_num = self.get_field_num(sel_row, sel_col)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
