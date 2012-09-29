@@ -280,10 +280,9 @@ class TableNextRow(AbstractTableMultiSelect):
         if sel_row < self.get_last_table_row(sel_row):
             if self.is_separator_row(sel_row + 1):
                 self.duplicate_row_and_fill(edit, sel_row, ' ')
-            sel_row += 1
         else:
             self.duplicate_row_and_fill(edit, sel_row, ' ')
-            sel_row += 1
+        sel_row += 1
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
