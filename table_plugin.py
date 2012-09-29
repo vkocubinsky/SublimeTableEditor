@@ -279,6 +279,8 @@ class TableNextRow(AbstractTableMultiSelect):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         if sel_row < self.get_last_table_row(sel_row):
+            if self.is_separator_row(sel_row + 1):
+                self.insert_empty_row_after(edit, sel_row)
             sel_row += 1
         else:
             self.insert_empty_row_after(edit, sel_row)
