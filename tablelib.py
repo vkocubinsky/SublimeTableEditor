@@ -223,7 +223,7 @@ class TextTable:
             out.append(out_row)
         self._rows = out
 
-    def format(self):
+    def format_to_lines(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
         self._prefix, sep, rest = lines[0].partition('|')
@@ -232,18 +232,21 @@ class TextTable:
             self._merge(cols)
         self._adjust_column_count()
         self._adjust_column_width()
+        return [self._prefix + "|" + "|".join(row) + "|" for row in self._rows]
 
-        return "\n".join(
-            [self._prefix + "|" + "|".join(row) + "|" for row in self._rows])
+    def format_to_text(self):
+        return "\n".join(self.format_to_lines())
 
 
-def format_table(text):
+def format_to_text(text):
     table = TextTable(text)
-    return table.format()
+    return table.format_to_text()
 
 
-def swap_column(self, text, i1, i2):
-    pass
+def format_to_lines(text):
+    table = TextTable(text)
+    return table.format_to_lines()
+
 
 if __name__ == '__main__':
     # each line begin from '|'
@@ -257,4 +260,4 @@ if __name__ == '__main__':
               | < | < |
               |1|1|
                |"""
-    print "Table:\n", format_table(raw_text)
+    print "Table:\n", format_to_text(raw_text)

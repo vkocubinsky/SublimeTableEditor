@@ -112,8 +112,17 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
 class AbstractTableMultiSelect(AbstractTableCommand):
 
+    def get_unformatted_field_num(self, sel_row, sel_col):
+        line_text = self.get_text(sel_row)
+        sel_field_num = line_text.count("|", 0, sel_col) - 1
+        i1 = line_text.rfind("|", 0, sel_col)
+        if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
+            sel_field_num = sel_field_num - 1
+        return sel_field_num
+
     def align_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
+
         first_table_row = self.get_first_table_row(self.get_row(sel.begin()))
         last_table_row = self.get_last_table_row(self.get_row(sel.begin()))
 
@@ -126,14 +135,9 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
         table_region = sublime.Region(begin_point, end_point)
         text = self.view.substr(table_region)
-        new_text = tablelib.format_table(text)
-        line_text = self.get_text(sel_row)
-        sel_field_num = line_text.count("|", 0, sel_col) - 1
-        i1 = line_text.rfind("|", 0, sel_col)
-        if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
-            sel_field_num = sel_field_num - 1
+        sel_field_num = self.get_unformatted_field_num(sel_row, sel_col)
 
-        new_text_lines = new_text.splitlines()
+        new_text_lines = tablelib.format_to_lines(text)
         row = first_table_row
         while row <= last_table_row:
             if row - first_table_row >= len(new_text_lines):
