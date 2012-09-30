@@ -39,6 +39,19 @@ def find(text, sep, num):
     return found
 
 
+def csv2table(text):
+    lines = []
+    try:
+        dialect = csv.Sniffer().sniff(text)
+        table_reader = csv.reader(text.splitlines(), dialect)
+        for row in table_reader:
+            lines.append("|" + "|".join(row) + "|")
+    except csv.Error:
+        for row in text.splitlines():
+            lines.append("|" + row + "|")
+    return "\n".join(lines)
+
+
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_text(self, row):
@@ -173,9 +186,8 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         return sel
 
 
-class TableAlignCommand(AbstractTableMultiSelect):
+class TableEditorAlignCommand(AbstractTableMultiSelect):
     """
-    Command: table_align
     Key: ctrl+shift+a
     Re-align the table without change the current table field.
     Move cursor to begin of the current table field.
@@ -185,9 +197,8 @@ class TableAlignCommand(AbstractTableMultiSelect):
         return self.align_one_sel(edit, sel)
 
 
-class TableNextField(AbstractTableMultiSelect):
+class TableEditorNextField(AbstractTableMultiSelect):
     """
-    Command: table_next_field.
     Key: tab
     Re-align the table, move to the next field.
     Creates a new row if necessary.
@@ -233,9 +244,8 @@ class TableNextField(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TablePreviousField(AbstractTableMultiSelect):
+class TableEditorPreviousField(AbstractTableMultiSelect):
     """
-    Command: table_previous_field
     Key: shift+tab
     Re-align, move to previous field.
     """
@@ -274,12 +284,12 @@ class TablePreviousField(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableNextRow(AbstractTableMultiSelect):
+class TableEditorNextRow(AbstractTableMultiSelect):
     """
-    Command: table_next_row
-    Key: alt + enter, enter
+    Key: enter
     Re-align the table and move down to next row.
     Creates a new row if necessary.
+    At the beginning or end of a line, enter still does new line.
     """
 
     def run_one_sel(self, edit, sel):
@@ -296,9 +306,8 @@ class TableNextRow(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableMoveColumnLeft(AbstractTableMultiSelect):
+class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
     """
-    Command: table_move_column_left
     Key: alt+left
     Move the current column right.
     """
@@ -327,9 +336,8 @@ class TableMoveColumnLeft(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableMoveColumnRight(AbstractTableMultiSelect):
+class TableEditorMoveColumnRight(AbstractTableMultiSelect):
     """
-    Command: table_move_column_right
     Key: alt+right
     Move the current column right.
     """
@@ -359,9 +367,8 @@ class TableMoveColumnRight(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableDeleteColumn(AbstractTableMultiSelect):
+class TableEditorDeleteColumn(AbstractTableMultiSelect):
     """
-    Command: (table_delete_column)
     Key: alt+shift+left
     Kill the current column.
     """
@@ -395,9 +402,8 @@ class TableDeleteColumn(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableInsertColumn(AbstractTableMultiSelect):
+class TableEditorInsertColumn(AbstractTableMultiSelect):
     """
-    Command: table_insert_column
     Keys: alt+shift+right
     Insert a new column to the left of the cursor position.
     """
@@ -425,9 +431,8 @@ class TableInsertColumn(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableKillRow(AbstractTableMultiSelect):
+class TableEditorKillRow(AbstractTableMultiSelect):
     """
-    Command: table_kill_row
     Key : alt+shift+up
     Kill the current row or horizontal line.
     """
@@ -450,9 +455,8 @@ class TableKillRow(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableInsertRow(AbstractTableMultiSelect):
+class TableEditorInsertRow(AbstractTableMultiSelect):
     """
-    Command: table_insert_row
     Key: alt+shift+down
     Insert a new row above the current row.
     """
@@ -470,9 +474,8 @@ class TableInsertRow(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableMoveRowUp(AbstractTableCommand):
+class TableEditorMoveRowUp(AbstractTableCommand):
     """
-    Command: table_move_row_up
     Key: alt+up
     Move the current row up.
     """
@@ -488,9 +491,8 @@ class TableMoveRowUp(AbstractTableCommand):
             self.view.run_command("swap_line_up")
 
 
-class TableMoveRowDown(AbstractTableCommand):
+class TableEditorMoveRowDown(AbstractTableCommand):
     """
-    Command: table_move_row_down
     Key: alt+down
     Move the current row down.
     """
@@ -506,9 +508,8 @@ class TableMoveRowDown(AbstractTableCommand):
             self.view.run_command("swap_line_down")
 
 
-class TableInsertHline(AbstractTableMultiSelect):
+class TableEditorInsertHline(AbstractTableMultiSelect):
     """
-    Command: table_insert_hline
     Key: ctrl+k,-
     Insert a horizontal line below current row.
     """
@@ -522,9 +523,8 @@ class TableInsertHline(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableHlineAndMove(AbstractTableMultiSelect):
+class TableEditorHlineAndMove(AbstractTableMultiSelect):
     """
-    Command:  table_hline_and_move
     Key: ctrl+k, enter
     Insert a horizontal line below current row,
     and move the cursor into the row below that line.
@@ -582,20 +582,7 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 sublime.save_settings(base_name)
 
 
-def csv2table(text):
-    lines = []
-    try:
-        dialect = csv.Sniffer().sniff(text)
-        table_reader = csv.reader(text.splitlines(), dialect)
-        for row in table_reader:
-            lines.append("|" + "|".join(row) + "|")
-    except csv.Error:
-        for row in text.splitlines():
-            lines.append("|" + row + "|")
-    return "\n".join(lines)
-
-
-class TableCsvToTable(AbstractTableCommand):
+class TableEditorCsvToTable(AbstractTableCommand):
     """
     Command: table_csv_to_table
     Key: ctrl+k, |

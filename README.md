@@ -212,9 +212,10 @@ Probably this option is usable if you work only with text or wiki markup files
 
         Re-align, move to previous field.
 
-**alt + enter or enter**
+**enter**
 
         Re-align the table and move down to next row. Creates a new row if necessary.
+        At the beginning or end of a line, enter still does new line.
 
 **alt+left**
 
