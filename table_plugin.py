@@ -180,7 +180,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         for sel in new_sels:
             self.view.sel().add(sel)
             self.view.show(sel, False)
-        #self.view.show(self.view.sel(), True)
 
     def run_one_sel(self, edit, sel):
         return sel
@@ -603,4 +602,5 @@ class TableEditorCsvToTable(AbstractTableCommand):
         self.view.sel().clear()
         for sel in new_sels:
             self.view.sel().add(sel)
-        self.view.run_command("table_align")
+            self.view.show(sel, False)
+        self.view.run_command("table_editor_align")
