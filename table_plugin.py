@@ -145,7 +145,9 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             if line_text != new_line_text:
                 self.view.replace(edit, region, new_line_text)
             row = row + 1
-
+        if len(new_text_lines) != last_table_row - first_table_row + 1:
+            print "WARN", "len formatted table", len(new_text_lines),
+            print "len sublime table", last_table_row - first_table_row + 1
         pt = self.get_field_default_point(sel_row, sel_field_num)
         return sublime.Region(pt, pt)
 
@@ -159,7 +161,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             new_sels.append(new_sel)
         self.view.sel().clear()
         for sel in new_sels:
-            #print "sel", sel, self.view.rowcol(sel.begin())
             self.view.sel().add(sel)
             self.view.show(sel, False)
         #self.view.show(self.view.sel(), True)
@@ -528,9 +529,7 @@ class TableHlineAndMove(AbstractTableMultiSelect):
     def run_one_sel(self, edit, sel):
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        print self.get_last_table_row(sel_row)
         self.duplicate_row_and_fill(edit, sel_row, '-')
-        print self.get_last_table_row(sel_row)
         if sel_row + 1 < self.get_last_table_row(sel_row):
             if self.is_separator_row(sel_row + 2):
                 self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
@@ -583,7 +582,6 @@ def csv2table(text):
     lines = []
     try:
         dialect = csv.Sniffer().sniff(text)
-        print "dialect is", dialect
         table_reader = csv.reader(text.splitlines(), dialect)
         for row in table_reader:
             lines.append("|" + "|".join(row) + "|")
