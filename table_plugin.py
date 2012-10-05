@@ -542,6 +542,43 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
 
+class TableEditorSplitColumnDown(AbstractTableMultiSelect):
+    """
+    Key: alt+enter
+    Split rest of cell down from current cursor position,
+    insert new line bellow if current row is last row in the table or
+    if next line is hline
+    """
+    def run_one_sel(self, edit, sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        end_region = self.view.find(r'\|', sel.begin())
+        rest_region = sublime.Region(sel.begin(), end_region.begin())
+        rest_data = self.view.substr(rest_region)
+        self.view.replace(edit, rest_region, "")
+        sel = self.align_one_sel(edit, sel)
+        if (sel_row == self.get_last_table_row(sel_row)
+                or self.is_separator_row(sel_row + 1)):
+            self.duplicate_row_and_fill(edit, sel_row, ' ')
+            sel_row = sel_row + 1
+        else:
+            sel_row = sel_row + 1
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.get_field_default_point(sel_row, field_num)
+        self.view.insert(edit, pt, " " + rest_data)
+        sel = self.align_one_sel(edit, sel)
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
+
+
+class TableEditorJoinLines(AbstractTableMultiSelect):
+    def run_one_sel(self, edit, sel):
+        print "join lines"
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        sel = self.align_one_sel(edit, sel)
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
+
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
