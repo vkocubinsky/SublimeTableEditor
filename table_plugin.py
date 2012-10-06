@@ -100,10 +100,13 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         text = self.get_text(row)
         i1 = find(text, '|', field_num + 1)
         i2 = find(text, '|', field_num + 2)
-        match = re.compile(r"^([^\s])").search(text, i1 + 1, i2)
+        match = re.compile(r"\s*([^\s])").search(text, i1 + 1, i2)
+        print "match", text, i1, i2
         if match:
+            print "match"
             return self.view.text_point(row, match.start(1))
         else:
+            print "doesn't match"
             return self.view.text_point(row, i1 + 2)
 
 
@@ -579,6 +582,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
             sel_row = sel_row + 1
         field_num = self.get_field_num(sel_row, sel_col)
         pt = self.get_field_begin_point(sel_row, field_num)
+        print pt
         self.view.insert(edit, pt, rest_data + " ")
         sel = self.align_one_sel(edit, sel)
         pt = self.get_field_default_point(sel_row, field_num)
