@@ -281,7 +281,8 @@ Package is distributed by GNU General Public License v3.0.
 
 You can make a donation online, using the link below with PayPal service
 
-[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CBL373WUKNTZW "Make a Donation to the Table Editor")
+[Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CBL373WUKNTZW 
+                "Make a Donation to the Table Editor")
 
 ## Testing
 

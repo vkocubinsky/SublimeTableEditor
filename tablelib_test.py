@@ -28,7 +28,7 @@ import tablelib
 class TestFuntions(unittest.TestCase):
 
     def test_auto_complete(self):
-        self.assertEquals("|   |", tablelib.format_table("|"))
+        self.assertEquals("|   |", tablelib.format_to_text("|"))
 
     def test_auto_complete_multi_line(self):
         raw_text = """\
@@ -39,7 +39,7 @@ class TestFuntions(unittest.TestCase):
 |   |
 |   |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_simple_format(self):
         raw_text = """\
@@ -54,7 +54,7 @@ class TestFuntions(unittest.TestCase):
 | cell 11 | cell 12 |
 | cell 21 | cell 22 |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_auto_alignment(self):
         raw_text = """\
@@ -71,7 +71,7 @@ class TestFuntions(unittest.TestCase):
 | text value row 1 | 0.9999999999999999 |
 | tv row 2         |                 99 |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_specify_alignment(self):
         raw_text = """\
@@ -90,7 +90,7 @@ class TestFuntions(unittest.TestCase):
 | 2        |    row 2 |    c2    |
 | 3        |    row 3 |    c3    |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_prefix(self):
         raw_text = """\
@@ -105,7 +105,7 @@ class TestFuntions(unittest.TestCase):
     | cell 11 | cell 12 |
     | cell 21 | cell 22 |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_tab_prefix(self):
         raw_text = """\
@@ -120,7 +120,7 @@ class TestFuntions(unittest.TestCase):
 \t\t| cell 11 | cell 12 |
 \t\t| cell 21 | cell 22 |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_cell_tab(self):
         raw_text = """\
@@ -129,11 +129,11 @@ class TestFuntions(unittest.TestCase):
         expected = """\
 | col 1 |
 """.rstrip()
-        self.assertMultiLineEqual(expected, tablelib.format_table(raw_text))
+        self.assertMultiLineEqual(expected, tablelib.format_to_text(raw_text))
 
     def test_not_table(self):
         with self.assertRaises(AssertionError):
-            tablelib.format_table("")
+            tablelib.format_to_text("")
 
 
 if __name__ == '__main__':
