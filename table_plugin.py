@@ -90,7 +90,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         text = self.get_text(row)
         i1 = find(text, '|', field_num + 1)
         i2 = find(text, '|', field_num + 2)
-        match = re.compile(r"([^\s])\s+$").search(text, i1 + 1, i2)
+        match = re.compile(r"([^\s])\s*$").search(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1) + 1)
         else:
@@ -586,6 +586,10 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
 
 
 class TableEditorJoinLines(AbstractTableMultiSelect):
+    """
+    Key: ctrl+join
+    Join current row and next row into one if next row is not hline
+    """
     def run_one_sel(self, edit, sel):
         print "join lines"
         (sel_row, sel_col) = self.view.rowcol(sel.begin())

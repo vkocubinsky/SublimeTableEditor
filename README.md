@@ -10,6 +10,8 @@
 - auto align number cells to right, text cells to left, header cells to center
 - move column left/right
 - move row up/down
+- split long cell
+- join two rows into one
 - specify column alignment
 - convert selected CSV region into table
 - temporary disable/enable table editor
@@ -261,8 +263,15 @@ Probably this option is usable if you work only with text or wiki markup files
 
         Convert selected CSV region into table
 
+**alt+enter**
+    
+        Split rest of cell down from current cursor position,
+        insert new line bellow if current row is last row in the table or if next line is hline
 
-
+ **ctrl+j**
+        
+        Join current row and next row into one if next row is not hline
+ 
 
 ## License
 

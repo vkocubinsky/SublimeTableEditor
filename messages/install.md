@@ -8,6 +8,8 @@
 - auto align number cells to right, text cells to left, header cells to center
 - move column left/right
 - move row up/down
+- split long cell
+- join two rows into one
 - specify column alignment
 - convert selected CSV region into table
 - temporary disable/enable table editor
