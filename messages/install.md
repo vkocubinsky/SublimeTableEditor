@@ -2,9 +2,9 @@
 
 *Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
+- navigate with tab/shift tab 
 - insert/delete row
 - insert/delete column
-- navigate with tab/shift tab 
 - auto align number cells to right, text cells to left, header cells to center
 - move column left/right
 - move row up/down

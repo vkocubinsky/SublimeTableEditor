@@ -4,9 +4,9 @@
 
 *Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
+- navigate with tab/shift tab 
 - insert/delete row
 - insert/delete column
-- navigate with tab/shift tab 
 - auto align number cells to right, text cells to left, header cells to center
 - move column left/right
 - move row up/down
@@ -19,41 +19,170 @@
 
 ## Usage
 
-### Create and edit table
+### Basic editing
 
 For first time you should enable table editor with command palette:
 
 * click *ctrl+shift+p*
 * select *Table Editor: Enable for current syntax* or *Table Editor: Enable for current view*
 
-Then when *Table Editor* is eabled just type
+Then when *Table Editor* is enabled, type
 
-    | Name | Age |
+    | Name | Phone |
     |-
 
 Then press *Tab* key, you will get pretty printed table
 
-    | Name | Age |
-    |------|-----|
-    | _    |     |
+    | Name | Phone |
+    |------|-------|
+    | _    |       |
 
-Then fill data and press *Tab* key to next field or add new row
+Then fill a data and press *Tab* key to next field or add new row if necessary 
 
-    |    Name   | Age |
-    |-----------|-----|
-    | Anna      |  20 |
-    | Alexander |  27 |
-    | _         |     |
+    |    Name   |   Phone   |
+    |-----------|-----------|
+    | Anna      | 123456789 |
+    | Alexander | 987654321 |
+    | _         |           |
 
-For make table faster type only
+For make table a bit faster faster type only
 
-    |Name|Age
+    |Name|Phone
 
-And then click *ctrl+k,enter*, you will get 
+And then click *ctrl+k,enter*. 
 
-    | Name | Age |
-    |------|-----|
-    | _    |     |
+Additional to *tab* and *shift+tab* use *enter*  for move cursor down and insert new row if necessary.
+
+### Work with columns
+
+Let's we have a table with columns *| Name | Phone |*, and you decide insert column *| Age |* before column *| Phone |*.
+For do this set cursor position into any rows in column Phone
+
+    |    Name   |   Phone   |
+    |-----------|-----------|
+    | Anna      | 123456789 |
+    | Alexander | 987654321 |
+    |           | _         |
+
+Click *alt+shift+right*
+
+    |    Name   |   |   Phone   |
+    |-----------|---|-----------|
+    | Anna      |   | 123456789 |
+    | Alexander |   | 987654321 |
+    |           | _ |           |
+
+Fill *| Age |* column
+
+    |    Name   | Age |   Phone   |
+    |-----------|-----|-----------|
+    | Anna      |  32 | 123456789 |
+    | Alexander |  28_| 987654321 |
+    |           |     |           |
+
+Then after some thought you decide switch columns *| Age |* and *| Phone |*. For do this, you can click *alt+right* when 
+cursor in the *| Age |* column or you can click *alt+left* when cursor position in the *| Phone |* column
+
+    |    Name   |   Phone   | Age |
+    |-----------|-----------|-----|
+    | Anna      | 123456789 | 32  |
+    | Alexander | 987654321 | 28_ |
+    |           |           |     |
+
+Now cursor position in the *| Age |* column, when you click *ctrl+shift+left*, column *| Age |* will be deleted
+
+    |    Name   |   Phone    |
+    |-----------|------------|
+    | Anna      | 123456789  |
+    | Alexander | 987654321_ |
+    |           |            |
+
+
+### Work with rows
+
+Let's we have a table
+
+    |    Name   |   Phone   | Age |
+    |-----------|-----------|-----|
+    | Anna      | 123456789 | 32_ |
+    | Alexander | 987654321 | 28  |
+    |           |           |     |
+
+For insert row bellow current cursor position click *alt+shift+down*
+
+    |    Name   |   Phone   | Age |
+    |-----------|-----------|-----|
+    |           |           | _   |
+    | Anna      | 123456789 | 32  |
+    | Alexander | 987654321 | 28  |
+    |           |           |     |
+
+For delete row click *alt_shift+up*
+
+    |    Name   |   Phone   | Age |
+    |-----------|-----------|-----|
+    | Anna      | 123456789 | 32_ |
+    | Alexander | 987654321 | 28  |
+    |           |           |     |
+
+Some time you cell value became to long as in next example column *| Position |*
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior Software Engineer_        |
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |           |           |     |                                  |
+
+You like to split value of column *| Position |* into several rows.
+First let's click *ctrl+k,-* for insert hline after cursor position
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior Software Engineer_        |
+    |-----------|-----------|-----|----------------------------------|
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |           |           |     |                                  |
+
+Then let's move cursor to before word *Engineer* in the first row and click *alt+enter*
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior Software                  |
+    |           |           |     | Engineer_                        |
+    |-----------|-----------|-----|----------------------------------|
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |           |           |     |                                  |
+
+Move cursor before word *Software* in the first row and click *alt+enter* again
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior                           |
+    |           |           |     | Software Engineer_               |
+    |-----------|-----------|-----|----------------------------------|
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |           |           |     |                                  |
+
+Move cursor to the first row after word *Senior* and click *ctrl+j*
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior Software Engineer_        |
+    |-----------|-----------|-----|----------------------------------|
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |           |           |     |                                  |
+
+Let's move cursor with tab key to second row(hlines skipped automatically) and click *ctrl+k,enter*
+
+    |    Name   |   Phone   | Age |             Position             |
+    |-----------|-----------|-----|----------------------------------|
+    | Anna      | 123456789 |  32 | Senior Software Engineer         |
+    |-----------|-----------|-----|----------------------------------|
+    | Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+    |-----------|-----------|-----|----------------------------------|
+    | _         |           |     |                                  |
+
+
 
 ### Column alignment
 
