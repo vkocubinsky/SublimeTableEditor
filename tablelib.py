@@ -21,62 +21,36 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Module for pretty print text table.
-
-There is a simple example
-    | col 1   | col 2   | col 3        |
-    |---------|---------|--------------|
-    | cell 11 | cell 12 | cell 13      |
-    | cell 21 | cell 22 | cell 23      |
-    | cell 31 | cell 32 | long cell 33 |
-
-Alignment:
-    Header alignment to center. Header is rows before separator.
-Header ->  | column 1 | column 2 |
-           |----------|----------|
-
-
-Multi line header -> |      column 1       |      column 2       |
-                  -> | column1 second line | column1 second line |
-                     |---------------------|---------------------|
-                     | data                | data                |
-
-Optional separator -> |----------|----------|
-Header ->             | column 1 | column 2 |
-                      |----------|----------|
-
-
-Numeric cells is
-formatted with right alignment, text cells formatted with left alignment.
-
--> Header            | text  | numeric |
-                     |-------|---------|
-                     | aaa   |     0.5 |
-                     | bbbb  |     0,6 |
-                     | ccccc |    1155 |
-
-
-Possible specify alignment with format characters.
-    | col 1 | col 2 | col 3  |
-    | <<<<< | >>>>> | ###### |
-    |-------|-------|--------|
-    | c11   |   c12 |   c13  |
-    | c21   |   c22 |   c23  |
-    | c31   |   c32 |   c33  |
-
-Possible specify several alignment with format characters.
-
-                         | col 1 | col 2 | col 3  |
-                         |-------|-------|--------|
-auto detect alignment -> | c11   |   c12 |   c13  |
-                         | c21   |   c22 |   c23  |
-new alignment ->         | <<<<< | >>>>> | ###### |
-                         | c31   |   c32 |   c33  |
-new alignment ->         | <<<<< | >>>>> | ###### |
-                         | c41   |   c42 |   c43  |
-"""
 import re
+
+
+class TableStyle:
+
+    def __init__(self, hline_out_border='|',
+                        hline_in_border='|'):
+        self.vline = '|'
+        self.hline_out_border = hline_out_border
+        self.hline_in_border = hline_in_border
+        self.hline_chars = set([self.vline, hline_out_border, hline_in_border])
+
+    def __str__(self):
+        return """
+{0} a {0} b {0}
+{1}---{2}---{1}""".format(
+                    self.vline,
+                    self.hline_out_border,
+                    self.hline_in_border
+                    )
+
+    def hline_border_pattern(self):
+        return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_chars]) + ")"
+
+    def hline_pattern(self):
+        return "^({0}|{1})+$".format(self.hline_border_pattern(), r"(\s*[-]+\s*)")
+
+simple_style = TableStyle('|', '|')
+emacs_style = TableStyle('|', '+')
+grid_style = TableStyle('+', '+')
 
 
 class TextTable:
@@ -89,8 +63,9 @@ class TextTable:
     ROW_HEADER = 'h'
     ROW_FORMAT = 'f'
 
-    def __init__(self, text):
+    def __init__(self, text, style):
         self.text = text
+        self.style = style
         self._rows = []
         self._row_types = []
         self._col_types = []
@@ -156,14 +131,17 @@ class TextTable:
         line = line.strip()
 
         #remove first '|' character
-        assert line[0] == '|'
+        assert line[0] in self.style.hline_chars
         line = line[1:]
 
         #remove last '|' character
-        if len(line) > 0 and line[-1] == '|':
+        if len(line) > 0 and line[-1] in self.style.hline_chars:
             line = line[:-1]
 
-        return line.split('|')
+        if re.match(self.style.hline_pattern(), line):
+            return re.split(self.style.hline_border_pattern(), line)
+        else:
+            return line.split('|')
 
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
@@ -232,32 +210,39 @@ class TextTable:
             self._merge(cols)
         self._adjust_column_count()
         self._adjust_column_width()
-        return [self._prefix + "|" + "|".join(row) + "|" for row in self._rows]
+
+        def join_row(row):
+            if self._is_row_separator(row):
+                return (self.style.hline_out_border
+                    + self.style.hline_in_border.join(row)
+                    + self.style.hline_out_border)
+            else:
+                vline = self.style.vline
+                return vline + vline.join(row) + vline
+        return [self._prefix + join_row(row) for row in self._rows]
 
     def format_to_text(self):
         return "\n".join(self.format_to_lines())
 
 
-def format_to_text(text):
-    table = TextTable(text)
+def format_to_text(text, style):
+    table = TextTable(text, style)
     return table.format_to_text()
 
 
-def format_to_lines(text):
-    table = TextTable(text)
+def format_to_lines(text, style):
+    table = TextTable(text, style)
     return table.format_to_lines()
 
 
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """| multi _line | col  ||
-              |  header     |  second line||
-              | ----------- |  --|
-              |
-              |   data      |  15 |
-              |   data      |  315 |
-              | < | < |
-              |1|1|
-               |"""
-    print "Table:\n", format_to_text(raw_text)
+    raw_text = """| h1 | h2
+              |-
+              |a|1|
+              |-
+              |b|2|
+              |-
+              |c|3|"""
+    print "Table:\n", format_to_text(raw_text, grid_style)

@@ -39,6 +39,15 @@ def find(text, sep, num):
     return found
 
 
+def hline_count(style, text, start, end):
+    if re.match(style.hline_pattern(), text):
+        return sum([text.count(ch, start, end) for ch in style.hline_chars])
+    else:
+        return text.count(style.vline, start, end)
+
+
+
+
 def csv2table(text):
     lines = []
     try:
@@ -53,6 +62,16 @@ def csv2table(text):
 
 
 class AbstractTableCommand(sublime_plugin.TextCommand):
+
+    def __init__(self, view):
+        sublime_plugin.TextCommand.__init__(self, view)
+        style_name = self.view.settings().get("table_style")
+        if style_name == "emacs":
+            self.style = tablelib.emacs_style
+        elif style_name == "grid":
+            self.style = tablelib.emacs_style
+        else:
+            self.style = tablelib.simple_style
 
     def get_text(self, row):
         point = self.view.text_point(row, 0)
@@ -70,26 +89,26 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return self.view.rowcol(point)[0]
 
     def is_separator_row(self, row):
-        return re.match(r"^\s*\|([\-]+\|)+$",
+        return re.match(self.style.hline_pattern(),
                         self.get_text(row)) is not None
 
     def is_table_row(self, row):
-        return re.match(r"^\s*\|", self.get_text(row)) is not None
+        return re.match(r"^\s*" + self.style.hline_border_pattern(), self.get_text(row)) is not None
 
     def get_field_num(self, row, col):
-        field_num = self.get_text(row).count("|", 0, col)
-        return field_num - 1
+        return hline_count(self.style, self.get_text(row), 0, col) - 1
 
     def get_field_count(self, row):
-        return self.get_text(row).count('|') - 1
+        text = self.get_text(row)
+        return hline_count(self.style, text, 0, len(text)) - 1
 
     def get_last_buffer_row(self):
         return self.view.rowcol(self.view.size())[0]
 
     def get_field_default_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, '|', field_num + 1)
-        i2 = find(text, '|', field_num + 2)
+        i1 = find(text, self.style.vline, field_num + 1)
+        i2 = find(text, self.style.vline, field_num + 2)
         match = re.compile(r"([^\s])\s*$").search(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1) + 1)
@@ -98,14 +117,13 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_begin_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, '|', field_num + 1)
-        i2 = find(text, '|', field_num + 2)
+        i1 = find(text, self.style.vline, field_num + 1)
+        i2 = find(text, self.style.vline, field_num + 2)
         match = re.compile(r"\s*([^\s]).*$").match(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1))
         else:
             return self.view.text_point(row, i1 + 2)
-
 
     def get_last_table_row(self, row):
         last_table_row = row
@@ -121,6 +139,14 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             first_table_row = row
             row = row - 1
         return first_table_row
+
+    def clone_line(self, style, text):
+        if re.match(self.style.hline_pattern(), text):
+            text = re.sub()
+            print "cloned text", text
+
+        i1 = find(text, style.vline, 1)
+        new_text = text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
 
     def duplicate_row_and_fill(self, edit, row, fill_char):
         point = self.view.text_point(row, 0)
@@ -161,7 +187,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         text = self.view.substr(table_region)
         sel_field_num = self.get_unformatted_field_num(sel_row, sel_col)
 
-        new_text_lines = tablelib.format_to_lines(text)
+        new_text_lines = tablelib.format_to_lines(text, self.style)
         row = first_table_row
         while row <= last_table_row:
             if row - first_table_row >= len(new_text_lines):
