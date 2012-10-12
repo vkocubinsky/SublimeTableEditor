@@ -140,23 +140,19 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             row = row - 1
         return first_table_row
 
-    def clone_line(self, style, text):
+    def clone_line(self, text, fill_char):
         if re.match(self.style.hline_pattern(), text):
-            text = re.sub()
+            text = re.sub(self.style.hline_pattern(), '|')
             print "cloned text", text
 
-        i1 = find(text, style.vline, 1)
-        new_text = text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
+        i1 = find(text, self.style.vline, 1)
+        return text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
 
     def duplicate_row_and_fill(self, edit, row, fill_char):
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
-        i1 = find(text, '|', 1)
-        new_text = ("\n"
-                    + text[:i1]
-                    + re.sub(r"[^\|]", fill_char, text[i1:])
-                    )
+        new_text = self.clone_line("\n" + text, fill_char)
         self.view.insert(edit, region.end(), new_text)
 
 
