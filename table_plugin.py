@@ -108,8 +108,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_default_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, self.style.vline, field_num + 1)
-        i2 = find(text, self.style.vline, field_num + 2)
+        i1 = find(text, [self.style.vline], field_num + 1)
+        i2 = find(text, [self.style.vline], field_num + 2)
         match = re.compile(r"([^\s])\s*$").search(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1) + 1)
@@ -118,8 +118,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_begin_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, self.style.vline, field_num + 1)
-        i2 = find(text, self.style.vline, field_num + 2)
+        i1 = find(text, [self.style.vline], field_num + 1)
+        i2 = find(text, [self.style.vline], field_num + 2)
         match = re.compile(r"\s*([^\s]).*$").match(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1))
@@ -146,7 +146,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             text = re.sub(self.style.hline_pattern(), '|')
             print "cloned text", text
 
-        i1 = find(text, self.style.vline, 1)
+        i1 = find(text, [self.style.vline], 1)
         return text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
 
     def duplicate_row_and_fill(self, edit, row, fill_char):
@@ -356,9 +356,9 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         row = start_row
         while row <= end_row:
             text = self.get_text(row)
-            i1 = find(text, '|', field_num + 0)
-            i2 = find(text, '|', field_num + 1)
-            i3 = find(text, '|', field_num + 2)
+            i1 = find(text, ['|'], field_num + 0)
+            i2 = find(text, ['|'], field_num + 1)
+            i3 = find(text, ['|'], field_num + 2)
             new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -387,9 +387,9 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
 
         while row <= last_table_row:
             text = self.get_text(row)
-            i1 = find(text, '|', field_num + 1)
-            i2 = find(text, '|', field_num + 2)
-            i3 = find(text, '|', field_num + 3)
+            i1 = find(text, ['|'], field_num + 1)
+            i2 = find(text, ['|'], field_num + 2)
+            i3 = find(text, ['|'], field_num + 3)
             new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -417,8 +417,8 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
         field_count = self.get_field_count(sel_row)
         while row <= last_table_row:
             text = self.get_text(row)
-            i1 = find(text, '|', field_num + 1)
-            i2 = find(text, '|', field_num + 2)
+            i1 = find(text, ['|'], field_num + 1)
+            i2 = find(text, ['|'], field_num + 2)
             if field_count > 1:
                 self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -454,7 +454,7 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
             cell = "   "
             if self.is_separator_row(row):
                 cell = "---"
-            i1 = find(text, '|', field_num + 1)
+            i1 = find(text, ['|'], field_num + 1)
             self.view.replace(edit,
                     self.view.line(self.view.text_point(row, sel_col)),
                     text[0:i1] + "|" + cell + text[i1:])
@@ -500,7 +500,7 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
-        i1 = find(text, '|', 1)
+        i1 = find(text, ['|'], 1)
         new_text = text[:i1] + re.sub(r"[^\|]", ' ', text[i1:]) + "\n"
         self.view.insert(edit, line_region.begin(), new_text)
         pt = self.get_field_default_point(sel_row, field_num)
