@@ -28,11 +28,14 @@ import re
 import tablelib
 
 
-def find(text, sep, num):
+def find(text, chars, num):
     found = -1
     index = 0
     for i in range(num):
-        found = text.find(sep, index)
+        for ch in chars:
+            found = text.find(ch, index)
+            if found != -1:
+                break
         if index == -1:
             return -1
         index = found + 1
@@ -44,8 +47,6 @@ def hline_count(style, text, start, end):
         return sum([text.count(ch, start, end) for ch in style.hline_chars])
     else:
         return text.count(style.vline, start, end)
-
-
 
 
 def csv2table(text):
