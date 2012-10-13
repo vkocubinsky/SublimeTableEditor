@@ -162,7 +162,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         line_text = self.get_text(sel_row)
         sel_field_num = self.hline_count(line_text, 0, sel_col) - 1
         if self.style.is_hline(line_text):
-            pattern = self.style.hline_border_pattern + r"\s*$"
+            pattern = self.style.hline_border_pattern() + r"\s*$"
         else:
             pattern = self.style.vline_pattern() + r"\s*$"
         if sel_field_num > 0 and re.match(pattern, line_text):
@@ -525,7 +525,7 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
-        new_text = self.clone_line(text) + "\n"
+        new_text = self.clone_line(text,' ') + "\n"
         self.view.insert(edit, line_region.begin(), new_text)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -634,21 +634,22 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
 
 class TableEditorJoinLines(AbstractTableMultiSelect):
     """
-    Key: ctrl+join
+    Key: ctrl+j
     Join current row and next row into one if next row is not hline
     """
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         sel = self.align_one_sel(edit, sel)
         field_num = self.get_field_num(sel_row, sel_col)
-
+        vline = self.style.vline
         if (sel_row < self.get_last_table_row(sel_row)
+                and not self.is_hline_row(sel_row)
                 and not self.is_hline_row(sel_row + 1)):
             curr_line = self.get_text(sel_row)
             next_line = self.get_text(sel_row + 1)
             cols = [f1.strip() + " " + f2.strip()
-                for f1, f2 in zip(curr_line.split('|'), next_line.split('|'))]
-            new_line = "|".join(cols) + "\n"
+                for f1, f2 in zip(curr_line.split(vline), next_line.split(vline))]
+            new_line = vline.join(cols) + "\n"
 
             curr_region = self.view.full_line(
                                 self.view.text_point(sel_row, 0))
