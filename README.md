@@ -223,6 +223,38 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
+### Table Styles
+
+Table editor supports different table styles:
+* simple
+* emacs
+* grid
+
+**Simple Style**
+
+    |    Name   | Age |   Phone   |
+    |-----------|-----|-----------|
+    | Anna      |  32 | 123456789 |
+    | Alexander |  28 | 987654321 |
+
+**Emacs Style**
+
+    |    Name   | Age |   Phone   |
+    |-----------+-----+-----------|
+    | Anna      |  32 | 123456789 |
+    | Alexander |  28 | 987654321 |
+
+
+**Grid Style**
+
+    |    Name   | Age |   Phone   |
+    +-----------+-----+-----------+
+    | Anna      |  32 | 123456789 |
+    | Alexander |  28 | 987654321 |
+
+By default *Table eDitor* use simple style. 
+
+
 ### Convert CSV into table
 
 Select some text with CSV data

@@ -32,13 +32,14 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
-        style_name = self.view.settings().get("table_style")
+        style_name = self.view.settings().get("table_editor_style")
         if style_name == "emacs":
             self.style = tablelib.emacs_style
         elif style_name == "grid":
             self.style = tablelib.emacs_style
         else:
             self.style = tablelib.simple_style
+        print self.style
 
     def csv2table(self, text):
         lines = []
