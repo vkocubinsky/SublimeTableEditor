@@ -369,7 +369,6 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
                         + text[i2 + 1:i3]
                         + in_border
                         + text[i1 + 1:i2]
-                        + in_border
                         + text[i3:]
                         )
             self.view.replace(edit,
@@ -413,7 +412,6 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
                         + text[i2 + 1:i3]
                         + in_border
                         + text[i1 + 1:i2]
-                        + in_border
                         + text[i3:])
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
