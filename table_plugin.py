@@ -142,9 +142,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_line(self, text, fill_char):
-        print "clone"
         if self.style.is_hline(text):
-            print "hline", self.style.hline_pattern(),self.style.vline, text
             text = re.sub(self.style.hline_pattern(), self.style.vline, text)
 
         i1 = self.find_border(text, 1)
@@ -361,10 +359,8 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         while row <= end_row:
             if self.is_hline_row(row):
                 in_border = self.style.hline_in_border
-                out_border = self.style.hline_out_border
             else:
                 in_border = self.style.vline
-                out_border = self.style.vline
 
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 0)
@@ -404,10 +400,8 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
         while row <= last_table_row:
             if self.is_hline_row(row):
                 in_border = self.style.hline_in_border
-                out_border = self.style.hline_out_border
             else:
                 in_border = self.style.vline
-                out_border = self.style.vline
 
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 1)
@@ -527,7 +521,7 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
-        new_text = self.clone_line(text,' ') + "\n"
+        new_text = self.clone_line(text, ' ') + "\n"
         self.view.insert(edit, line_region.begin(), new_text)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -601,6 +595,7 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         sel_row = sel_row + 2
         pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
+
 
 class TableEditorSplitColumnDown(AbstractTableMultiSelect):
     """
@@ -723,7 +718,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
                 new_sels.append(sel)
             else:
                 text = self.view.substr(sel)
-                new_text = csv2table(text)
+                new_text = self.csv2table(text)
                 self.view.replace(edit, sel, new_text)
                 pt = self.get_field_default_point(sel_row, 0)
                 new_sels.append(sublime.Region(pt, pt))
