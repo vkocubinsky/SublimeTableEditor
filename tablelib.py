@@ -52,6 +52,7 @@ class TableStyle:
         return "^({0}|{1})+$".format(self.hline_border_pattern(), r"(\s*[-]+\s*)")
 
     def is_hline(self, text):
+        print "is_hline", self.hline_pattern(), text, re.match(self.hline_pattern(), text) is not None
         return re.match(self.hline_pattern(), text) is not None
 
 simple_style = TableStyle('|', '|')

@@ -142,8 +142,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_line(self, text, fill_char):
+        print "clone"
         if self.style.is_hline(text):
-            text = re.sub(self.style.hline_pattern(), self.style.vline)
+            print "hline", self.style.hline_pattern(),self.style.vline, text
+            text = re.sub(self.style.hline_pattern(), self.style.vline, text)
 
         i1 = self.find_border(text, 1)
         return text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
