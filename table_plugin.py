@@ -28,40 +28,6 @@ import re
 import tablelib
 
 
-def find(text, chars, num):
-    found = -1
-    index = 0
-    for i in range(num):
-        for ch in chars:
-            found = text.find(ch, index)
-            if found != -1:
-                break
-        if index == -1:
-            return -1
-        index = found + 1
-    return found
-
-
-def hline_count(style, text, start, end):
-    if re.match(style.hline_pattern(), text):
-        return sum([text.count(ch, start, end) for ch in style.hline_chars])
-    else:
-        return text.count(style.vline, start, end)
-
-
-def csv2table(text):
-    lines = []
-    try:
-        dialect = csv.Sniffer().sniff(text)
-        table_reader = csv.reader(text.splitlines(), dialect)
-        for row in table_reader:
-            lines.append("|" + "|".join(row) + "|")
-    except csv.Error:
-        for row in text.splitlines():
-            lines.append("|" + row + "|")
-    return "\n".join(lines)
-
-
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def __init__(self, view):
@@ -73,6 +39,43 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             self.style = tablelib.emacs_style
         else:
             self.style = tablelib.simple_style
+
+    def csv2table(self, text):
+        lines = []
+        try:
+            vline = self.style.vline
+            dialect = csv.Sniffer().sniff(text)
+            table_reader = csv.reader(text.splitlines(), dialect)
+            for row in table_reader:
+                lines.append(vline + vline.join(row) + vline)
+        except csv.Error:
+            for row in text.splitlines():
+                lines.append(vline + row + vline)
+        return "\n".join(lines)
+
+    def find_border(self, text, num):
+        if self.style.is_hline(text):
+            chars = self.style.hline_chars
+        else:
+            chars = [self.style.vline]
+        found = -1
+        index = 0
+        for i in range(num):
+            for ch in chars:
+                found = text.find(ch, index)
+                if found != -1:
+                    break
+            if index == -1:
+                return -1
+            index = found + 1
+        return found
+
+    def hline_count(self, text, start, end):
+        if self.style.is_hline(text):
+            return sum([text.count(ch, start, end)
+                                            for ch in self.style.hline_chars])
+        else:
+            return text.count(self.style.vline, start, end)
 
     def get_text(self, row):
         point = self.view.text_point(row, 0)
@@ -89,27 +92,26 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def get_row(self, point):
         return self.view.rowcol(point)[0]
 
-    def is_separator_row(self, row):
-        return re.match(self.style.hline_pattern(),
-                        self.get_text(row)) is not None
+    def is_hline_row(self, row):
+        return self.style.is_hline(self.get_text(row))
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.style.hline_border_pattern(), self.get_text(row)) is not None
 
     def get_field_num(self, row, col):
-        return hline_count(self.style, self.get_text(row), 0, col) - 1
+        return self.hline_count(self.get_text(row), 0, col) - 1
 
     def get_field_count(self, row):
         text = self.get_text(row)
-        return hline_count(self.style, text, 0, len(text)) - 1
+        return self.hline_count(text, 0, len(text)) - 1
 
     def get_last_buffer_row(self):
         return self.view.rowcol(self.view.size())[0]
 
     def get_field_default_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, [self.style.vline], field_num + 1)
-        i2 = find(text, [self.style.vline], field_num + 2)
+        i1 = self.find_border(text, field_num + 1)
+        i2 = self.find_border(text, field_num + 2)
         match = re.compile(r"([^\s])\s*$").search(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1) + 1)
@@ -118,8 +120,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_begin_point(self, row, field_num):
         text = self.get_text(row)
-        i1 = find(text, [self.style.vline], field_num + 1)
-        i2 = find(text, [self.style.vline], field_num + 2)
+        i1 = self.find_border(text, field_num + 1)
+        i2 = self.find_border(text, field_num + 2)
         match = re.compile(r"\s*([^\s]).*$").match(text, i1 + 1, i2)
         if match:
             return self.view.text_point(row, match.start(1))
@@ -142,11 +144,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_line(self, text, fill_char):
-        if re.match(self.style.hline_pattern(), text):
-            text = re.sub(self.style.hline_pattern(), '|')
-            print "cloned text", text
+        if self.style.is_hline(text):
+            text = re.sub(self.style.hline_pattern(), self.style.vline)
 
-        i1 = find(text, [self.style.vline], 1)
+        i1 = self.find_border(text, 1)
         return text[:i1] + re.sub(r"[^\|]", fill_char, text[i1:])
 
     def duplicate_row_and_fill(self, edit, row, fill_char):
@@ -245,7 +246,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
         field_count = self.get_field_count(sel_row)
         moved = False
         while True:
-            if self.is_separator_row(sel_row):
+            if self.is_hline_row(sel_row):
                 if sel_row < last_table_row:
                     sel_row = sel_row + 1
                     field_num = 0
@@ -290,7 +291,7 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
         first_table_row = self.get_first_table_row(sel_row)
         moved = False
         while True:
-            if self.is_separator_row(sel_row):
+            if self.is_hline_row(sel_row):
                 if sel_row > first_table_row:
                     sel_row = sel_row - 1
                     field_num = self.get_field_count(sel_row) - 1
@@ -330,7 +331,7 @@ class TableEditorNextRow(AbstractTableMultiSelect):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         if sel_row < self.get_last_table_row(sel_row):
-            if self.is_separator_row(sel_row + 1):
+            if self.is_hline_row(sel_row + 1):
                 self.duplicate_row_and_fill(edit, sel_row, ' ')
         else:
             self.duplicate_row_and_fill(edit, sel_row, ' ')
@@ -356,9 +357,9 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         row = start_row
         while row <= end_row:
             text = self.get_text(row)
-            i1 = find(text, ['|'], field_num + 0)
-            i2 = find(text, ['|'], field_num + 1)
-            i3 = find(text, ['|'], field_num + 2)
+            i1 = self.find_border(text, field_num + 0)
+            i2 = self.find_border(text, field_num + 1)
+            i3 = self.find_border(text, field_num + 2)
             new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -387,9 +388,9 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
 
         while row <= last_table_row:
             text = self.get_text(row)
-            i1 = find(text, ['|'], field_num + 1)
-            i2 = find(text, ['|'], field_num + 2)
-            i3 = find(text, ['|'], field_num + 3)
+            i1 = self.find_border(text, field_num + 1)
+            i2 = self.find_border(text, field_num + 2)
+            i3 = self.find_border(text, field_num + 3)
             new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -417,8 +418,8 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
         field_count = self.get_field_count(sel_row)
         while row <= last_table_row:
             text = self.get_text(row)
-            i1 = find(text, ['|'], field_num + 1)
-            i2 = find(text, ['|'], field_num + 2)
+            i1 = self.find_border(text, field_num + 1)
+            i2 = self.find_border(text, field_num + 2)
             if field_count > 1:
                 self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
@@ -452,12 +453,12 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
         while row <= last_table_row:
             text = self.get_text(row)
             cell = "   "
-            if self.is_separator_row(row):
+            if self.is_hline_row(row):
                 cell = "---"
-            i1 = find(text, ['|'], field_num + 1)
+            i1 = self.find_border(text, field_num + 1)
             self.view.replace(edit,
                     self.view.line(self.view.text_point(row, sel_col)),
-                    text[0:i1] + "|" + cell + text[i1:])
+                    text[0:i1] + self.style.vline + cell + text[i1:])
 
             row += 1
         pt = self.get_field_default_point(sel_row, field_num)
@@ -500,8 +501,7 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
-        i1 = find(text, ['|'], 1)
-        new_text = text[:i1] + re.sub(r"[^\|]", ' ', text[i1:]) + "\n"
+        new_text = self.clone_line(text) + "\n"
         self.view.insert(edit, line_region.begin(), new_text)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -568,7 +568,7 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.duplicate_row_and_fill(edit, sel_row, '-')
         if sel_row + 1 < self.get_last_table_row(sel_row):
-            if self.is_separator_row(sel_row + 2):
+            if self.is_hline_row(sel_row + 2):
                 self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
         else:
             self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
@@ -595,7 +595,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         rest_data = self.remove_rest_line(edit, sel)
         sel = self.align_one_sel(edit, sel)
         if (sel_row == self.get_last_table_row(sel_row)
-                or self.is_separator_row(sel_row + 1)):
+                or self.is_hline_row(sel_row + 1)):
             self.duplicate_row_and_fill(edit, sel_row, ' ')
             sel_row = sel_row + 1
         else:
@@ -619,7 +619,7 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
 
         if (sel_row < self.get_last_table_row(sel_row)
-                and not self.is_separator_row(sel_row + 1)):
+                and not self.is_hline_row(sel_row + 1)):
             curr_line = self.get_text(sel_row)
             next_line = self.get_text(sel_row + 1)
             cols = [f1.strip() + " " + f2.strip()
