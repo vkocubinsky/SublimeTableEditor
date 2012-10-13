@@ -160,9 +160,12 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
     def get_unformatted_field_num(self, sel_row, sel_col):
         line_text = self.get_text(sel_row)
-        sel_field_num = line_text.count("|", 0, sel_col) - 1
-        i1 = line_text.rfind("|", 0, sel_col)
-        if len(line_text[i1 + 1:].strip()) == 0 and sel_field_num > 0:
+        sel_field_num = self.hline_count(line_text, 0, sel_col) - 1
+        if self.style.is_hline(line_text):
+            pattern = self.style.hline_border_pattern + r"\s*$"
+        else:
+            pattern = self.style.vline_pattern() + r"\s*$"
+        if sel_field_num > 0 and re.match(pattern, line_text):
             sel_field_num = sel_field_num - 1
         return sel_field_num
 
