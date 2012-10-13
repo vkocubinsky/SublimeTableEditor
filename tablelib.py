@@ -45,6 +45,9 @@ class TableStyle:
     def hline_border_pattern(self):
         return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_chars]) + ")"
 
+    def vline_pattern(self):
+        return "(?:" + re.escape(self.vline) + ")"
+
     def hline_pattern(self):
         return "^({0}|{1})+$".format(self.hline_border_pattern(), r"(\s*[-]+\s*)")
 

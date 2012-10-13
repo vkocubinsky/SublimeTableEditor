@@ -55,20 +55,18 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def find_border(self, text, num):
         if self.style.is_hline(text):
-            chars = self.style.hline_chars
+            pattern = self.style.hline_border_pattern()
         else:
-            chars = [self.style.vline]
-        found = -1
-        index = 0
+            pattern = self.style.vline_pattern()
+        it = re.finditer(pattern, text)
+        index = -1
         for i in range(num):
-            for ch in chars:
-                found = text.find(ch, index)
-                if found != -1:
-                    break
-            if index == -1:
-                return -1
-            index = found + 1
-        return found
+            try:
+                mo = it.next()
+                index = mo.start()
+            except StopIteration:
+                index = -1
+        return index
 
     def hline_count(self, text, start, end):
         if self.style.is_hline(text):
@@ -356,11 +354,24 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         end_row = self.get_last_table_row(sel_row)
         row = start_row
         while row <= end_row:
+            if self.is_hline_row(row):
+                in_border = self.style.hline_in_border
+                out_border = self.style.hline_out_border
+            else:
+                in_border = self.style.vline
+                out_border = self.style.vline
+
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 0)
             i2 = self.find_border(text, field_num + 1)
             i3 = self.find_border(text, field_num + 2)
-            new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
+            new_text = (text[0:i1 + 1]
+                        + text[i2 + 1:i3]
+                        + in_border
+                        + text[i1 + 1:i2]
+                        + in_border
+                        + text[i3:]
+                        )
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
                         new_text
@@ -387,11 +398,23 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
         row = first_table_row
 
         while row <= last_table_row:
+            if self.is_hline_row(row):
+                in_border = self.style.hline_in_border
+                out_border = self.style.hline_out_border
+            else:
+                in_border = self.style.vline
+                out_border = self.style.vline
+
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 1)
             i2 = self.find_border(text, field_num + 2)
             i3 = self.find_border(text, field_num + 3)
-            new_text = text[0:i1] + text[i2:i3] + text[i1:i2] + text[i3:]
+            new_text = (text[0:i1 + 1]
+                        + text[i2 + 1:i3]
+                        + in_border
+                        + text[i1 + 1:i2]
+                        + in_border
+                        + text[i3:])
             self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
                         new_text
