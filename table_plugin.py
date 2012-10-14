@@ -463,7 +463,7 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
             i2 = self.find_border(text, field_num + 2)
             if field_count > 1:
                 if self.style.is_hline(text):
-                    if field_num == 0:
+                    if field_num == 0 or field_num == field_count - 1:
                         vline = self.style.hline_out_border
                     else:
                         vline = self.style.hline_in_border
