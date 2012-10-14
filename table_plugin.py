@@ -54,12 +54,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return "\n".join(lines)
 
     def find_border(self, text, num):
-        print "find_border({0},{1})".format(text, num)
         if self.style.is_hline(text):
             pattern = self.style.hline_border_pattern()
         else:
             pattern = self.style.vline_pattern()
-        print "find_border pattern:" + pattern
         it = re.finditer(pattern, text)
         index = -1
         for i in range(num):
@@ -68,7 +66,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 index = mo.start()
             except StopIteration:
                 index = -1
-        print "find_border:{0}".format(index)
         return index
 
     def hline_count(self, text, start, end):
@@ -174,17 +171,18 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         region = self.view.line(point)
         text = self.view.substr(region)
         new_text = "\n" + self.clone_as_hline(text)
-        print "duplicate_as_empty_row:new_text" + new_text
+        print "duplicate_as_hrow:new_text", new_text
         self.view.insert(edit, region.end(), new_text)
-
 
     def duplicate_as_empty_row(self, edit, row):
         print "duplicate_as_empty_row({0},{1})".format(edit, row)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
+        print region, point
         text = self.view.substr(region)
+        print "duplicate_as_empty_row:text", text
         new_text = "\n" + self.clone_as_empty_line(text)
-        print "duplicate_as_empty_row:new_text" + new_text
+        print "duplicate_as_empty_row:new_text", new_text
         self.view.insert(edit, region.end(), new_text)
 
 

@@ -234,7 +234,11 @@ class TextTable:
     def format_to_lines(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
-        _prefix, sep, rest = lines[0].partition('|')
+        if self.style.is_hline(lines[0]):
+            _prefix, sep, rest = lines[0].partition(self.style.hline_out_border)
+        else:
+            _prefix, sep, rest = lines[0].partition(self.style.vline)
+        print "prefix", _prefix
         for line in lines:
             cols = self._split_line(line.strip())
             self._merge(cols)
@@ -277,5 +281,10 @@ if __name__ == '__main__':
               |-
               |c|3|
               |-"""
+    #print "Table:\n", format_to_text(raw_text, grid_style)
+
+    raw_text = """+-
+     |"""
     print "Table:\n", format_to_text(raw_text, grid_style)
+
 
