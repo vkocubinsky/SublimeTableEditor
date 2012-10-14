@@ -425,7 +425,12 @@ Probably this option is usable if you work only with text or wiki markup files
 
 **ctrl+k, -**
 
-        Insert a horizontal line below current row. 
+        Insert single horizontal line below current row. 
+
+**ctrl+k, =**
+
+        Insert double horizontal line below current row. 
+
 
 **ctrl+k, enter**
 

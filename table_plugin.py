@@ -150,14 +150,14 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         i1 = self.find_border(text, 1)
         return text[:i1] + re.sub(self.style.not_vline_pattern(), ' ', text[i1:])
 
-    def clone_as_hline(self, text):
+    def clone_as_hline(self, text, hline='-'):
         print "clone_as_hline(text={0})".format(text)
         if self.style.is_hline(text):
             return text[:]
         i1 = text.find(self.style.vline)
         i2 = text.rfind(self.style.vline)
         in_text = text[i1 + 1:i2]
-        in_text = re.sub(self.style.not_vline_pattern(), '-', in_text)
+        in_text = re.sub(self.style.not_vline_pattern(), hline, in_text)
         in_text = re.sub(self.style.vline_pattern(), self.style.hline_in_border, in_text)
         return (text[:i1]
                 + self.style.hline_out_border
@@ -165,12 +165,12 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 + self.style.hline_out_border
                 + text[i2 + 1:])
 
-    def duplicate_as_hrow(self, edit, row):
+    def duplicate_as_hrow(self, edit, row, hline='-'):
         print "duplicate_as_hrow({0},{1})".format(edit, row)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
-        new_text = "\n" + self.clone_as_hline(text)
+        new_text = "\n" + self.clone_as_hline(text, hline)
         print "duplicate_as_hrow:new_text", new_text
         self.view.insert(edit, region.end(), new_text)
 
@@ -594,16 +594,31 @@ class TableEditorMoveRowDown(AbstractTableCommand):
             self.view.run_command("swap_line_down")
 
 
-class TableEditorInsertHline(AbstractTableMultiSelect):
+class TableEditorInsertSingleHline(AbstractTableMultiSelect):
     """
     Key: ctrl+k,-
-    Insert a horizontal line below current row.
+    Insert single horizontal line below current row.
     """
 
     def run_one_sel(self, edit, sel):
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.duplicate_as_hrow(edit, sel_row)
+        field_num = self.get_field_num(sel_row, sel_col)
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
+
+
+class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
+    """
+    Key: ctrl+k,=
+    Insert double horizontal line below current row.
+    """
+
+    def run_one_sel(self, edit, sel):
+        sel = self.align_one_sel(edit, sel)
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        self.duplicate_as_hrow(edit, sel_row, "=")
         field_num = self.get_field_num(sel_row, sel_col)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
