@@ -53,13 +53,22 @@ class TableStyle:
     def not_vline_pattern(self):
         return "([^" + re.escape(self.vline) + "])"
 
-    def hline_pattern(self):
-        return "(^({border}|{h1})+$)|(^({border}|{h2})+$)".format(border=self.hline_border_pattern(),
-                                                h1=r"(\s*[\-]+\s*)",
-                                                h2=r"(\s*[\=]+\s*)")
+    def single_hline_pattern(self):
+        return "(^({border}|{line})+$)".format(border=self.hline_border_pattern(),
+                                                line=r"(\s*[\-]+\s*)")
+
+    def double_hline_pattern(self):
+        return "(^({border}|{line})+$)".format(border=self.hline_border_pattern(),
+                                                line=r"(\s*[\=]+\s*)")
+
+    def is_single_hline(self, text):
+        return re.match(self.single_hline_pattern(), text) is not None
+
+    def is_double_hline(self, text):
+        return re.match(self.double_hline_pattern(), text) is not None
 
     def is_hline(self, text):
-        return re.match(self.hline_pattern(), text) is not None
+        return self.is_single_hline(text) or self.is_double_hline(text)
 
 simple_style = TableStyle('|', '|')
 emacs_style = TableStyle('|', '+')
@@ -72,8 +81,8 @@ class TextTable:
     ALIGN_CENTER = 'center'
 
     ROW_DATA = 'd'
-    ROW_SEPARATOR = '-'
-    ROW_HEADER_SEPARATOR = '='
+    ROW_SINGLE_SEPARATOR = '-'
+    ROW_DOUBLE_SEPARATOR = '='
     ROW_HEADER = 'h'
     ROW_FORMAT = 'f'
 
@@ -105,13 +114,13 @@ class TextTable:
             col = col + ' '
         return col
 
-    def _is_row_separator(self, row):
+    def _is_single_row_separator(self, row):
         for col in row:
             if not re.match(r"^\s*[\-]+\s*$", col):
                 return False
         return True
 
-    def _is_row_header_separator(self, row):
+    def _is_double_row_separator(self, row):
         for col in row:
             if not re.match(r"^\s*[\=]+\s*$", col):
                 return False
@@ -124,13 +133,13 @@ class TextTable:
         return True
 
     def _merge(self, new_row):
-        if self._is_row_separator(new_row) or self._is_row_header_separator(new_row):
-            if self._is_row_separator(new_row):
+        if self._is_single_row_separator(new_row) or self._is_double_row_separator(new_row):
+            if self._is_single_row_separator(new_row):
                 new_row = ['---' for col in new_row]
-                self._row_types.append(TextTable.ROW_SEPARATOR)
+                self._row_types.append(TextTable.ROW_SINGLE_SEPARATOR)
             else:
                 new_row = ['===' for col in new_row]
-                self._row_types.append(TextTable.ROW_HEADER_SEPARATOR)
+                self._row_types.append(TextTable.ROW_DOUBLE_SEPARATOR)
             if not self._header_found and TextTable.ROW_DATA in self._row_types:
                 for i, x in enumerate(self._row_types):
                     if x == TextTable.ROW_DATA:
@@ -179,9 +188,9 @@ class TextTable:
                                 self._row_types[start_row_ind:]):
             if row_type == TextTable.ROW_FORMAT:
                 break
-            elif row_type == TextTable.ROW_SEPARATOR:
+            elif row_type == TextTable.ROW_SINGLE_SEPARATOR:
                 continue
-            elif row_type == TextTable.ROW_HEADER_SEPARATOR:
+            elif row_type == TextTable.ROW_DOUBLE_SEPARATOR:
                 continue
             elif row_type == TextTable.ROW_HEADER:
                 continue
@@ -202,9 +211,9 @@ class TextTable:
                 col = row[col_ind]
                 col_len = self._col_lens[col_ind]
 
-                if row_type == TextTable.ROW_SEPARATOR:
+                if row_type == TextTable.ROW_SINGLE_SEPARATOR:
                     col = '-' * col_len
-                elif row_type == TextTable.ROW_HEADER_SEPARATOR:
+                elif row_type == TextTable.ROW_DOUBLE_SEPARATOR:
                     col = '=' * col_len
                 elif row_type == TextTable.ROW_HEADER:
                     col = col.center(col_len, ' ')
@@ -236,11 +245,9 @@ class TextTable:
         assert len(lines) > 0, "Table is empty"
         mo = re.search(r"[^\s]", lines[0])
         if mo:
-            print "yes", mo.start()
             prefix = lines[0][:mo.start()]
         else:
             prefix = ""
-        print "prefix", prefix
         for line in lines:
             cols = self._split_line(line.strip())
             self._merge(cols)
@@ -248,7 +255,7 @@ class TextTable:
         self._adjust_column_width()
 
         def join_row(row):
-            if self._is_row_separator(row) or self._is_row_header_separator(row):
+            if self._is_single_row_separator(row) or self._is_double_row_separator(row):
                 return (self.style.hline_out_border
                     + self.style.hline_in_border.join(row)
                     + self.style.hline_out_border)
@@ -288,5 +295,3 @@ if __name__ == '__main__':
     raw_text = """   |-
      |"""
     print "Table:\n", format_to_text(raw_text, grid_style)
-
-
