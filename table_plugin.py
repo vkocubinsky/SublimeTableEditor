@@ -186,7 +186,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             pattern = self.style.hline_border_pattern() + r"\s*$"
         else:
             pattern = self.style.vline_pattern() + r"\s*$"
-        if sel_field_num > 0 and re.match(pattern, line_text):
+        if sel_field_num > 0 and re.search(pattern, line_text):
             sel_field_num = sel_field_num - 1
         return sel_field_num
 
@@ -206,7 +206,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         table_region = sublime.Region(begin_point, end_point)
         text = self.view.substr(table_region)
         sel_field_num = self.get_unformatted_field_num(sel_row, sel_col)
-
         new_text_lines = tablelib.format_to_lines(text, self.style)
         row = first_table_row
         while row <= last_table_row:

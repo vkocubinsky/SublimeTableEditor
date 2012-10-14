@@ -242,7 +242,7 @@ There are list of available settings:
 * "table_editor_style" : "emacs"
 * "table_editor_style" : "grid"
 
-**Simple Style**
+#### Simple Style
 
     |-----------|-----|-----------|
     |    Name   | Age |   Phone   |
@@ -252,7 +252,7 @@ There are list of available settings:
     | Alexander |  28 | 987654321 |
     |-----------|-----|-----------|    
 
-**Emacs Style**
+#### Emacs Style
 
     |-----------+-----+-----------|
     |    Name   | Age |   Phone   |
@@ -262,7 +262,7 @@ There are list of available settings:
     | Alexander |  28 | 987654321 |
     |-----------+-----+-----------|
 
-**Grid Style**
+#### Grid Style
 
     +-----------+-----+-----------+
     |    Name   | Age |   Phone   |
