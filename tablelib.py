@@ -48,6 +48,9 @@ class TableStyle:
     def vline_pattern(self):
         return "(?:" + re.escape(self.vline) + ")"
 
+    def not_vline_pattern(self):
+        return "([^" + re.escape(self.vline) + "])"
+
     def hline_pattern(self):
         return "^({0}|{1})+$".format(self.hline_border_pattern(), r"(\s*[-]+\s*)")
 
@@ -252,3 +255,8 @@ if __name__ == '__main__':
               |-
               |c|3|"""
     print "Table:\n", format_to_text(raw_text, grid_style)
+
+
+    print grid_style.hline_border_pattern()
+    text = re.sub(grid_style.hline_border_pattern(), grid_style.vline, "+  g +   h  |")
+    print "new text", text
