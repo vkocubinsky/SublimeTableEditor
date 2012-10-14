@@ -142,10 +142,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_as_empty_line(self, text):
-        print "clone_as_empty_line(text={0})".format(text)
         if self.style.is_hline(text):
             text = re.sub(self.style.hline_border_pattern(), self.style.vline, text)
-            print "clone_as_empty_line: new text:" + text
 
         i1 = self.find_border(text, 1)
         return text[:i1] + re.sub(self.style.not_vline_pattern(), ' ', text[i1:])
@@ -166,23 +164,17 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 + text[i2 + 1:])
 
     def duplicate_as_hrow(self, edit, row, hline='-'):
-        print "duplicate_as_hrow({0},{1})".format(edit, row)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
         new_text = "\n" + self.clone_as_hline(text, hline)
-        print "duplicate_as_hrow:new_text", new_text
         self.view.insert(edit, region.end(), new_text)
 
     def duplicate_as_empty_row(self, edit, row):
-        print "duplicate_as_empty_row({0},{1})".format(edit, row)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
-        print region, point
         text = self.view.substr(region)
-        print "duplicate_as_empty_row:text", text
         new_text = "\n" + self.clone_as_empty_line(text)
-        print "duplicate_as_empty_row:new_text", new_text
         self.view.insert(edit, region.end(), new_text)
 
 
