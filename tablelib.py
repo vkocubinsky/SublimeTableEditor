@@ -31,7 +31,8 @@ class TableStyle:
         self.vline = '|'
         self.hline_out_border = hline_out_border
         self.hline_in_border = hline_in_border
-        self.hline_borders = set([self.vline, hline_out_border, hline_in_border])
+        #characters from all styles correct switch from one style to other
+        self.hline_borders = ['+', '|']
 
     def __str__(self):
         return """
