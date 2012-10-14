@@ -144,22 +144,47 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             row = row - 1
         return first_table_row
 
-    def clone_line(self, text, fill_char):
-        print "clone_line(text={0}, char ={1})".format(text, fill_char)
+    def clone_as_empty_line(self, text):
+        print "clone_as_empty_line(text={0})".format(text)
         if self.style.is_hline(text):
             text = re.sub(self.style.hline_border_pattern(), self.style.vline, text)
-            print "clone_line: new text:" + text
+            print "clone_as_empty_line: new text:" + text
 
         i1 = self.find_border(text, 1)
-        return text[:i1] + re.sub(self.style.not_vline_pattern(), fill_char, text[i1:])
+        return text[:i1] + re.sub(self.style.not_vline_pattern(), ' ', text[i1:])
 
-    def duplicate_row_and_fill(self, edit, row, fill_char):
-        print "duplicate_row_and_fill({0},{1},{2})".format(edit, row, fill_char)
+    def clone_as_hline(self, text):
+        print "clone_as_hline(text={0})".format(text)
+        if self.style.is_hline(text):
+            return text[:]
+        i1 = text.find(self.style.vline)
+        i2 = text.rfind(self.style.vline)
+        in_text = text[i1 + 1:i2]
+        in_text = re.sub(self.style.not_vline_pattern(), '-', in_text)
+        in_text = re.sub(self.style.vline_pattern(), self.style.hline_in_border, in_text)
+        return (text[:i1]
+                + self.style.hline_out_border
+                + in_text
+                + self.style.hline_out_border
+                + text[i2 + 1:])
+
+    def duplicate_as_hrow(self, edit, row):
+        print "duplicate_as_hrow({0},{1})".format(edit, row)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
-        new_text = "\n" + self.clone_line(text, fill_char)
-        print "duplicate_row_and_fill:new_text" + new_text
+        new_text = "\n" + self.clone_as_hline(text)
+        print "duplicate_as_empty_row:new_text" + new_text
+        self.view.insert(edit, region.end(), new_text)
+
+
+    def duplicate_as_empty_row(self, edit, row):
+        print "duplicate_as_empty_row({0},{1})".format(edit, row)
+        point = self.view.text_point(row, 0)
+        region = self.view.line(point)
+        text = self.view.substr(region)
+        new_text = "\n" + self.clone_as_empty_line(text)
+        print "duplicate_as_empty_row:new_text" + new_text
         self.view.insert(edit, region.end(), new_text)
 
 
@@ -262,7 +287,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
                     continue
                 else:
                     #sel_row == last_table_row
-                    self.duplicate_row_and_fill(edit, sel_row, ' ')
+                    self.duplicate_as_empty_row(edit, sel_row)
                     field_num = 0
                     sel_row += 1
                     break
@@ -278,7 +303,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
                 continue
             else:
                 #sel_row == last_table_row
-                self.duplicate_row_and_fill(edit, sel_row, ' ')
+                self.duplicate_as_empty_row(edit, sel_row)
                 field_num = 0
                 sel_row += 1
                 break
@@ -340,9 +365,9 @@ class TableEditorNextRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         if sel_row < self.get_last_table_row(sel_row):
             if self.is_hline_row(sel_row + 1):
-                self.duplicate_row_and_fill(edit, sel_row, ' ')
+                self.duplicate_as_empty_row(edit, sel_row)
         else:
-            self.duplicate_row_and_fill(edit, sel_row, ' ')
+            self.duplicate_as_empty_row(edit, sel_row)
         sel_row += 1
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -528,7 +553,7 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         field_num = self.get_field_num(sel_row, sel_col)
         line_region = self.view.line(sel)
         text = self.view.substr(line_region)
-        new_text = self.clone_line(text, ' ') + "\n"
+        new_text = self.clone_as_empty_line(text) + "\n"
         self.view.insert(edit, line_region.begin(), new_text)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -577,7 +602,7 @@ class TableEditorInsertHline(AbstractTableMultiSelect):
     def run_one_sel(self, edit, sel):
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_row_and_fill(edit, sel_row, '-')
+        self.duplicate_as_hrow(edit, sel_row)
         field_num = self.get_field_num(sel_row, sel_col)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -593,12 +618,12 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
     def run_one_sel(self, edit, sel):
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_row_and_fill(edit, sel_row, '-')
+        self.duplicate_as_hrow(edit, sel_row)
         if sel_row + 1 < self.get_last_table_row(sel_row):
             if self.is_hline_row(sel_row + 2):
-                self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
+                self.duplicate_as_empty_row(edit, sel_row + 1)
         else:
-            self.duplicate_row_and_fill(edit, sel_row + 1, ' ')
+            self.duplicate_as_empty_row(edit, sel_row + 1)
         sel_row = sel_row + 2
         pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
@@ -624,7 +649,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         sel = self.align_one_sel(edit, sel)
         if (sel_row == self.get_last_table_row(sel_row)
                 or self.is_hline_row(sel_row + 1)):
-            self.duplicate_row_and_fill(edit, sel_row, ' ')
+            self.duplicate_as_empty_row(edit, sel_row)
             sel_row = sel_row + 1
         else:
             sel_row = sel_row + 1
