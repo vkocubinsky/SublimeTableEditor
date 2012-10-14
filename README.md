@@ -2,7 +2,7 @@
 
 ## Overview
 
-*Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a ST2 package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
 - navigate with tab/shift tab 
 - insert/delete row
@@ -14,6 +14,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
+- support emacs, grid, simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
@@ -230,6 +231,17 @@ Table editor supports different table styles:
 * emacs
 * grid
 
+*simple* style is default style. You can change default table style if modify 
+user settings. You can open user settings with menu "Preferences -> Settings - User".
+You can set per syntax table style if modify syntax settings. For example when you edit Markdown file you can open syntax settings with menu 
+"Preferences -> Settings - More -> Syntax Specific - User"
+
+There are list of available settings:
+
+* "table_editor_style" : "simple"
+* "table_editor_style" : "emacs"
+* "table_editor_style" : "grid"
+
 **Simple Style**
 
     |    Name   | Age |   Phone   |
@@ -244,7 +256,6 @@ Table editor supports different table styles:
     | Anna      |  32 | 123456789 |
     | Alexander |  28 | 987654321 |
 
-
 **Grid Style**
 
     |    Name   | Age |   Phone   |
@@ -252,7 +263,7 @@ Table editor supports different table styles:
     | Anna      |  32 | 123456789 |
     | Alexander |  28 | 987654321 |
 
-By default *Table eDitor* use simple style. 
+
 
 
 ### Convert CSV into table

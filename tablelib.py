@@ -147,7 +147,7 @@ class TextTable:
         if re.match(self.style.hline_pattern(), line):
             return re.split(self.style.hline_border_pattern(), line)
         else:
-            return line.split('|')
+            return line.split(self.style.vline)
 
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
@@ -210,7 +210,7 @@ class TextTable:
     def format_to_lines(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
-        self._prefix, sep, rest = lines[0].partition('|')
+        _prefix, sep, rest = lines[0].partition('|')
         for line in lines:
             cols = self._split_line(line.strip())
             self._merge(cols)
@@ -225,7 +225,7 @@ class TextTable:
             else:
                 vline = self.style.vline
                 return vline + vline.join(row) + vline
-        return [self._prefix + join_row(row) for row in self._rows]
+        return [_prefix + join_row(row) for row in self._rows]
 
     def format_to_text(self):
         return "\n".join(self.format_to_lines())

@@ -1,6 +1,6 @@
 # Table Editor
 
-*Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a ST2 package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
 - navigate with tab/shift tab 
 - insert/delete row
@@ -12,6 +12,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
+- support emacs, grid, simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
