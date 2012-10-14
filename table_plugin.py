@@ -185,7 +185,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         pattern = self.style.hline_border_pattern() + r"\s*$"
         if sel_field_num > 0 and re.match(pattern, line_text):
             sel_field_num = sel_field_num - 1
-        print "get_unformatted_field_num", sel_field_num
         return sel_field_num
 
     def align_one_sel(self, edit, sel):
