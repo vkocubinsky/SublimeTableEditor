@@ -149,7 +149,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return text[:i1] + re.sub(self.style.not_vline_pattern(), ' ', text[i1:])
 
     def clone_as_hline(self, text, hline='-'):
-        print "clone_as_hline(text={0})".format(text)
         if self.style.is_hline(text):
             return text[:]
         i1 = text.find(self.style.vline)
