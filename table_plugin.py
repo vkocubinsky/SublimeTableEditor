@@ -502,9 +502,12 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
         row = first_table_row
         while row <= last_table_row:
             text = self.get_text(row)
-            cell = "   "
-            if self.is_hline_row(row):
+            if self.style.is_single_hline(text):
                 cell = "---"
+            elif self.style.is_double_hline(text):
+                cell = "==="
+            else:
+                cell = "   "
             i1 = self.find_border(text, field_num + 1)
             self.view.replace(edit,
                     self.view.line(self.view.text_point(row, sel_col)),
