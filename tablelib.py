@@ -268,7 +268,7 @@ class TextTable:
         return "\n".join(self.format_to_lines())
 
 
-def format_to_text(text, style):
+def format_to_text(text, style = simple_style):
     table = TextTable(text, style)
     return table.format_to_text()
 
