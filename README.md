@@ -244,26 +244,33 @@ There are list of available settings:
 
 **Simple Style**
 
-    |    Name   | Age |   Phone   |
     |-----------|-----|-----------|
+    |    Name   | Age |   Phone   |
+    |===========|=====|===========|
     | Anna      |  32 | 123456789 |
+    |-----------|-----|-----------|    
     | Alexander |  28 | 987654321 |
+    |-----------|-----|-----------|    
 
 **Emacs Style**
 
-    |    Name   | Age |   Phone   |
     |-----------+-----+-----------|
+    |    Name   | Age |   Phone   |
+    |===========+=====+===========|
     | Anna      |  32 | 123456789 |
+    |-----------+-----+-----------|
     | Alexander |  28 | 987654321 |
+    |-----------+-----+-----------|
 
 **Grid Style**
 
-    |    Name   | Age |   Phone   |
     +-----------+-----+-----------+
+    |    Name   | Age |   Phone   |
+    +===========+=====+===========+
     | Anna      |  32 | 123456789 |
+    +-----------+-----+-----------+
     | Alexander |  28 | 987654321 |
-
-
+    +-----------+-----+-----------+
 
 
 ### Convert CSV into table
@@ -465,29 +472,4 @@ You can make a donation online, using the link below with PayPal service
 
 I tested *Table Editor* package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
 
-
-## Difference from emacs org-mode table editor
-
-*Table Editor* is very similar to emacs org-mode table editor with the same key binding. In fact I always run *Emacs*
-and compare with *Table Editor* to get similiar behavior.
-
-But exists some differences. One of this is Emacs use character '+' in separator line, sublime text editor use character '|'.
-
-Emacs table:
-
-    
-    | col 1  | col2   | col3   |
-    |--------+--------+--------|
-    | data 1 | data 2 | data 3 |
-
-Sublime text editor table:
-
-    | col 1  |  col2  |  col3  |
-    |--------|--------|--------|
-    | data 1 | data 2 | data 3 |
-
-
-Second one is navigation between field. Emacs set pointer to begin of field indepent of alignment, additionally 
-*Emacs* has keys *alt-a* to navigate to the begin of field, *alt-e* to navigate to the end of field.
-*Table Editor* combine it into one and set point to the end of data in field. 
 
