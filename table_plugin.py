@@ -54,10 +54,12 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return "\n".join(lines)
 
     def find_border(self, text, num):
+        print "find_border({0},{1})".format(text, num)
         if self.style.is_hline(text):
             pattern = self.style.hline_border_pattern()
         else:
             pattern = self.style.vline_pattern()
+        print "find_border pattern:" + pattern
         it = re.finditer(pattern, text)
         index = -1
         for i in range(num):
@@ -66,6 +68,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 index = mo.start()
             except StopIteration:
                 index = -1
+        print "find_border:{0}".format(index)
         return index
 
     def hline_count(self, text, start, end):
@@ -142,17 +145,21 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_line(self, text, fill_char):
+        print "clone_line(text={0}, char ={1})".format(text, fill_char)
         if self.style.is_hline(text):
             text = re.sub(self.style.hline_border_pattern(), self.style.vline, text)
+            print "clone_line: new text:" + text
 
         i1 = self.find_border(text, 1)
-        return text[:i1] + re.sub(self.not_vline_pattern(), fill_char, text[i1:])
+        return text[:i1] + re.sub(self.style.not_vline_pattern(), fill_char, text[i1:])
 
     def duplicate_row_and_fill(self, edit, row, fill_char):
+        print "duplicate_row_and_fill({0},{1},{2})".format(edit, row, fill_char)
         point = self.view.text_point(row, 0)
         region = self.view.line(point)
         text = self.view.substr(region)
-        new_text = self.clone_line("\n" + text, fill_char)
+        new_text = "\n" + self.clone_line(text, fill_char)
+        print "duplicate_row_and_fill:new_text" + new_text
         self.view.insert(edit, region.end(), new_text)
 
 
