@@ -31,19 +31,21 @@ class TableStyle:
         self.vline = '|'
         self.hline_out_border = hline_out_border
         self.hline_in_border = hline_in_border
-        self.hline_chars = set([self.vline, hline_out_border, hline_in_border])
+        self.hline_borders = set([self.vline, hline_out_border, hline_in_border])
 
     def __str__(self):
         return """
 {0} a {0} b {0}
-{1}---{2}---{1}""".format(
+{1}---{2}---{1}
+{0} c {0} d {0}
+""".format(
                     self.vline,
                     self.hline_out_border,
                     self.hline_in_border
                     )
 
     def hline_border_pattern(self):
-        return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_chars]) + ")"
+        return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
 
     def vline_pattern(self):
         return "(?:" + re.escape(self.vline) + ")"
@@ -52,7 +54,9 @@ class TableStyle:
         return "([^" + re.escape(self.vline) + "])"
 
     def hline_pattern(self):
-        return "^({0}|{1})+$".format(self.hline_border_pattern(), r"(\s*[-]+\s*)")
+        return "(^({border}|{h1})+$)|(^({border}|{h2})+$)".format(border=self.hline_border_pattern(),
+                                                h1=r"(\s*[\-]+\s*)",
+                                                h2=r"(\s*[\=]+\s*)")
 
     def is_hline(self, text):
         return re.match(self.hline_pattern(), text) is not None
@@ -68,7 +72,8 @@ class TextTable:
     ALIGN_CENTER = 'center'
 
     ROW_DATA = 'd'
-    ROW_SEPARATOR = 's'
+    ROW_SEPARATOR = '-'
+    ROW_HEADER_SEPARATOR = '='
     ROW_HEADER = 'h'
     ROW_FORMAT = 'f'
 
@@ -102,7 +107,13 @@ class TextTable:
 
     def _is_row_separator(self, row):
         for col in row:
-            if not re.match(r"^\s*[-]+\s*$", col):
+            if not re.match(r"^\s*[\-]+\s*$", col):
+                return False
+        return True
+
+    def _is_row_header_separator(self, row):
+        for col in row:
+            if not re.match(r"^\s*[\=]+\s*$", col):
                 return False
         return True
 
@@ -113,9 +124,13 @@ class TextTable:
         return True
 
     def _merge(self, new_row):
-        if self._is_row_separator(new_row):
-            new_row = ['---' for col in new_row]
-            self._row_types.append(TextTable.ROW_SEPARATOR)
+        if self._is_row_separator(new_row) or self._is_row_header_separator(new_row):
+            if self._is_row_separator(new_row):
+                new_row = ['---' for col in new_row]
+                self._row_types.append(TextTable.ROW_SEPARATOR)
+            else:
+                new_row = ['===' for col in new_row]
+                self._row_types.append(TextTable.ROW_HEADER_SEPARATOR)
             if not self._header_found and TextTable.ROW_DATA in self._row_types:
                 for i, x in enumerate(self._row_types):
                     if x == TextTable.ROW_DATA:
@@ -140,14 +155,16 @@ class TextTable:
         line = line.strip()
 
         #remove first '|' character
-        assert line[0] in self.style.hline_chars
+        assert line[0] in self.style.hline_borders
+
         line = line[1:]
 
         #remove last '|' character
-        if len(line) > 0 and line[-1] in self.style.hline_chars:
+        if len(line) > 0 and line[-1] in self.style.hline_borders:
+
             line = line[:-1]
 
-        if re.match(self.style.hline_pattern(), line):
+        if self.style.is_hline(line):
             return re.split(self.style.hline_border_pattern(), line)
         else:
             return line.split(self.style.vline)
@@ -163,6 +180,8 @@ class TextTable:
             if row_type == TextTable.ROW_FORMAT:
                 break
             elif row_type == TextTable.ROW_SEPARATOR:
+                continue
+            elif row_type == TextTable.ROW_HEADER_SEPARATOR:
                 continue
             elif row_type == TextTable.ROW_HEADER:
                 continue
@@ -185,6 +204,8 @@ class TextTable:
 
                 if row_type == TextTable.ROW_SEPARATOR:
                     col = '-' * col_len
+                elif row_type == TextTable.ROW_HEADER_SEPARATOR:
+                    col = '=' * col_len
                 elif row_type == TextTable.ROW_HEADER:
                     col = col.center(col_len, ' ')
                 elif row_type == TextTable.ROW_FORMAT:
@@ -221,7 +242,7 @@ class TextTable:
         self._adjust_column_width()
 
         def join_row(row):
-            if self._is_row_separator(row):
+            if self._is_row_separator(row) or self._is_row_header_separator(row):
                 return (self.style.hline_out_border
                     + self.style.hline_in_border.join(row)
                     + self.style.hline_out_border)
@@ -247,16 +268,14 @@ def format_to_lines(text, style):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """| h1 | h2
-              |-
+    raw_text = """|-
+                | h1 | h2
+              |=
               |a|1|
               |-
               |b|2|
               |-
-              |c|3|"""
+              |c|3|
+              |-"""
     print "Table:\n", format_to_text(raw_text, grid_style)
 
-
-    print grid_style.hline_border_pattern()
-    text = re.sub(grid_style.hline_border_pattern(), grid_style.vline, "+  g +   h  |")
-    print "new text", text

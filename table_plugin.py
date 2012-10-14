@@ -74,7 +74,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def hline_count(self, text, start, end):
         if self.style.is_hline(text):
             return sum([text.count(ch, start, end)
-                                            for ch in self.style.hline_chars])
+                                            for ch in self.style.hline_borders])
         else:
             return text.count(self.style.vline, start, end)
 
