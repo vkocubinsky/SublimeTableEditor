@@ -119,7 +119,7 @@ class TextTable:
 
     def is_format_row(self, row):
         for col in row:
-            if not re.match(r"^\s*(<+|>+|#+)\s*$", col):
+            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
                 return False
         return True
 
@@ -234,11 +234,13 @@ class TextTable:
     def format_to_lines(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
-        if self.style.is_hline(lines[0]):
-            _prefix, sep, rest = lines[0].partition(self.style.hline_out_border)
+        mo = re.search(r"[^\s]", lines[0])
+        if mo:
+            print "yes", mo.start()
+            prefix = lines[0][:mo.start()]
         else:
-            _prefix, sep, rest = lines[0].partition(self.style.vline)
-        print "prefix", _prefix
+            prefix = ""
+        print "prefix", prefix
         for line in lines:
             cols = self._split_line(line.strip())
             self._merge(cols)
@@ -253,7 +255,7 @@ class TextTable:
             else:
                 vline = self.style.vline
                 return vline + vline.join(row) + vline
-        return [_prefix + join_row(row) for row in self._rows]
+        return [prefix + join_row(row) for row in self._rows]
 
     def format_to_text(self):
         return "\n".join(self.format_to_lines())
@@ -272,7 +274,7 @@ def format_to_lines(text, style):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """|-
+    raw_text = """  |-
                 | h1 | h2
               |=
               |a|1|
@@ -283,7 +285,7 @@ if __name__ == '__main__':
               |-"""
     #print "Table:\n", format_to_text(raw_text, grid_style)
 
-    raw_text = """+-
+    raw_text = """   |-
      |"""
     print "Table:\n", format_to_text(raw_text, grid_style)
 
