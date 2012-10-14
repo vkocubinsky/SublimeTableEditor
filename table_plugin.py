@@ -500,9 +500,25 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
             else:
                 cell = "   "
             i1 = self.find_border(text, field_num + 1)
+            if self.style.is_hline(text):
+                if field_num == 0:
+                    vline = self.style.hline_out_border
+                else:
+                    vline = self.style.hline_in_border
+                new_text = (text[0:i1]
+                            + vline
+                            + cell
+                            + self.style.hline_in_border
+                            + text[i1 + 1:])
+            else:
+                new_text = (text[0:i1]
+                            + self.style.vline
+                            + cell
+                            + self.style.vline
+                            + text[i1 + 1:])
             self.view.replace(edit,
                     self.view.line(self.view.text_point(row, sel_col)),
-                    text[0:i1] + self.style.vline + cell + text[i1:])
+                    new_text)
 
             row += 1
         pt = self.get_field_default_point(sel_row, field_num)
