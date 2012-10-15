@@ -147,7 +147,7 @@ class TextTable:
                         self._row_types[i] = TextTable.ROW_HEADER
                     self._header_found = True
         elif self.is_format_row(new_row):
-            new_row = [' ' + re.search("<|>|#", col).group(0) + ' '
+            new_row = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row]
             self._row_types.append(TextTable.ROW_FORMAT)
         else:
