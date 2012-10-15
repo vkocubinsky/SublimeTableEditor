@@ -695,8 +695,8 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
     Join current row and next row into one if next row is not hline
     """
     def run_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
         sel = self.align_one_sel(edit, sel)
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
         vline = self.style.vline
         if (sel_row < self.get_last_table_row(sel_row)
@@ -704,9 +704,17 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
                 and not self.is_hline_row(sel_row + 1)):
             curr_line = self.get_text(sel_row)
             next_line = self.get_text(sel_row + 1)
+
+            i1 = curr_line.find(vline)
+            i2 = curr_line.rfind(vline)
+            prefix = curr_line[:i1]
+
+            curr_line = curr_line[i1 + 1:i2]
+            next_line = next_line[i1 + 1:i2]
+
             cols = [f1.strip() + " " + f2.strip()
                 for f1, f2 in zip(curr_line.split(vline), next_line.split(vline))]
-            new_line = vline.join(cols) + "\n"
+            new_line = prefix + vline + vline.join(cols) + vline + "\n"
 
             curr_region = self.view.full_line(
                                 self.view.text_point(sel_row, 0))

@@ -282,7 +282,7 @@ def format_to_lines(text, style):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """  |-
+    raw_text = """      |-
                 | h1 | h2
               |=
               |a|1|
@@ -291,6 +291,6 @@ if __name__ == '__main__':
               |-
               |c|3|
               |-"""
-    #print "Table:\n", format_to_text(raw_text, grid_style)
+    print "Table:\n", format_to_text(raw_text, grid_style)
 
-    print emacs_style.is_hline(" |-----------+-------------------------+-----|")
+
