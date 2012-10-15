@@ -663,23 +663,25 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
     or if next line is hline
     """
     def remove_rest_line(self, edit, sel):
-        end_region = self.view.find(r'\|', sel.begin())
+        end_region = self.view.find(self.style.hline_border_pattern(), sel.begin())
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
         self.view.replace(edit, rest_region, "")
+        print "rest", rest_data
         return rest_data.strip()
 
     def run_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
         sel = self.align_one_sel(edit, sel)
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_field_num(sel_row, sel_col)
         if (sel_row == self.get_last_table_row(sel_row)
                 or self.is_hline_row(sel_row + 1)):
             self.duplicate_as_empty_row(edit, sel_row)
             sel_row = sel_row + 1
         else:
             sel_row = sel_row + 1
-        field_num = self.get_field_num(sel_row, sel_col)
         pt = self.get_field_begin_point(sel_row, field_num)
         self.view.insert(edit, pt, rest_data + " ")
         sel = self.align_one_sel(edit, sel)

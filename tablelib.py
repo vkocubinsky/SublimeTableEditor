@@ -55,11 +55,11 @@ class TableStyle:
         return "([^" + re.escape(self.vline) + "])"
 
     def single_hline_pattern(self):
-        return "(^({border}|{line})+$)".format(border=self.hline_border_pattern(),
+        return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
                                                 line=r"(\s*[\-]+\s*)")
 
     def double_hline_pattern(self):
-        return "(^({border}|{line})+$)".format(border=self.hline_border_pattern(),
+        return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
                                                 line=r"(\s*[\=]+\s*)")
 
     def is_single_hline(self, text):
@@ -293,6 +293,4 @@ if __name__ == '__main__':
               |-"""
     #print "Table:\n", format_to_text(raw_text, grid_style)
 
-    raw_text = """   |-
-     |"""
-    print "Table:\n", format_to_text(raw_text, grid_style)
+    print emacs_style.is_hline(" |-----------+-------------------------+-----|")
