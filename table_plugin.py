@@ -667,7 +667,6 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
         self.view.replace(edit, rest_region, "")
-        print "rest", rest_data
         return rest_data.strip()
 
     def run_one_sel(self, edit, sel):
