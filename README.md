@@ -2,7 +2,7 @@
 
 ## Overview
 
-*Table Editor* is a package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a ST2 package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
 - navigate with tab/shift tab 
 - insert/delete row
@@ -14,6 +14,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
+- support emacs, grid, simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
@@ -223,6 +224,55 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
+### Table Styles
+
+Table editor supports different table styles:
+* simple
+* emacs
+* grid
+
+*simple* style is default style. You can change default table style if modify 
+user settings. You can open user settings with menu "Preferences -> Settings - User".
+You can set per syntax table style if modify syntax settings. For example when you edit Markdown file you can open syntax settings with menu 
+"Preferences -> Settings - More -> Syntax Specific - User"
+
+There are list of available settings:
+
+* "table_editor_style" : "simple"
+* "table_editor_style" : "emacs"
+* "table_editor_style" : "grid"
+
+#### Simple Style
+
+    |-----------|-----|-----------|
+    |    Name   | Age |   Phone   |
+    |===========|=====|===========|
+    | Anna      |  32 | 123456789 |
+    |-----------|-----|-----------|    
+    | Alexander |  28 | 987654321 |
+    |-----------|-----|-----------|    
+
+#### Emacs Style
+
+    |-----------+-----+-----------|
+    |    Name   | Age |   Phone   |
+    |===========+=====+===========|
+    | Anna      |  32 | 123456789 |
+    |-----------+-----+-----------|
+    | Alexander |  28 | 987654321 |
+    |-----------+-----+-----------|
+
+#### Grid Style
+
+    +-----------+-----+-----------+
+    |    Name   | Age |   Phone   |
+    +===========+=====+===========+
+    | Anna      |  32 | 123456789 |
+    +-----------+-----+-----------+
+    | Alexander |  28 | 987654321 |
+    +-----------+-----+-----------+
+
+
 ### Convert CSV into table
 
 Select some text with CSV data
@@ -382,7 +432,12 @@ Probably this option is usable if you work only with text or wiki markup files
 
 **ctrl+k, -**
 
-        Insert a horizontal line below current row. 
+        Insert single horizontal line below current row. 
+
+**ctrl+k, =**
+
+        Insert double horizontal line below current row. 
+
 
 **ctrl+k, enter**
 
@@ -418,27 +473,3 @@ You can make a donation online, using the link below with PayPal service
 I tested *Table Editor* package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
 
 
-## Difference from emacs org-mode table editor
-
-*Table Editor* is very similar to emacs org-mode table editor with the same key binding. In fact I always run *Emacs*
-and compare with *Table Editor* to get similiar behavior.
-
-But exists some differences. One of this is Emacs use character '+' in separator line, sublime text editor use character '|'.
-
-Emacs table:
-
-    
-    | col 1  | col2   | col3   |
-    |--------+--------+--------|
-    | data 1 | data 2 | data 3 |
-
-Sublime text editor table:
-
-    | col 1  |  col2  |  col3  |
-    |--------|--------|--------|
-    | data 1 | data 2 | data 3 |
-
-
-Second one is navigation between field. Emacs set pointer to begin of field indepent of alignment, additionally 
-*Emacs* has keys *alt-a* to navigate to the begin of field, *alt-e* to navigate to the end of field.
-*Table Editor* combine it into one and set point to the end of data in field. 

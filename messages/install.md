@@ -12,6 +12,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
+- support emacs, grid, simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
