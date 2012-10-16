@@ -14,7 +14,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
-- support emacs, grid, simple styles 
+- support emacs, grid(pandoc grid tables, reStructuredText grid tables), simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
@@ -224,55 +224,6 @@ You can change justification several times
     |    3     | row 3    |       c3 |
 
 
-### Table Styles
-
-Table editor supports different table styles:
-* simple
-* emacs
-* grid
-
-*simple* style is default style. You can change default table style if modify 
-user settings. You can open user settings with menu "Preferences -> Settings - User".
-You can set per syntax table style if modify syntax settings. For example when you edit Markdown file you can open syntax settings with menu 
-"Preferences -> Settings - More -> Syntax Specific - User"
-
-There are list of available settings:
-
-* "table_editor_style" : "simple"
-* "table_editor_style" : "emacs"
-* "table_editor_style" : "grid"
-
-#### Simple Style
-
-    |-----------|-----|-----------|
-    |    Name   | Age |   Phone   |
-    |===========|=====|===========|
-    | Anna      |  32 | 123456789 |
-    |-----------|-----|-----------|    
-    | Alexander |  28 | 987654321 |
-    |-----------|-----|-----------|    
-
-#### Emacs Style
-
-    |-----------+-----+-----------|
-    |    Name   | Age |   Phone   |
-    |===========+=====+===========|
-    | Anna      |  32 | 123456789 |
-    |-----------+-----+-----------|
-    | Alexander |  28 | 987654321 |
-    |-----------+-----+-----------|
-
-#### Grid Style
-
-    +-----------+-----+-----------+
-    |    Name   | Age |   Phone   |
-    +===========+=====+===========+
-    | Anna      |  32 | 123456789 |
-    +-----------+-----+-----------+
-    | Alexander |  28 | 987654321 |
-    +-----------+-----+-----------+
-
-
 ### Convert CSV into table
 
 Select some text with CSV data
@@ -326,6 +277,9 @@ If you like work with HEAD you can locate *Table Editor* in your packages direct
 
 ## Settings
 
+
+### Enable Table Editor
+
 By default *Table Editor* is disable. You be able enable *Table Editor* for:
 
 * specific synax
@@ -336,7 +290,7 @@ You can ebable *Table Editor* with setting *"enable_table_editor": true* on a st
 in http://docs.sublimetext.info/en/latest/customization/settings.html. But *Table Editor* out of the box contains
 feature for set this property on a more simple way.
 
-### Enable for specific syntax
+#### Enable for specific syntax
 
 It is most usable option. Usually you like to enable Table Editor for Plain text, Markdown, Textile, reStructuredText syntax. 
 
@@ -360,7 +314,7 @@ You can do the same manually by
   or delete line with propert *enable_table_editor*
 * save Syntax Specific File
 
-### Enable for current view
+#### Enable for current view
 
 Some time you like temporary enable table editor and then disable it. It is usefull if you edit *Python* or *Java* code and like to pretty print table, then contine edit your code. For do this you should:
 
@@ -372,12 +326,62 @@ Then after you edit table you can disable Table Editor
 * Click *ctrl+shift+p* for show command palette
 * Select *Table Editor: Disable for current view*
 
-### Enable for all files
+#### Enable for all files
 
 Probably this option is usable if you work only with text or wiki markup files
 
 * Click *Preferences -> Settings - User*
 * put setting *"enable_table_editor": true*
+
+
+### Set Table Styles
+
+Table editor supports different table styles:
+* simple
+* emacs
+* grid
+
+*simple* style is default style. You can change default table style if modify 
+user settings. You can open user settings with menu "Preferences -> Settings - User".
+You can set per syntax table style if modify syntax settings. For example when you edit Markdown file you can open syntax settings with menu 
+"Preferences -> Settings - More -> Syntax Specific - User"
+
+There are list of available settings:
+
+* "table_editor_style" : "simple"
+* "table_editor_style" : "emacs"
+* "table_editor_style" : "grid"
+
+#### Simple Style
+
+    |-----------|-----|-----------|
+    |    Name   | Age |   Phone   |
+    |===========|=====|===========|
+    | Anna      |  32 | 123456789 |
+    |-----------|-----|-----------|    
+    | Alexander |  28 | 987654321 |
+    |-----------|-----|-----------|    
+
+#### Emacs Style
+
+    |-----------+-----+-----------|
+    |    Name   | Age |   Phone   |
+    |===========+=====+===========|
+    | Anna      |  32 | 123456789 |
+    |-----------+-----+-----------|
+    | Alexander |  28 | 987654321 |
+    |-----------+-----+-----------|
+
+#### Grid Style
+
+    +-----------+-----+-----------+
+    |    Name   | Age |   Phone   |
+    +===========+=====+===========+
+    | Anna      |  32 | 123456789 |
+    +-----------+-----+-----------+
+    | Alexander |  28 | 987654321 |
+    +-----------+-----+-----------+
+
 
 ## Key binding
 
