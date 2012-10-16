@@ -14,7 +14,7 @@
 - join two rows into one
 - specify column alignment
 - convert selected CSV region into table
-- support emacs, grid(pandoc grid tables, reStructuredText grid tables), simple styles 
+- support emacs org mode, grid(pandoc grid tables, reStructuredText grid tables), simple styles 
 - temporary disable/enable table editor
 - show integration tests film
 
@@ -337,9 +337,11 @@ Probably this option is usable if you work only with text or wiki markup files
 ### Set Table Styles
 
 Table editor supports different table styles:
+
 * simple
-* emacs
-* grid
+* emacs org mode
+* grid (pandoc grid tables, reStructuredText grid tables)
+
 
 *simple* style is default style. You can change default table style if modify 
 user settings. You can open user settings with menu "Preferences -> Settings - User".
