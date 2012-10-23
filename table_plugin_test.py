@@ -44,77 +44,192 @@ class CallbackTest:
         pass
 
 
-class SimpleTableTest(CallbackTest):
+class BasicEditingTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Simple table test")
+        CallbackTest.__init__(self, "Basic Editing")
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
-| column A | column B |
+| Name | Phone |
 |-"""}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "1"}))
+        self.commands.append(CommandDef("insert", {"characters": "Anna"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "one"}))
+        self.commands.append(CommandDef("insert", {"characters": "123456789"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "2"}))
+        self.commands.append(CommandDef("insert", {"characters": "Alexander"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "two"}))
+        self.commands.append(CommandDef("insert", {"characters": "987654321"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-
-    def expected_value(self):
-        return """{0}
-| column A | column B |
-|----------|----------|
-|        1 | one      |
-|        2 | two      |
-|          |          |""".format(self.description)
 
     @property
     def description(self):
         return """Test: {0}
-- create table with separator
-- navigate with tab key
-- automatic row creation
+- Create simple table
+- Navigate with tab key
+- Automatic row creation
+- Fill the table
 """.format(self.name)
 
+    def expected_value(self):
+        return """{0}
+|    Name   |   Phone   |
+|-----------|-----------|
+| Anna      | 123456789 |
+| Alexander | 987654321 |
+|           |           |""".format(self.description)
 
-class MoveColumnTest(CallbackTest):
 
+class QuickTableCreateTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Move columns test")
+        CallbackTest.__init__(self, "Quick Table Creation")
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
-| column A | column B | column C |
+| Name | Phone"""}))
+        self.commands.append(CommandDef("table_editor_hline_and_move"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Quick table creation with key ctrl+k,enter
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+| Name | Phone |
+|------|-------|
+|      |       |""".format(self.description)
+
+
+class ColumnsTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Work with columns")
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+| Name | Phone |
 |-"""}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "row A"}))
+        self.commands.append(CommandDef("insert", {"characters": "Anna"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "row B"}))
+        self.commands.append(CommandDef("insert", {"characters": "123456789"}))
         self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "row C"}))
-        self.commands.append(CommandDef("table_editor_move_column_left"))
-        self.commands.append(CommandDef("table_editor_move_column_right"))
+        self.commands.append(CommandDef("insert", {"characters": "Alexander"}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        self.commands.append(CommandDef("insert", {"characters": "987654321"}))
+        self.commands.append(CommandDef("table_editor_next_row"))
         self.commands.append(CommandDef("table_editor_insert_column"))
+        for i in range(0, 3):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("insert", {"characters": "28"}))
+        for i in range(0, 3):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("insert", {"characters": "32"}))
+        for i in range(0, 3):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("insert", {"characters": "Age"}))
+        self.commands.append(CommandDef("table_editor_move_column_right"))
         self.commands.append(CommandDef("table_editor_delete_column"))
 
     @property
     def description(self):
         return """Test: {0}
-- create table with separator
-- navigate with tab key
-- move column left/right
-- insert/delete column
+- Create simple table
+- Insert And Fill Column
+- Move Column Right
+- Delete Column
 """.format(self.name)
 
     def expected_value(self):
         return """{0}
-| column A | column B | column C |
-|----------|----------|----------|
-| row A    | row B    | row C    |""".format(self.description)
+|    Name   |   Phone   |
+|-----------|-----------|
+| Anna      | 123456789 |
+| Alexander | 987654321 |
+|           |           |""".format(self.description)
+
+
+class RowsTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Work with rows")
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+|    Name   |   Phone   | Age |
+|-----------|-----------|-----|
+| Anna      | 123456789 |  32 |
+| Alexander | 987654321 |  28 |"""}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        for i in range(4):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("table_editor_insert_row"))
+        self.commands.append(CommandDef("table_editor_kill_row"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Insert Row
+- Delete Row
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|    Name   |   Phone   | Age |
+|-----------|-----------|-----|
+| Anna      | 123456789 |  32 |
+| Alexander | 987654321 |  28 |
+|           |           |     |""".format(self.description)
+
+
+class LongRowsTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Work with long rows")
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+|    Name   |   Phone   | Age |             Position             |
+|-----------|-----------|-----|----------------------------------|
+| Anna      | 123456789 |  32 | Senior Software Engineer         |
+| Alexander | 987654321 |  28 | Senior Software Testing Engineer |"""}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        for i in range(5):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("table_editor_insert_single_hline"))
+        self.commands.append(CommandDef("move", {"by": "words", "forward": False}))
+        self.commands.append(CommandDef("table_editor_split_column_down"))
+        for i in range(4):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("move", {"by": "words", "forward": False}))
+        self.commands.append(CommandDef("table_editor_split_column_down"))
+        for i in range(4):
+            self.commands.append(CommandDef("table_editor_previous_field"))
+        self.commands.append(CommandDef("table_editor_join_lines"))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        self.commands.append(CommandDef("table_editor_hline_and_move"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Split Row
+- Join Rows
+- Insert hlines
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|    Name   |   Phone   | Age |             Position             |
+|-----------|-----------|-----|----------------------------------|
+| Anna      | 123456789 |  32 | Senior Software Engineer         |
+|-----------|-----------|-----|----------------------------------|
+| Alexander | 987654321 |  28 | Senior Software Testing Engineer |
+|-----------|-----------|-----|----------------------------------|
+|           |           |     |                                  |""".format(self.description)
 
 
 class CustomAlignTest(CallbackTest):
@@ -181,55 +296,6 @@ class CustomAlignTest(CallbackTest):
 |          |          |          |""".format(self.description)
 
 
-class RowsTableTest(CallbackTest):
-    def __init__(self):
-        CallbackTest.__init__(self, "Row table test")
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
-        self.commands.append(CommandDef("insert", {"characters": self.description}))
-        self.commands.append(CommandDef("insert", {"characters": """
-| column A | column B |
-|-"""}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "1"}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "one"}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "2"}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "two"}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "3"}))
-        self.commands.append(CommandDef("table_editor_next_field"))
-        self.commands.append(CommandDef("insert", {"characters": "three"}))
-        self.commands.append(CommandDef("table_editor_align"))
-        self.commands.append(CommandDef("table_editor_previous_field"))
-        self.commands.append(CommandDef("table_editor_previous_field"))
-        self.commands.append(CommandDef("table_editor_kill_row"))
-        self.commands.append(CommandDef("table_editor_insert_row"))
-        self.commands.append(CommandDef("table_editor_next_row"))
-        self.commands.append(CommandDef("table_editor_next_row"))
-        self.commands.append(CommandDef("table_editor_next_row"))
-
-    def expected_value(self):
-        return """{0}
-| column A | column B |
-|----------|----------|
-|        1 | one      |
-|          |          |
-|        3 | three    |
-|          |          |
-|          |          |""".format(self.description)
-
-    @property
-    def description(self):
-        return """Test: {0}
-- create table with separator
-- navigate with tab key
-- insert/delete row
-""".format(self.name)
-
-
 class TableEditorTestSuite(sublime_plugin.TextCommand):
     COMMAND_TIMEOUT = 250
     TEST_TIMEOUT = 500
@@ -239,10 +305,12 @@ class TableEditorTestSuite(sublime_plugin.TextCommand):
 
     def run(self):
         tests = []
-        tests.append(SimpleTableTest())
-        tests.append(MoveColumnTest())
+        tests.append(BasicEditingTest())
+        tests.append(QuickTableCreateTest())
+        tests.append(ColumnsTest())
+        tests.append(RowsTest())
+        tests.append(LongRowsTest())
         tests.append(CustomAlignTest())
-        tests.append(RowsTableTest())
         self.run_tests(tests, 0, 0)
 
     def run_tests(self, tests, test_ind, command_ind):
