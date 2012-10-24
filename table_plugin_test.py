@@ -104,6 +104,46 @@ class QuickTableCreateTest(CallbackTest):
 |      |       |""".format(self.description)
 
 
+class GridTableTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Grid Table Creation")
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+| Name | Phone |
+|="""}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        self.commands.append(CommandDef("insert", {"characters": "Anna"}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        self.commands.append(CommandDef("insert", {"characters": "123456789"}))
+        self.commands.append(CommandDef("table_editor_hline_and_move"))
+        self.commands.append(CommandDef("insert", {"characters": "Alexander"}))
+        self.commands.append(CommandDef("table_editor_next_field"))
+        self.commands.append(CommandDef("insert", {"characters": "987654321"}))
+        self.commands.append(CommandDef("table_editor_hline_and_move"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Create simple table
+- Use double hline
+- Add lines separated by single hline
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|    Name   |   Phone   |
+|===========|===========|
+| Anna      | 123456789 |
+|-----------|-----------|
+| Alexander | 987654321 |
+|-----------|-----------|
+|           |           |""".format(self.description)
+
+
+
+
 class ColumnsTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Work with columns")
@@ -307,6 +347,7 @@ class TableEditorTestSuite(sublime_plugin.TextCommand):
         tests = []
         tests.append(BasicEditingTest())
         tests.append(QuickTableCreateTest())
+        tests.append(GridTableTest())
         tests.append(ColumnsTest())
         tests.append(RowsTest())
         tests.append(LongRowsTest())

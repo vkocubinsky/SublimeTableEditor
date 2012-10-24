@@ -2,7 +2,7 @@
 
 ## Overview
 
-*Table Editor* is a ST2 package for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a package for the *Sublime Text 2* editor for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
 
 - navigate with tab/shift tab 
 - insert/delete row
@@ -12,11 +12,16 @@
 - move row up/down
 - split long cell
 - join two rows into one
-- specify column alignment
 - convert selected CSV region into table
-- support emacs org mode, grid(pandoc grid tables, reStructuredText grid tables), simple styles 
+- specify column alignment
+- support single hline with character '-'
+- support double hline with character '='
+- support different table styles
+    - emacs org mode
+    - grid(pandoc grid tables, reStructuredText grid tables)
+    - simple styles 
 - temporary disable/enable table editor
-- show integration tests film
+- show demo film in scratch view
 
 ## Usage
 
@@ -38,7 +43,7 @@ Then press *Tab* key, you will get pretty printed table
     |------|-------|
     | _    |       |
 
-Then fill a data and press *Tab* key to next field or add new row if necessary 
+Then fill a data and press *Tab* key to navigate to next field or add new row if necessary 
 
     |    Name   |   Phone   |
     |-----------|-----------|
@@ -51,6 +56,32 @@ For make table a bit faster faster type only
     |Name|Phone
 
 And then click *ctrl+k,enter*. 
+
+    | Name | Phone |
+    |------|-------|
+    | _    |       |
+
+*Table Editor* support double hline with character '='. Type bellow 
+
+    | Name | Phone |
+    |=
+
+and click *tab* key
+
+    | Name | Phone |
+    |======|=======|
+    | _    |       |
+
+Then fill rows and click *ctrl+k,enter* each time when cursor in *Phone* position
+
+    |    Name   |   Phone   |
+    |===========|===========|
+    | Anna      | 123456789 |
+    |-----------|-----------|
+    | Alexander | 987654321 |
+    |-----------|-----------|
+    | _         |           |
+
 
 Additional to *tab* and *shift+tab* use *enter*  for move cursor down and insert new row if necessary.
 
@@ -184,8 +215,26 @@ Let's move cursor with tab key to second row(hlines skipped automatically) and c
     | _         |           |     |                                  |
 
 
+### Convert CSV into table
+
+Select some text with CSV data
+
+    Name,Age
+    Anna,20
+    Alexander,27
+
+ and then click *ctrl+k, |* to convert CSV data into table, you will get
+
+    | Name      | Age |
+    | Anna      | 20  |
+    | Alexander | 27  |
+
+*Convert CSV into table* command automatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not recognize CSV dialect you will get one row table where selected line is a row in the table.
+
 
 ### Column alignment
+
+**This feature is experimental and can be changed in future releases.**
 
 By default text data is left justified, numeric data is right justified, column header is centered.
 
@@ -193,7 +242,7 @@ By default text data is left justified, numeric data is right justified, column 
     |  second line 1   |   second line 2    |
     |------------------|--------------------|
     | text value row 1 | 0.9999999999999999 |
-    | tv row 2         |                 99 |
+    | row 2            |                 99 |
 
 But you can explicit set justification with format characters 
 
@@ -222,23 +271,6 @@ You can change justification several times
     |    1     | row 1    |       c1 |
     |    2     | row 2    |       c2 |
     |    3     | row 3    |       c3 |
-
-
-### Convert CSV into table
-
-Select some text with CSV data
-
-    Name,Age
-    Anna,20
-    Alexander,27
-
- and then click *ctrl+k, |* to convert CSV data into table, you will get
-
-    | Name      | Age |
-    | Anna      | 20  |
-    | Alexander | 27  |
-
-*Convert CSV into table* command aumatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not regonize CSV dialect you will get one row table where selected line is a row in the table.
 
 
 ### Demo 
@@ -282,7 +314,7 @@ If you like work with HEAD you can locate *Table Editor* in your packages direct
 
 By default *Table Editor* is disable. You be able enable *Table Editor* for:
 
-* specific synax
+* specific syntax
 * current view 
 * all files
 
@@ -476,6 +508,6 @@ You can make a donation online, using the link below with PayPal service
 
 ## Testing
 
-I tested *Table Editor* package under Windows and quickly tested under Linux. It should work under Mac, but I did not test, because I do not have a mac.
+I tested *Table Editor* package under Windows and Linux. It should work under Mac, but I did not test, because I do not have a mac.
 
 
