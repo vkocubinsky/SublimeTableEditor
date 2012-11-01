@@ -13,7 +13,6 @@
 - split long cell
 - join two rows into one
 - convert selected CSV region into table
-- specify column alignment
 - support single hline with character '-'
 - support double hline with character '='
 - support different table styles
@@ -21,6 +20,7 @@
     - grid(pandoc grid tables, reStructuredText grid tables)
     - simple styles 
 - temporary disable/enable table editor
+- specify column alignment(experimental)
 - show demo film in scratch view
 
 ## Usage
@@ -232,7 +232,7 @@ Select some text with CSV data
 *Convert CSV into table* command automatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not recognize CSV dialect you will get one row table where selected line is a row in the table.
 
 
-### Column alignment
+### Custom column alignment
 
 **This feature is experimental and can be changed in future releases.**
 

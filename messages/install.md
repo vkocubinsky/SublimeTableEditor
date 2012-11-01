@@ -11,7 +11,6 @@
 - split long cell
 - join two rows into one
 - convert selected CSV region into table
-- specify column alignment
 - support single hline with character '-'
 - support double hline with character '='
 - support different table styles
@@ -19,7 +18,9 @@
     - grid(pandoc grid tables, reStructuredText grid tables)
     - simple styles 
 - temporary disable/enable table editor
+- specify column alignment(experimental)
 - show demo film in scratch view
+
 
 For more information see
 
