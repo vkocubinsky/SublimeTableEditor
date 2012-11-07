@@ -228,7 +228,7 @@ class TextTable:
                     elif '#' in col:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
                         col = ' ' + '#' * (col_len - 2) + ' '
-                elif row_type == 'd':
+                elif row_type == TextTable.ROW_DATA:
                     if (data_alignment[col_ind] is None):
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
                     if data_alignment[col_ind] == TextTable.ALIGN_RIGHT:
