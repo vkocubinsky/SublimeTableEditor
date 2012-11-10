@@ -146,7 +146,7 @@ class TextTable:
         assert len(col) < size
         return col.ljust(size, fillchar)
 
-    def _norm(self, col):
+    def _norm_data(self, col):
         col = col.strip()
         if len(col) == 0:
             return '   '
@@ -155,6 +155,17 @@ class TextTable:
         if (col[-1] != ' '):
             col = col + ' '
         return col
+
+    def _norm_multi_markdown(self, col):
+        col = col.strip()
+        if col.count(':') == 2:
+            return ':-:'
+        elif col[0] == ':':
+            return ':-'
+        elif col[-1] == ':':
+            return '-:'
+        else:
+            return '-'
 
     def _is_single_row_separator(self, row):
         for col in row:
@@ -174,7 +185,11 @@ class TextTable:
                 return False
         return True
 
-
+    def is_multi_markdown_align_row(self, row):
+        for col in row:
+            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
+                return False
+        return True
 
     def _merge(self, new_row):
         if (self._is_single_row_separator(new_row) or
@@ -196,8 +211,13 @@ class TextTable:
             new_row = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row]
             self._row_types.append(TextTable.ROW_CUSTOM_ALIGN)
+        elif (self.style.multi_markdown_column_alignment
+              and self.is_multi_markdown_align_row(new_row)):
+            new_row = [' ' + self._norm_multi_markdown(col) + ' '
+                                                        for col in new_row]
+            self._row_types.append(TextTable.ROW_MULTI_MARKDOWN_ALIGN)
         else:
-            new_row = [self._norm(col) for col in new_row]
+            new_row = [self._norm_data(col) for col in new_row]
             self._row_types.append(TextTable.ROW_DATA)
         self._rows.append(new_row)
         new_col_lens = [len(col) for col in new_row]
@@ -274,6 +294,19 @@ class TextTable:
                     elif '#' in col:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
                         col = ' ' + '#' * (col_len - 2) + ' '
+                elif row_type == TextTable.ROW_MULTI_MARKDOWN_ALIGN:
+                    if col.count(':') == 2:
+                        data_alignment[col_ind] = TextTable.ALIGN_CENTER
+                        col = ' :' + '-' * (col_len - 4) + ': '
+                    elif col[1] == ':':
+                        data_alignment[col_ind] = TextTable.ALIGN_LEFT
+                        col = ' :' + '-' * (col_len - 3) + ' '
+                    elif col[-2] == ':':
+                        data_alignment[col_ind] = TextTable.ALIGN_RIGHT
+                        col = ' ' + '-' * (col_len - 3) + ': '
+                    else:
+                        col = ' ' + '-' * (col_len - 2) + ' '
+
                 elif row_type == TextTable.ROW_DATA:
                     if (data_alignment[col_ind] is None):
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
@@ -329,16 +362,12 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """      |-
-                | header 1 | header 2
-              |-
-              |<|#
+                | header 1 | header 2 |header 3 | header 4 |
+                | ------------ | ----------- | ---------- | ----- |
+                | :----------- | ----------: | :--------: | ----- |
               |=
-              |a|1|
-              |-
-              |b|2|
-              |-
-              |c|3|
+              |a  |   b   | c |1 |
+              |a  |   b   | c |2 |
               |-"""
-    style = simple_style
-    style = pandoc_style
+    style = multi_markdown_style
     print "Table:\n", format_to_text(raw_text, style)
