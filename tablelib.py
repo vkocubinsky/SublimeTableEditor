@@ -116,10 +116,6 @@ textile_style = TableStyle(hline_out_border='|',
                            textile_cell_alignment=True)
 
 
-
-
-
-
 class TextTable:
     ALIGN_LEFT = 'left'
     ALIGN_RIGHT = 'right'
@@ -129,7 +125,8 @@ class TextTable:
     ROW_SINGLE_SEPARATOR = '-'
     ROW_DOUBLE_SEPARATOR = '='
     ROW_HEADER = 'h'
-    ROW_FORMAT = 'f'
+    ROW_CUSTOM_ALIGN = '<>#'
+    ROW_MULTI_MARKDOWN_ALIGN = ':-:'
 
     def __init__(self, text, style):
         self.text = text
@@ -171,29 +168,34 @@ class TextTable:
                 return False
         return True
 
-    def is_format_row(self, row):
+    def is_custom_align_row(self, row):
         for col in row:
             if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
                 return False
         return True
 
+
+
     def _merge(self, new_row):
-        if self._is_single_row_separator(new_row) or self._is_double_row_separator(new_row):
+        if (self._is_single_row_separator(new_row) or
+            self._is_double_row_separator(new_row)):
             if self._is_single_row_separator(new_row):
                 new_row = ['---' for col in new_row]
                 self._row_types.append(TextTable.ROW_SINGLE_SEPARATOR)
             else:
                 new_row = ['===' for col in new_row]
                 self._row_types.append(TextTable.ROW_DOUBLE_SEPARATOR)
-            if not self._header_found and TextTable.ROW_DATA in self._row_types:
+            if (not self._header_found and
+                TextTable.ROW_DATA in self._row_types):
                 for i, x in enumerate(self._row_types):
                     if x == TextTable.ROW_DATA:
                         self._row_types[i] = TextTable.ROW_HEADER
                     self._header_found = True
-        elif self.is_format_row(new_row):
+        elif (self.style.custom_column_alignment and
+              self.is_custom_align_row(new_row)):
             new_row = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row]
-            self._row_types.append(TextTable.ROW_FORMAT)
+            self._row_types.append(TextTable.ROW_CUSTOM_ALIGN)
         else:
             new_row = [self._norm(col) for col in new_row]
             self._row_types.append(TextTable.ROW_DATA)
@@ -231,7 +233,7 @@ class TextTable:
     def _auto_detect_column(self, start_row_ind, col_ind):
         for row, row_type in zip(self._rows[start_row_ind:],
                                 self._row_types[start_row_ind:]):
-            if row_type == TextTable.ROW_FORMAT:
+            if row_type == TextTable.ROW_CUSTOM_ALIGN:
                 break
             elif row_type == TextTable.ROW_SINGLE_SEPARATOR:
                 continue
@@ -262,7 +264,7 @@ class TextTable:
                     col = '=' * col_len
                 elif row_type == TextTable.ROW_HEADER:
                     col = col.center(col_len, ' ')
-                elif row_type == TextTable.ROW_FORMAT:
+                elif row_type == TextTable.ROW_CUSTOM_ALIGN:
                     if '<' in col:
                         data_alignment[col_ind] = TextTable.ALIGN_LEFT
                         col = ' ' + '<' * (col_len - 2) + ' '
@@ -313,7 +315,7 @@ class TextTable:
         return "\n".join(self.format_to_lines())
 
 
-def format_to_text(text, style = simple_style):
+def format_to_text(text, style=simple_style):
     table = TextTable(text, style)
     return table.format_to_text()
 
@@ -327,7 +329,9 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """      |-
-                | h1 | h2
+                | header 1 | header 2
+              |-
+              |<|#
               |=
               |a|1|
               |-
@@ -335,6 +339,6 @@ if __name__ == '__main__':
               |-
               |c|3|
               |-"""
-    print "Table:\n", format_to_text(raw_text, grid_style)
-
-
+    style = simple_style
+    style = pandoc_style
+    print "Table:\n", format_to_text(raw_text, style)
