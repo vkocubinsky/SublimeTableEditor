@@ -32,13 +32,49 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
-        style_name = self.view.settings().get("table_editor_style")
-        if style_name == "emacs":
-            self.style = tablelib.emacs_style
-        elif style_name == "grid":
-            self.style = tablelib.grid_style
-        else:
+        style_name = self.view.settings().get("table_editor_wiki_style")
+        print "style_name", style_name
+        if style_name == "Simple":
             self.style = tablelib.simple_style
+        elif style_name == "EmacsOrgMode":
+            self.style = tablelib.simple_style
+        elif style_name == "Pandoc":
+            self.style = tablelib.pandoc_style
+        elif style_name == "MultiMarkdown":
+            self.style = tablelib.multi_markdown_style
+        elif style_name == "reStructuredText":
+            self.style = tablelib.re_structured_text_style
+        elif style_name == "Textile":
+            self.style == tablelib.textile_style
+        else:
+            self.style = self.auto_detect_style()
+
+        border_style = (self.view.settings().get("table_editor_border_style",
+                                                   None) or
+                         self.view.settings().get("table_editor_style",
+                         None))
+        if border_style == "emacs":
+            self.style.hline_out_border = '|'
+            self.style.hline_in_border = '+'
+        elif border_style == "grid":
+            self.style.hline_out_border = '+'
+            self.style.hline_in_border = '+'
+        elif border_style == "simple":
+            self.style.hline_out_border = '|'
+            self.style.hline_in_border = '|'
+
+        if self.view.settings().get("table_editor_custom_column_alignment",
+                                    False):
+            self.style.custom_column_alignment = True
+        if self.view.settings().get("table_editor_multi_markdown_column_alignment",
+                                    False):
+            self.style.multi_markdown_column_alignment = True
+        if self.view.settings().get("table_editor_textile_cell_alignment",
+                                    False):
+            self.style.textile_cell_alignment = True
+
+    def auto_detect_style(self):
+        return tablelib.simple_style
 
     def csv2table(self, text):
         lines = []

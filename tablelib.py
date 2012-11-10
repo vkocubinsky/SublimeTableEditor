@@ -27,12 +27,18 @@ import re
 class TableStyle:
 
     def __init__(self, hline_out_border='|',
-                        hline_in_border='|'):
+                       hline_in_border='|',
+                       custom_column_alignment=False,
+                       multi_markdown_column_alignment=False,
+                       textile_cell_alignment=False):
         self.vline = '|'
         self.hline_out_border = hline_out_border
         self.hline_in_border = hline_in_border
         #characters from all styles correct switch from one style to other
         self.hline_borders = ['+', '|']
+        self.custom_column_alignment = custom_column_alignment
+        self.multi_markdown_column_alignment = multi_markdown_column_alignment
+        self.textile_cell_alignment = textile_cell_alignment
 
     def __str__(self):
         return """
@@ -71,9 +77,47 @@ class TableStyle:
     def is_hline(self, text):
         return self.is_single_hline(text) or self.is_double_hline(text)
 
-simple_style = TableStyle('|', '|')
-emacs_style = TableStyle('|', '+')
-grid_style = TableStyle('+', '+')
+
+simple_style = TableStyle(hline_out_border='|',
+                          hline_in_border='|',
+                          custom_column_alignment=True,
+                          multi_markdown_column_alignment=False,
+                          textile_cell_alignment=False)
+
+emacs_org_mode_style = TableStyle(hline_out_border='|',
+                          hline_in_border='+',
+                          custom_column_alignment=False,
+                          multi_markdown_column_alignment=False,
+                          textile_cell_alignment=False)
+
+pandoc_style = TableStyle(hline_out_border='+',
+                          hline_in_border='+',
+                          custom_column_alignment=False,
+                          multi_markdown_column_alignment=False,
+                          textile_cell_alignment=False)
+
+re_structured_text_style = TableStyle(hline_out_border='+',
+                                      hline_in_border='+',
+                                      custom_column_alignment=False,
+                                      multi_markdown_column_alignment=False,
+                                      textile_cell_alignment=False)
+
+multi_markdown_style = TableStyle(hline_out_border='|',
+                                  hline_in_border='|',
+                                  custom_column_alignment=False,
+                                  multi_markdown_column_alignment=True,
+                                  textile_cell_alignment=False)
+
+
+textile_wiki_style = TableStyle(hline_out_border='|',
+                                hline_in_border='|',
+                                custom_column_alignment=False,
+                                multi_markdown_column_alignment=False,
+                                textile_cell_alignment=True)
+
+
+
+
 
 
 class TextTable:
