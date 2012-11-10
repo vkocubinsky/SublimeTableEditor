@@ -109,11 +109,11 @@ multi_markdown_style = TableStyle(hline_out_border='|',
                                   textile_cell_alignment=False)
 
 
-textile_wiki_style = TableStyle(hline_out_border='|',
-                                hline_in_border='|',
-                                custom_column_alignment=False,
-                                multi_markdown_column_alignment=False,
-                                textile_cell_alignment=True)
+textile_style = TableStyle(hline_out_border='|',
+                           hline_in_border='|',
+                           custom_column_alignment=False,
+                           multi_markdown_column_alignment=False,
+                           textile_cell_alignment=True)
 
 
 

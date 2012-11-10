@@ -32,49 +32,62 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
-        style_name = self.view.settings().get("table_editor_wiki_style")
-        print "style_name", style_name
-        if style_name == "Simple":
-            self.style = tablelib.simple_style
-        elif style_name == "EmacsOrgMode":
-            self.style = tablelib.simple_style
-        elif style_name == "Pandoc":
-            self.style = tablelib.pandoc_style
-        elif style_name == "MultiMarkdown":
-            self.style = tablelib.multi_markdown_style
-        elif style_name == "reStructuredText":
-            self.style = tablelib.re_structured_text_style
-        elif style_name == "Textile":
-            self.style == tablelib.textile_style
-        else:
-            self.style = self.auto_detect_style()
 
+    @property
+    def style(self):
+        style_name = self.view.settings().get("table_editor_wiki_style")
+        if style_name == "Simple":
+            style = tablelib.simple_style
+        elif style_name == "EmacsOrgMode":
+            style = tablelib.emacs_org_mode_style
+        elif style_name == "Pandoc":
+            style = tablelib.pandoc_style
+        elif style_name == "MultiMarkdown":
+            style = tablelib.multi_markdown_style
+        elif style_name == "reStructuredText":
+            style = tablelib.re_structured_text_style
+        elif style_name == "Textile":
+            style = tablelib.textile_style
+        else:
+            style = self.auto_detect_style()
         border_style = (self.view.settings().get("table_editor_border_style",
                                                    None) or
                          self.view.settings().get("table_editor_style",
                          None))
         if border_style == "emacs":
-            self.style.hline_out_border = '|'
-            self.style.hline_in_border = '+'
+            style.hline_out_border = '|'
+            style.hline_in_border = '+'
         elif border_style == "grid":
-            self.style.hline_out_border = '+'
-            self.style.hline_in_border = '+'
+            style.hline_out_border = '+'
+            style.hline_in_border = '+'
         elif border_style == "simple":
-            self.style.hline_out_border = '|'
-            self.style.hline_in_border = '|'
+            style.hline_out_border = '|'
+            style.hline_in_border = '|'
 
         if self.view.settings().get("table_editor_custom_column_alignment",
                                     False):
-            self.style.custom_column_alignment = True
+            style.custom_column_alignment = True
         if self.view.settings().get("table_editor_multi_markdown_column_alignment",
                                     False):
-            self.style.multi_markdown_column_alignment = True
+            style.multi_markdown_column_alignment = True
         if self.view.settings().get("table_editor_textile_cell_alignment",
                                     False):
-            self.style.textile_cell_alignment = True
+            style.textile_cell_alignment = True
+        return style
 
     def auto_detect_style(self):
-        return tablelib.simple_style
+        syntax = self.view.settings().get('syntax')
+        if (syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
+            syntax == 'Packages/Markdown/Markdown.tmLanguage'):
+            return tablelib.multi_markdown_style
+        elif syntax == 'Packages/Textile/Textile.tmLanguage':
+            return tablelib.textile_style
+        elif syntax == 'Packages/RestructuredText/reStructuredText.tmLanguage':
+            return tablelib.re_structured_text_style
+        else:
+            return tablelib.simple_style
+        #'Packages/Text/Plain text.tmLanguage':
+        #
 
     def csv2table(self, text):
         lines = []
@@ -769,6 +782,31 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
+class TableEditorCsvToTable(AbstractTableCommand):
+    """
+    Command: table_csv_to_table
+    Key: ctrl+k, |
+    Convert selected CSV region into table
+    """
+    def run(self, edit):
+        new_sels = []
+        for sel in self.view.sel():
+            (sel_row, sel_col) = self.view.rowcol(sel.begin())
+            if sel.empty():
+                new_sels.append(sel)
+            else:
+                text = self.view.substr(sel)
+                new_text = self.csv2table(text)
+                self.view.replace(edit, sel, new_text)
+                pt = self.get_field_default_point(sel_row, 0)
+                new_sels.append(sublime.Region(pt, pt))
+        self.view.sel().clear()
+        for sel in new_sels:
+            self.view.sel().add(sel)
+            self.view.show(sel, False)
+        self.view.run_command("table_editor_align")
+
+
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
     def run(self, args):
@@ -807,26 +845,9 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 sublime.save_settings(base_name)
 
 
-class TableEditorCsvToTable(AbstractTableCommand):
-    """
-    Command: table_csv_to_table
-    Key: ctrl+k, |
-    Convert selected CSV region into table
-    """
-    def run(self, edit):
-        new_sels = []
-        for sel in self.view.sel():
-            (sel_row, sel_col) = self.view.rowcol(sel.begin())
-            if sel.empty():
-                new_sels.append(sel)
-            else:
-                text = self.view.substr(sel)
-                new_text = self.csv2table(text)
-                self.view.replace(edit, sel, new_text)
-                pt = self.get_field_default_point(sel_row, 0)
-                new_sels.append(sublime.Region(pt, pt))
-        self.view.sel().clear()
-        for sel in new_sels:
-            self.view.sel().add(sel)
-            self.view.show(sel, False)
-        self.view.run_command("table_editor_align")
+class TableEditorSetStyle(sublime_plugin.TextCommand):
+
+    def run(self, edit, style):
+        self.view.settings().set("enable_table_editor", True)
+        self.view.settings().set("table_editor_wiki_style", style)
+        sublime.status_message("Table Editor: set style to {0}".format(style))

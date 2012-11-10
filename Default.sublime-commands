@@ -1,7 +1,24 @@
 [
-    { "caption": "Table Editor: Enable for current view", "command": "table_editor_enable_for_current_view" },
-    { "caption": "Table Editor: Disable for current view", "command": "table_editor_disable_for_current_view" },
-    { "caption": "Table Editor: Enable for current syntax", "command": "table_editor_enable_for_current_syntax" },
-    { "caption": "Table Editor: Disable for current syntax", "command": "table_editor_disable_for_current_syntax" },
-    { "caption": "Table Editor: Show demo film in new scratch view", "command": "table_editor_film" }
+    { "caption": "Table Editor: Enable for current view", "command": "table_editor_enable_for_current_view" 
+    },
+    { "caption": "Table Editor: Disable for current view", "command": "table_editor_disable_for_current_view" 
+    },
+    { "caption": "Table Editor: Enable for current syntax", "command": "table_editor_enable_for_current_syntax" 
+    },
+    { "caption": "Table Editor: Disable for current syntax", "command": "table_editor_disable_for_current_syntax" 
+    },
+    { "caption": "Table Editor: Show demo film in new scratch view", "command": "table_editor_film" 
+    },
+    { "caption": "Table Editor: Set table style 'Simple' for current view", "command": "table_editor_set_style", "args": {"style": "Simple"}
+    },
+    { "caption": "Table Editor: Set table style 'EmacsOrgMode' for current view", "command": "table_editor_set_style", "args": {"style": "EmacsOrgMode"}
+    },
+    { "caption": "Table Editor: Set table style 'Pandoc' for current view", "command": "table_editor_set_style", "args": {"style": "Pandoc"}
+    },
+    { "caption": "Table Editor: Set table style 'MultiMarkdown' for current view", "command": "table_editor_set_style", "args": {"style": "MultiMarkdown"}
+    },
+    { "caption": "Table Editor: Set table style 'reStructuredText' for current view", "command": "table_editor_set_style", "args": {"style": "reStructuredText"}
+    },
+    { "caption": "Table Editor: Set table style 'Textile' for current view", "command": "table_editor_set_style", "args": {"style": "Textile"}
+    }
 ]
