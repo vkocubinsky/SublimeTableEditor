@@ -373,7 +373,7 @@ Table Border Style is a part of Table Syntax and usually we should not change th
 
 ### Override custom column alignment
 
-This settings by default enable only for Simple Table Syntax, but you enable it for other syntax
+This settings by default enabled only for Simple Table Syntax, but you enable it for other syntax
 
 ```javascript
 {
@@ -412,7 +412,7 @@ You can change justification several times
 
 ### Override MultiMarkdown custom column alignment
 
-This settings by default enable only for MultiMarkdown Table Syntax, but you enable it for other syntax
+This settings by default enabled only for MultiMarkdown Table Syntax, but you enable it for other syntax
 
 ```javascript
 {
