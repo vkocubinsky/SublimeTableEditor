@@ -30,69 +30,66 @@ import tablelib
 
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
-    def __init__(self, view):
-        sublime_plugin.TextCommand.__init__(self, view)
-
     @property
-    def style(self):
-        style_name = self.view.settings().get("table_editor_wiki_style")
-        if style_name == "Simple":
-            style = tablelib.simple_style
-        elif style_name == "EmacsOrgMode":
-            style = tablelib.emacs_org_mode_style
-        elif style_name == "Pandoc":
-            style = tablelib.pandoc_style
-        elif style_name == "MultiMarkdown":
-            style = tablelib.multi_markdown_style
-        elif style_name == "reStructuredText":
-            style = tablelib.re_structured_text_style
-        elif style_name == "Textile":
-            style = tablelib.textile_style
+    def syntax(self):
+        syntax_name = self.view.settings().get("table_editor_syntax")
+        if syntax_name == "Simple":
+            syntax = tablelib.simple_syntax
+        elif syntax_name == "EmacsOrgMode":
+            syntax = tablelib.emacs_org_mode_syntax
+        elif syntax_name == "Pandoc":
+            syntax = tablelib.pandoc_syntax
+        elif syntax_name == "MultiMarkdown":
+            syntax = tablelib.multi_markdown_syntax
+        elif syntax_name == "reStructuredText":
+            syntax = tablelib.re_structured_text_syntax
+        elif syntax_name == "Textile":
+            syntax = tablelib.textile_syntax
         else:
-            style = self.auto_detect_style()
+            syntax = self.auto_detect_syntax()
         border_style = (self.view.settings().get("table_editor_border_style",
                                                    None) or
                          self.view.settings().get("table_editor_style",
                          None))
         if border_style == "emacs":
-            style.hline_out_border = '|'
-            style.hline_in_border = '+'
+            syntax.hline_out_border = '|'
+            syntax.hline_in_border = '+'
         elif border_style == "grid":
-            style.hline_out_border = '+'
-            style.hline_in_border = '+'
+            syntax.hline_out_border = '+'
+            syntax.hline_in_border = '+'
         elif border_style == "simple":
-            style.hline_out_border = '|'
-            style.hline_in_border = '|'
+            syntax.hline_out_border = '|'
+            syntax.hline_in_border = '|'
 
         if self.view.settings().get("table_editor_custom_column_alignment",
                                     False):
-            style.custom_column_alignment = True
+            syntax.custom_column_alignment = True
         if self.view.settings().get("table_editor_multi_markdown_column_alignment",
                                     False):
-            style.multi_markdown_column_alignment = True
+            syntax.multi_markdown_column_alignment = True
         if self.view.settings().get("table_editor_textile_cell_alignment",
                                     False):
-            style.textile_cell_alignment = True
-        return style
+            syntax.textile_cell_alignment = True
+        return syntax
 
-    def auto_detect_style(self):
-        syntax = self.view.settings().get('syntax')
-        if (syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
-            syntax == 'Packages/Markdown/Markdown.tmLanguage'):
-            return tablelib.multi_markdown_style
-        elif syntax == 'Packages/Textile/Textile.tmLanguage':
-            return tablelib.textile_style
-        elif syntax == 'Packages/RestructuredText/reStructuredText.tmLanguage':
-            return tablelib.re_structured_text_style
+    def auto_detect_syntax(self):
+        view_syntax = self.view.settings().get('syntax')
+        if (view_syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
+            view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
+            return tablelib.multi_markdown_syntax
+        elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
+            return tablelib.textile_syntax
+        elif view_syntax == 'Packages/RestructuredText/reStructuredText.tmLanguage':
+            return tablelib.re_structured_text_syntax
         else:
-            return tablelib.simple_style
+            return tablelib.simple_syntax
         #'Packages/Text/Plain text.tmLanguage':
         #
 
     def csv2table(self, text):
         lines = []
         try:
-            vline = self.style.vline
+            vline = self.syntax.vline
             dialect = csv.Sniffer().sniff(text)
             table_reader = csv.reader(text.splitlines(), dialect)
             for row in table_reader:
@@ -103,10 +100,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return "\n".join(lines)
 
     def find_border(self, text, num):
-        if self.style.is_hline(text):
-            pattern = self.style.hline_border_pattern()
+        if self.syntax.is_hline(text):
+            pattern = self.syntax.hline_border_pattern()
         else:
-            pattern = self.style.vline_pattern()
+            pattern = self.syntax.vline_pattern()
         it = re.finditer(pattern, text)
         index = -1
         for i in range(num):
@@ -118,11 +115,11 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return index
 
     def hline_count(self, text, start, end):
-        if self.style.is_hline(text):
+        if self.syntax.is_hline(text):
             return sum([text.count(ch, start, end)
-                                            for ch in self.style.hline_borders])
+                                            for ch in self.syntax.hline_borders])
         else:
-            return text.count(self.style.vline, start, end)
+            return text.count(self.syntax.vline, start, end)
 
     def get_text(self, row):
         point = self.view.text_point(row, 0)
@@ -140,10 +137,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return self.view.rowcol(point)[0]
 
     def is_hline_row(self, row):
-        return self.style.is_hline(self.get_text(row))
+        return self.syntax.is_hline(self.get_text(row))
 
     def is_table_row(self, row):
-        return re.match(r"^\s*" + self.style.hline_border_pattern(), self.get_text(row)) is not None
+        return re.match(r"^\s*" + self.syntax.hline_border_pattern(), self.get_text(row)) is not None
 
     def get_field_num(self, row, col):
         return self.hline_count(self.get_text(row), 0, col) - 1
@@ -191,24 +188,24 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return first_table_row
 
     def clone_as_empty_line(self, text):
-        if self.style.is_hline(text):
-            text = re.sub(self.style.hline_border_pattern(), self.style.vline, text)
+        if self.syntax.is_hline(text):
+            text = re.sub(self.syntax.hline_border_pattern(), self.syntax.vline, text)
 
         i1 = self.find_border(text, 1)
-        return text[:i1] + re.sub(self.style.not_vline_pattern(), ' ', text[i1:])
+        return text[:i1] + re.sub(self.syntax.not_vline_pattern(), ' ', text[i1:])
 
     def clone_as_hline(self, text, hline='-'):
-        if self.style.is_hline(text):
+        if self.syntax.is_hline(text):
             return text[:]
-        i1 = text.find(self.style.vline)
-        i2 = text.rfind(self.style.vline)
+        i1 = text.find(self.syntax.vline)
+        i2 = text.rfind(self.syntax.vline)
         in_text = text[i1 + 1:i2]
-        in_text = re.sub(self.style.not_vline_pattern(), hline, in_text)
-        in_text = re.sub(self.style.vline_pattern(), self.style.hline_in_border, in_text)
+        in_text = re.sub(self.syntax.not_vline_pattern(), hline, in_text)
+        in_text = re.sub(self.syntax.vline_pattern(), self.syntax.hline_in_border, in_text)
         return (text[:i1]
-                + self.style.hline_out_border
+                + self.syntax.hline_out_border
                 + in_text
-                + self.style.hline_out_border
+                + self.syntax.hline_out_border
                 + text[i2 + 1:])
 
     def duplicate_as_hrow(self, edit, row, hline='-'):
@@ -252,7 +249,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         table_region = sublime.Region(begin_point, end_point)
         text = self.view.substr(table_region)
         sel_field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        new_text_lines = tablelib.format_to_lines(text, self.style)
+        new_text_lines = tablelib.format_to_lines(text, self.syntax)
         row = first_table_row
         while row <= last_table_row:
             if row - first_table_row >= len(new_text_lines):
@@ -424,9 +421,9 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         row = start_row
         while row <= end_row:
             if self.is_hline_row(row):
-                in_border = self.style.hline_in_border
+                in_border = self.syntax.hline_in_border
             else:
-                in_border = self.style.vline
+                in_border = self.syntax.vline
 
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 0)
@@ -465,9 +462,9 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
 
         while row <= last_table_row:
             if self.is_hline_row(row):
-                in_border = self.style.hline_in_border
+                in_border = self.syntax.hline_in_border
             else:
-                in_border = self.style.vline
+                in_border = self.syntax.vline
 
             text = self.get_text(row)
             i1 = self.find_border(text, field_num + 1)
@@ -507,13 +504,13 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
             i1 = self.find_border(text, field_num + 1)
             i2 = self.find_border(text, field_num + 2)
             if field_count > 1:
-                if self.style.is_hline(text):
+                if self.syntax.is_hline(text):
                     if field_num == 0 or field_num == field_count - 1:
-                        vline = self.style.hline_out_border
+                        vline = self.syntax.hline_out_border
                     else:
-                        vline = self.style.hline_in_border
+                        vline = self.syntax.hline_in_border
                 else:
-                    vline = self.style.vline
+                    vline = self.syntax.vline
                 self.view.replace(edit,
                         self.view.line(self.view.text_point(row, sel_col)),
                         text[0:i1] + vline + text[i2 + 1:])
@@ -545,28 +542,28 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
         row = first_table_row
         while row <= last_table_row:
             text = self.get_text(row)
-            if self.style.is_single_hline(text):
+            if self.syntax.is_single_hline(text):
                 cell = "---"
-            elif self.style.is_double_hline(text):
+            elif self.syntax.is_double_hline(text):
                 cell = "==="
             else:
                 cell = "   "
             i1 = self.find_border(text, field_num + 1)
-            if self.style.is_hline(text):
+            if self.syntax.is_hline(text):
                 if field_num == 0:
-                    vline = self.style.hline_out_border
+                    vline = self.syntax.hline_out_border
                 else:
-                    vline = self.style.hline_in_border
+                    vline = self.syntax.hline_in_border
                 new_text = (text[0:i1]
                             + vline
                             + cell
-                            + self.style.hline_in_border
+                            + self.syntax.hline_in_border
                             + text[i1 + 1:])
             else:
                 new_text = (text[0:i1]
-                            + self.style.vline
+                            + self.syntax.vline
                             + cell
-                            + self.style.vline
+                            + self.syntax.vline
                             + text[i1 + 1:])
             self.view.replace(edit,
                     self.view.line(self.view.text_point(row, sel_col)),
@@ -712,7 +709,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
     or if next line is hline
     """
     def remove_rest_line(self, edit, sel):
-        end_region = self.view.find(self.style.hline_border_pattern(), sel.begin())
+        end_region = self.view.find(self.syntax.hline_border_pattern(), sel.begin())
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
         self.view.replace(edit, rest_region, "")
@@ -746,7 +743,7 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
-        vline = self.style.vline
+        vline = self.syntax.vline
         if (sel_row < self.get_last_table_row(sel_row)
                 and not self.is_hline_row(sel_row)
                 and not self.is_hline_row(sel_row + 1)):
@@ -845,9 +842,9 @@ class TableEditorEnableForCurrentSyntax(sublime_plugin.TextCommand):
                 sublime.save_settings(base_name)
 
 
-class TableEditorSetStyle(sublime_plugin.TextCommand):
+class TableEditorSetSyntax(sublime_plugin.TextCommand):
 
-    def run(self, edit, style):
+    def run(self, edit, syntax):
         self.view.settings().set("enable_table_editor", True)
-        self.view.settings().set("table_editor_wiki_style", style)
-        sublime.status_message("Table Editor: set style to {0}".format(style))
+        self.view.settings().set("table_editor_syntax", syntax)
+        sublime.status_message("Table Editor: set syntax to '{0}'".format(syntax))

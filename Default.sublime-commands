@@ -9,16 +9,16 @@
     },
     { "caption": "Table Editor: Show demo film in new scratch view", "command": "table_editor_film" 
     },
-    { "caption": "Table Editor: Set table style 'Simple' for current view", "command": "table_editor_set_style", "args": {"style": "Simple"}
+    { "caption": "Table Editor: Set table syntax 'Simple' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "Simple"}
     },
-    { "caption": "Table Editor: Set table style 'EmacsOrgMode' for current view", "command": "table_editor_set_style", "args": {"style": "EmacsOrgMode"}
+    { "caption": "Table Editor: Set table syntax 'EmacsOrgMode' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "EmacsOrgMode"}
     },
-    { "caption": "Table Editor: Set table style 'Pandoc' for current view", "command": "table_editor_set_style", "args": {"style": "Pandoc"}
+    { "caption": "Table Editor: Set table syntax 'Pandoc' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "Pandoc"}
     },
-    { "caption": "Table Editor: Set table style 'MultiMarkdown' for current view", "command": "table_editor_set_style", "args": {"style": "MultiMarkdown"}
+    { "caption": "Table Editor: Set table syntax 'MultiMarkdown' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "MultiMarkdown"}
     },
-    { "caption": "Table Editor: Set table style 'reStructuredText' for current view", "command": "table_editor_set_style", "args": {"style": "reStructuredText"}
+    { "caption": "Table Editor: Set table syntax 'reStructuredText' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "reStructuredText"}
     },
-    { "caption": "Table Editor: Set table style 'Textile' for current view", "command": "table_editor_set_style", "args": {"style": "Textile"}
+    { "caption": "Table Editor: Set table syntax 'Textile' for current view", "command": "table_editor_set_syntax", "args": {"syntax": "Textile"}
     }
 ]
