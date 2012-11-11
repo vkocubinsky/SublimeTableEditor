@@ -353,7 +353,7 @@ You can control table syntax with settings
 
 ### Override Table Border Style
 
-Table Border Style is a part of Table Syntax and usually we should not need change this. But if you like you can override table border style. Table editor supports next table border styles:
+Table Border Style is a part of Table Syntax and usually we should not change this. But if you like you can override table border style. Table editor supports next table border styles:
 
 * simple: *|---|---|*
 * emacs: org mode *|---+---|*
