@@ -2,7 +2,10 @@
 
 ## Overview
 
-*Table Editor* is a package for the *Sublime Text 2* editor for edit simple text tables in text mode, markdown mode, textile mode, reStructuredText mode etc. *Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. *Table Editor* allow on easy way edit text table, it allows:
+*Table Editor* is a package for the *Sublime Text 2* editor for edit text tables. 
+*Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. 
+
+*Table Editor* allow on easy way edit text table, it allows:
 
 - navigate with tab/shift tab 
 - insert/delete row
@@ -15,12 +18,17 @@
 - convert selected CSV region into table
 - support single hline with character '-'
 - support double hline with character '='
-- support different table styles
-    - emacs org mode
-    - grid(pandoc grid tables, reStructuredText grid tables)
-    - simple styles 
+- direct support subset of wiki table syntax
+    - Simple
+    - EmacsOrgMode
+    - Pandoc
+    - Multi Markdown
+    - reStructuredText
+    - Textile
+- auto detect table syntax by view syntax
+- switch between different table syntax on the fly
 - temporary disable/enable table editor
-- specify column alignment(experimental)
+- customize table syntax
 - show demo film in scratch view
 
 ## Usage
@@ -30,7 +38,7 @@
 For first time you should enable table editor with command palette:
 
 * click *ctrl+shift+p*
-* select *Table Editor: Enable for current syntax* or *Table Editor: Enable for current view*
+* select *Table Editor: Enable for current syntax* or *Table Editor: Enable for current view* or "Table Editor: Set table syntax ... for current view"
 
 Then when *Table Editor* is enabled, type
 
@@ -232,50 +240,44 @@ Select some text with CSV data
 *Convert CSV into table* command automatically recognize CSV dialect, for example you can enter data separated by *tab*. If *Convert CSV into table* command can not recognize CSV dialect you will get one row table where selected line is a row in the table.
 
 
-### Custom column alignment
+### Temporary Enable/Disable *Table Editor* for current view
 
-**This feature is experimental and can be changed in future releases.**
+Some time you like temporary enable table editor and then disable it. It is useful if you edit *Python* or *Java* code and like to pretty print table, then continue edit your code.
+For do this you should:
 
-By default text data is left justified, numeric data is right justified, column header is centered.
+* Click *ctrl+shift+p* for show command palette
+* Select *Table Editor: Enable for current view*
 
-    |     column 1     |      column 2      |
-    |  second line 1   |   second line 2    |
-    |------------------|--------------------|
-    | text value row 1 | 0.9999999999999999 |
-    | row 2            |                 99 |
+Then after you edit table you can disable Table Editor
 
-But you can explicit set justification with format characters 
+* Click *ctrl+shift+p* for show command palette
+* Select *Table Editor: Disable for current view*
 
-* '<' - left 
-* '>' - right
-* '#' - center
+### Switch table syntax on the fly
 
-as in next example
+Table editor support next table syntax:
 
-    | column 1 | column 2 | column 3 |
-    | <<<<<<<< | >>>>>>>> | ######## |
-    |----------|----------|----------|
-    | 1        |    row 1 |    c1    |
-    | 2        |    row 2 |    c2    |
-    | 3        |    row 3 |    c3    |
+- Simple
+- EmacsOrgMode
+- Pandoc
+- Multi Markdown
+- reStructuredText
+- Textile
 
-You can change justification several times
+Table Editor syntax detected by user settings and if it is not specified recognized automatically by view syntax. But you can change table syntax on the fly with command palette:
 
-    | column 1 | column 2 | column 3 |
-    | <<<<<<<< | >>>>>>>> | ######## |
-    |----------|----------|----------|
-    | 1        |    row 1 |    c1    |
-    | 2        |    row 2 |    c2    |
-    | 3        |    row 3 |    c3    |
-    | ######## | <<<<<<<< | >>>>>>>> |
-    |    1     | row 1    |       c1 |
-    |    2     | row 2    |       c2 |
-    |    3     | row 3    |       c3 |
+- Table Editor: Set table syntax 'Simple' for current view
+- Table Editor: Set table syntax 'EmacsOrgMode' for current view
+- Table Editor: Set table syntax 'Pandoc' for current view
+- Table Editor: Set table syntax 'MultiMarkdown' for current view
+- Table Editor: Set table syntax 'reStructuredText' for current view
+- Table Editor: Set table syntax 'Textile' for current view
 
+Above commands automatically enable table editor for current view.
 
 ### Demo 
 
-Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view* . It is integration test and demo at the same time. 
+Press *ctrl+shift+p* to launch command palette and select *Table Editor: Show demo film in new scratch view*. It is integration test and demo at the same time. 
 
 
 ## Installation
@@ -309,112 +311,117 @@ If you like work with HEAD you can locate *Table Editor* in your packages direct
 
 ## Settings
 
+You can customize *Table Editor* by change settings. For do this you have to modify settings file (see http://docs.sublimetext.info/en/latest/customization/settings.html).
+
+For apply changes for all files you can open user settings with menu "Preferences -> Settings - User". For apply changes for specific syntax you can open syntax settings with menu "Preferences -> Settings - More -> Syntax Specific - User". 
 
 ### Enable Table Editor
 
-By default *Table Editor* is disable. You be able enable *Table Editor* for:
+By default *Table Editor* is disabled. For enable *Table Editor* you have to set
 
-* specific syntax
-* current view 
-* all files
+```javascript
+{
+    "enable_table_editor": true
+}
+```
 
-You can ebable *Table Editor* with setting *"enable_table_editor": true* on a standard sublime way descrubed 
-in http://docs.sublimetext.info/en/latest/customization/settings.html. But *Table Editor* out of the box contains
-feature for set this property on a more simple way.
-
-#### Enable for specific syntax
-
-It is most usable option. Usually you like to enable Table Editor for Plain text, Markdown, Textile, reStructuredText syntax. 
-
-For enable Table Editor for specific syntax
-
-* Open file with specific syntax(for example .txt for Plain text)
-* Click *ctrl+shift+p* for show command palette
-* Select *Table Editor: Enable for current syntax*
-
-For disable Table Editor for specific syntax
-
-* Open file with specific syntax(for example .txt for Plain text)
-* Click *ctrl+shift+p* for show command palette
-* Select *Table Editor: Disable for current syntax*
-
-You can do the same manually by
-
-* Open file with specific syntax(for example .txt for Plain text)
-* Click *Preferences -> Settings - More -> Syntax Specific User*
-* put setting *"enable_table_editor": true* or put setting *"enable_table_editor": false* 
-  or delete line with propert *enable_table_editor*
-* save Syntax Specific File
-
-#### Enable for current view
-
-Some time you like temporary enable table editor and then disable it. It is usefull if you edit *Python* or *Java* code and like to pretty print table, then contine edit your code. For do this you should:
-
-* Click *ctrl+shift+p* for show command palette
-* Select *Table Editor: Enable for current view*
-
-Then after you edit table you can disable Table Editor
-
-* Click *ctrl+shift+p* for show command palette
-* Select *Table Editor: Disable for current view*
-
-#### Enable for all files
-
-Probably this option is usable if you work only with text or wiki markup files
-
-* Click *Preferences -> Settings - User*
-* put setting *"enable_table_editor": true*
+Usually you will enable *Table Editor* for specific syntax.
+You can do this very easy if launch command palette by *ctrl+shift+p* and select 
+*Table Editor: Enable for current syntax*. 
 
 
-### Set Table Styles
+### Set Table Syntax
 
-Table editor supports different table styles:
+You can control table syntax with settings
 
-* simple
-* emacs org mode
-* grid (pandoc grid tables, reStructuredText grid tables)
+```javascript
+{
+    // Set table syntax for Table Editor.
+    // Valid options are: "Auto", "Simple", "EmacsOrgMode", "Pandoc", "MultiMarkdown",
+    //                    "reStructuredText", "Textile"
+    "table_editor_syntax": "Auto"
+}
+```
+
+"Auto" settings detect table syntax by view syntax with next rules:
+
+- Markdown, MultiMarkdown -> MultiMarkdown
+- reStructuredText -> reStructuredText
+- Textile -> Textile
+- Other -> Simple
 
 
-*simple* style is default style. You can change default table style if modify 
-user settings. You can open user settings with menu "Preferences -> Settings - User".
-You can set per syntax table style if modify syntax settings. For example when you edit Markdown file you can open syntax settings with menu 
-"Preferences -> Settings - More -> Syntax Specific - User"
+### Override Table Border Style
 
-There are list of available settings:
+Table Border Style is a part of Table Syntax and usually we should not need change this. But if you like you can override table border style. Table editor supports next table border styles:
 
-* "table_editor_style" : "simple"
-* "table_editor_style" : "emacs"
-* "table_editor_style" : "grid"
+* simple: *|---|---|*
+* emacs: org mode *|---+---|*
+* grid: *+---+---+* 
 
-#### Simple Style
+```javascript
+{
+    // Override border style for Table Editor
+    // Valid options are: "simple", "grid", "emacs"
+    "table_editor_border_style": "simple"
 
-    |-----------|-----|-----------|
-    |    Name   | Age |   Phone   |
-    |===========|=====|===========|
-    | Anna      |  32 | 123456789 |
-    |-----------|-----|-----------|    
-    | Alexander |  28 | 987654321 |
-    |-----------|-----|-----------|    
+    // Deprecated 
+    // see "table_editor_border_style"
+    // "table_editor_style": "simple"
+}
+```
 
-#### Emacs Style
+### Override custom column alignment
 
-    |-----------+-----+-----------|
-    |    Name   | Age |   Phone   |
-    |===========+=====+===========|
-    | Anna      |  32 | 123456789 |
-    |-----------+-----+-----------|
-    | Alexander |  28 | 987654321 |
-    |-----------+-----+-----------|
+This settings by default enable only for Simple Table Syntax, but you enable it for other syntax
 
-#### Grid Style
+```javascript
+{
+    // If table_editor_custom_column_alignment is true, supports '<', '>', '#' column alignment
+    "table_editor_custom_column_alignment": true
+}
+```
 
-    +-----------+-----+-----------+
-    |    Name   | Age |   Phone   |
-    +===========+=====+===========+
-    | Anna      |  32 | 123456789 |
-    +-----------+-----+-----------+
-    | Alexander |  28 | 987654321 |
-    +-----------+-----+-----------+
+With this feature you can explicit set justification with format characters 
+
+* '<' - left 
+* '>' - right
+* '#' - center
+
+as in next example
+
+    | column 1 | column 2 | column 3 |
+    | <<<<<<<< | >>>>>>>> | ######## |
+    |----------|----------|----------|
+    | 1        |    row 1 |    c1    |
+    | 2        |    row 2 |    c2    |
+    | 3        |    row 3 |    c3    |
+
+You can change justification several times
+
+    | column 1 | column 2 | column 3 |
+    | <<<<<<<< | >>>>>>>> | ######## |
+    |----------|----------|----------|
+    | 1        |    row 1 |    c1    |
+    | 2        |    row 2 |    c2    |
+    | 3        |    row 3 |    c3    |
+    | ######## | <<<<<<<< | >>>>>>>> |
+    |    1     | row 1    |       c1 |
+    |    2     | row 2    |       c2 |
+    |    3     | row 3    |       c3 |
+
+### Override MultiMarkdown custom column alignment
+
+This settings by default enable only for MultiMarkdown Table Syntax, but you enable it for other syntax
+
+```javascript
+{
+    // If table_editor_multimarkdown_alignment is true, supports ":---", ":---:","---:" 
+    // column alignment
+    "table_editor_multi_markdown_column_alignment": true
+}
+```
+
 
 
 ## Key binding

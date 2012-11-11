@@ -64,8 +64,9 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().get("table_editor_custom_column_alignment",
                                     False):
             syntax.custom_column_alignment = True
-        if self.view.settings().get("table_editor_multi_markdown_column_alignment",
-                                    False):
+        if self.view.settings().get(
+                               "table_editor_multi_markdown_column_alignment",
+                               False):
             syntax.multi_markdown_column_alignment = True
         if self.view.settings().get("table_editor_textile_cell_alignment",
                                     False):
@@ -79,7 +80,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             return tablelib.multi_markdown_syntax
         elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
             return tablelib.textile_syntax
-        elif view_syntax == 'Packages/RestructuredText/reStructuredText.tmLanguage':
+        elif (view_syntax ==
+                     'Packages/RestructuredText/reStructuredText.tmLanguage'):
             return tablelib.re_structured_text_syntax
         else:
             return tablelib.simple_syntax
@@ -117,7 +119,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def hline_count(self, text, start, end):
         if self.syntax.is_hline(text):
             return sum([text.count(ch, start, end)
-                                            for ch in self.syntax.hline_borders])
+                                        for ch in self.syntax.hline_borders])
         else:
             return text.count(self.syntax.vline, start, end)
 
@@ -140,7 +142,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         return self.syntax.is_hline(self.get_text(row))
 
     def is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.hline_border_pattern(), self.get_text(row)) is not None
+        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
+                        self.get_text(row)) is not None
 
     def get_field_num(self, row, col):
         return self.hline_count(self.get_text(row), 0, col) - 1
@@ -189,10 +192,12 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def clone_as_empty_line(self, text):
         if self.syntax.is_hline(text):
-            text = re.sub(self.syntax.hline_border_pattern(), self.syntax.vline, text)
+            text = re.sub(self.syntax.hline_border_pattern(),
+                          self.syntax.vline, text)
 
         i1 = self.find_border(text, 1)
-        return text[:i1] + re.sub(self.syntax.not_vline_pattern(), ' ', text[i1:])
+        return text[:i1] + re.sub(self.syntax.not_vline_pattern(),
+                                  ' ', text[i1:])
 
     def clone_as_hline(self, text, hline='-'):
         if self.syntax.is_hline(text):
@@ -201,7 +206,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         i2 = text.rfind(self.syntax.vline)
         in_text = text[i1 + 1:i2]
         in_text = re.sub(self.syntax.not_vline_pattern(), hline, in_text)
-        in_text = re.sub(self.syntax.vline_pattern(), self.syntax.hline_in_border, in_text)
+        in_text = re.sub(self.syntax.vline_pattern(),
+                         self.syntax.hline_in_border, in_text)
         return (text[:i1]
                 + self.syntax.hline_out_border
                 + in_text
@@ -709,7 +715,8 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
     or if next line is hline
     """
     def remove_rest_line(self, edit, sel):
-        end_region = self.view.find(self.syntax.hline_border_pattern(), sel.begin())
+        end_region = self.view.find(self.syntax.hline_border_pattern(),
+                                    sel.begin())
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
         self.view.replace(edit, rest_region, "")
@@ -758,7 +765,8 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
             next_line = next_line[i1 + 1:i2]
 
             cols = [f1.strip() + " " + f2.strip()
-                for f1, f2 in zip(curr_line.split(vline), next_line.split(vline))]
+                for f1, f2 in zip(curr_line.split(vline),
+                                  next_line.split(vline))]
             new_line = prefix + vline + vline.join(cols) + vline + "\n"
 
             curr_region = self.view.full_line(
@@ -847,4 +855,5 @@ class TableEditorSetSyntax(sublime_plugin.TextCommand):
     def run(self, edit, syntax):
         self.view.settings().set("enable_table_editor", True)
         self.view.settings().set("table_editor_syntax", syntax)
-        sublime.status_message("Table Editor: set syntax to '{0}'".format(syntax))
+        sublime.status_message("Table Editor: set syntax to '{0}'"
+                               .format(syntax))

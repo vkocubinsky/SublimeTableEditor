@@ -335,7 +335,8 @@ class TextTable:
         self._adjust_column_width()
 
         def join_row(row):
-            if self._is_single_row_separator(row) or self._is_double_row_separator(row):
+            if (self._is_single_row_separator(row) or
+                self._is_double_row_separator(row)):
                 return (self.syntax.hline_out_border
                     + self.syntax.hline_in_border.join(row)
                     + self.syntax.hline_out_border)
