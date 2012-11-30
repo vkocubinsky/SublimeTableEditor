@@ -515,6 +515,13 @@ You can make a donation online, using the link below with PayPal service
 
 ## Testing
 
-I tested *Table Editor* package under Windows and Linux. It should work under Mac, but I did not test, because I do not have a mac.
+Test environment
+
+- Ubuntu 12.04 64bit
+- Windows 7 64bit
+- OS X 10.8.2
+
+
+
 
 
