@@ -520,8 +520,3 @@ Test environment
 - Ubuntu 12.04 64bit
 - Windows 7 64bit
 - OS X 10.8.2
-
-
-
-
-
