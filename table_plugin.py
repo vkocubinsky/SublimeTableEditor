@@ -815,7 +815,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
     def run(self, args):
-        self.view.settings().erase("enable_table_editor")
+        self.view.settings().set("enable_table_editor", False)
 
 
 class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
