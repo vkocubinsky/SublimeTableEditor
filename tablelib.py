@@ -116,6 +116,47 @@ textile_syntax = TableSyntax(hline_out_border='|',
                            textile_cell_alignment=True)
 
 
+class Row:
+    def __init__(self, syntax, cols):
+        self.syntax = syntax
+        self.cols = cols
+
+    def is_single_row_separator(self):
+        for col in self.cols:
+            if not re.match(r"^\s*[\-]+\s*$", col):
+                return False
+        return True
+
+
+    def is_double_row_separator(self):
+        for col in self.cols:
+            if not re.match(r"^\s*[\=]+\s*$", col):
+                return False
+        return True
+
+    def is_custom_align_row(self):
+        for col in self.cols:
+            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
+                return False
+        return True
+
+    def is_multi_markdown_align_row(self):
+        for col in self.cols:
+            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
+                return False
+        return True
+
+    def render(self):
+        if (self.is_single_row_separator() or
+            self.is_double_row_separator()):
+            return (self.syntax.hline_out_border
+                + self.syntax.hline_in_border.join(self.cols)
+                + self.syntax.hline_out_border)
+        else:
+            vline = self.syntax.vline
+            return vline + vline.join(self.cols) + vline
+
+
 class TextTable:
     ALIGN_LEFT = 'left'
     ALIGN_RIGHT = 'right'
@@ -167,38 +208,15 @@ class TextTable:
         else:
             return '-'
 
-    def _is_single_row_separator(self, row):
-        for col in row:
-            if not re.match(r"^\s*[\-]+\s*$", col):
-                return False
-        return True
-
-    def _is_double_row_separator(self, row):
-        for col in row:
-            if not re.match(r"^\s*[\=]+\s*$", col):
-                return False
-        return True
-
-    def is_custom_align_row(self, row):
-        for col in row:
-            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
-                return False
-        return True
-
-    def is_multi_markdown_align_row(self, row):
-        for col in row:
-            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
-                return False
-        return True
 
     def _merge(self, new_row):
-        if (self._is_single_row_separator(new_row) or
-            self._is_double_row_separator(new_row)):
-            if self._is_single_row_separator(new_row):
-                new_row = ['---' for col in new_row]
+        if (new_row.is_single_row_separator() or
+            new_row.is_double_row_separator()):
+            if new_row.is_single_row_separator():
+                new_row.cols = ['---' for col in new_row.cols]
                 self._row_types.append(TextTable.ROW_SINGLE_SEPARATOR)
             else:
-                new_row = ['===' for col in new_row]
+                new_row.cols = ['===' for col in new_row.cols]
                 self._row_types.append(TextTable.ROW_DOUBLE_SEPARATOR)
             if (not self._header_found and
                 TextTable.ROW_DATA in self._row_types):
@@ -207,20 +225,20 @@ class TextTable:
                         self._row_types[i] = TextTable.ROW_HEADER
                     self._header_found = True
         elif (self.syntax.custom_column_alignment and
-              self.is_custom_align_row(new_row)):
-            new_row = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
-                                                        for col in new_row]
+              new_row.is_custom_align_row()):
+            new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
+                                                        for col in new_row.cols]
             self._row_types.append(TextTable.ROW_CUSTOM_ALIGN)
         elif (self.syntax.multi_markdown_column_alignment
-              and self.is_multi_markdown_align_row(new_row)):
-            new_row = [' ' + self._norm_multi_markdown(col) + ' '
-                                                        for col in new_row]
+              and new_row.is_multi_markdown_align_row()):
+            new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
+                                                        for col in new_row.cols]
             self._row_types.append(TextTable.ROW_MULTI_MARKDOWN_ALIGN)
         else:
-            new_row = [self._norm_data(col) for col in new_row]
+            new_row.cols = [self._norm_data(col) for col in new_row.cols]
             self._row_types.append(TextTable.ROW_DATA)
         self._rows.append(new_row)
-        new_col_lens = [len(col) for col in new_row]
+        new_col_lens = [len(col) for col in new_row.cols]
         if len(new_col_lens) < len(self._col_lens):
             new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
         elif len(self._col_lens) < len(new_col_lens):
@@ -248,7 +266,7 @@ class TextTable:
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
         for row in self._rows:
-            row.extend(['   '] * (column_count - len(row)))
+            row.cols.extend(['   '] * (column_count - len(row.cols)))
 
     def _auto_detect_column(self, start_row_ind, col_ind):
         for row, row_type in zip(self._rows[start_row_ind:],
@@ -261,7 +279,7 @@ class TextTable:
                 continue
             elif row_type == TextTable.ROW_HEADER:
                 continue
-            if len(row[col_ind].strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row[col_ind]):
+            if len(row.cols[col_ind].strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.cols[col_ind]):
                 return TextTable.ALIGN_LEFT
         return TextTable.ALIGN_RIGHT
 
@@ -271,7 +289,7 @@ class TextTable:
         row_count = len(self._rows)
         data_alignment = [None] * len(self._col_lens)
         for row_ind in range(row_count):
-            row = self._rows[row_ind]
+            row = self._rows[row_ind].cols
             row_type = self._row_types[row_ind]
             out_row = []
             for col_ind in range(column_count):
@@ -317,7 +335,7 @@ class TextTable:
                     elif data_alignment[col_ind] == TextTable.ALIGN_CENTER:
                         col = col.center(col_len, ' ')
                 out_row.append(col)
-            out.append(out_row)
+            out.append(Row(self.syntax, out_row))
         self._rows = out
 
     def format_to_lines(self):
@@ -330,20 +348,12 @@ class TextTable:
             prefix = ""
         for line in lines:
             cols = self._split_line(line.strip())
-            self._merge(cols)
+            row = Row(self.syntax, cols)
+            self._merge(row)
         self._adjust_column_count()
         self._adjust_column_width()
 
-        def join_row(row):
-            if (self._is_single_row_separator(row) or
-                self._is_double_row_separator(row)):
-                return (self.syntax.hline_out_border
-                    + self.syntax.hline_in_border.join(row)
-                    + self.syntax.hline_out_border)
-            else:
-                vline = self.syntax.vline
-                return vline + vline.join(row) + vline
-        return [prefix + join_row(row) for row in self._rows]
+        return [prefix + row.render() for row in self._rows]
 
     def format_to_text(self):
         return "\n".join(self.format_to_lines())
@@ -367,8 +377,8 @@ if __name__ == '__main__':
                 | ------------ | ----------- | ---------- | ----- |
                 | :----------- | ----------: | :--------: | ----- |
               |=
-              |a  |   b   | c |1 |
-              |a  |   b   | c |2 |
+              |a  |   b   | c |d |
+              |1  |   2   | 3 |4 |
               |-"""
     syntax = multi_markdown_syntax
     print "Table:\n", format_to_text(raw_text, syntax)
