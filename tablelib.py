@@ -117,8 +117,8 @@ textile_syntax = TableSyntax(hline_out_border='|',
 
 
 class Row:
-    def __init__(self, syntax, cols):
-        self.syntax = syntax
+    def __init__(self, table, cols):
+        self.table = table
         self.cols = cols
 
     def is_single_row_separator(self):
@@ -147,13 +147,14 @@ class Row:
         return True
 
     def render(self):
+        syntax = self.table.syntax
         if (self.is_single_row_separator() or
             self.is_double_row_separator()):
-            return (self.syntax.hline_out_border
-                + self.syntax.hline_in_border.join(self.cols)
-                + self.syntax.hline_out_border)
+            return (syntax.hline_out_border
+                + syntax.hline_in_border.join(self.cols)
+                + syntax.hline_out_border)
         else:
-            vline = self.syntax.vline
+            vline = syntax.vline
             return vline + vline.join(self.cols) + vline
 
 
@@ -335,7 +336,7 @@ class TextTable:
                     elif data_alignment[col_ind] == TextTable.ALIGN_CENTER:
                         col = col.center(col_len, ' ')
                 out_row.append(col)
-            out.append(Row(self.syntax, out_row))
+            out.append(Row(self, out_row))
         self._rows = out
 
     def format_to_lines(self):
@@ -348,7 +349,7 @@ class TextTable:
             prefix = ""
         for line in lines:
             cols = self._split_line(line.strip())
-            row = Row(self.syntax, cols)
+            row = Row(self, cols)
             self._merge(row)
         self._adjust_column_count()
         self._adjust_column_width()
