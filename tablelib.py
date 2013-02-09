@@ -115,6 +115,11 @@ textile_syntax = TableSyntax(hline_out_border='|',
                            multi_markdown_column_alignment=False,
                            textile_cell_alignment=True)
 
+class Column:
+
+    def __init__(self, data):
+        self.data = data
+
 
 class Row:
     ROW_DATA = 'd'
@@ -201,6 +206,13 @@ class TextTable:
             ):
             self.header_separator_index = row.index
 
+        new_col_lens = [len(col) for col in row.cols]
+        if len(new_col_lens) < len(self._col_lens):
+            new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
+        elif len(self._col_lens) < len(new_col_lens):
+            self._col_lens.extend([0] * (len(new_col_lens) - len(self._col_lens)))
+        self._col_lens = [max(x, y) for x, y in zip(self._col_lens, new_col_lens)]
+
 
     def _extend_list(self, list, size, fill_value):
         assert len(list) < size
@@ -254,12 +266,6 @@ class TextTable:
             new_row.cols = [self._norm_data(col) for col in new_row.cols]
             new_row.row_type = Row.ROW_DATA
         self.add_row(new_row)
-        new_col_lens = [len(col) for col in new_row.cols]
-        if len(new_col_lens) < len(self._col_lens):
-            new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
-        elif len(self._col_lens) < len(new_col_lens):
-            self._col_lens.extend([0] * (len(new_col_lens) - len(self._col_lens)))
-        self._col_lens = [max(x, y) for x, y in zip(self._col_lens, new_col_lens)]
 
 
     def _adjust_column_count(self):
