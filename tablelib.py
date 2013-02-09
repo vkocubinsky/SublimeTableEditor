@@ -127,8 +127,12 @@ class Row:
     def __init__(self, table, cols):
         self.table = table
         self.cols = cols
-        self.header = False
         self.row_type = None
+        self.index = 0
+
+    @property
+    def header(self):
+        return self.index < self.table.header_separator_index
 
     def is_single_row_separator(self):
         for col in self.cols:
@@ -177,16 +181,26 @@ class TextTable:
         self.text = text
         self.syntax = syntax
         self._rows = []
-        self._row_types = []
         self._col_types = []
         self._col_lens = []
 
         self._header_found = False
+        self.header_separator_index = -1
+        self.first_data_index = -1
 
     def add_row(self, row):
         row.index = len(self._rows)
         self._rows.append(row)
-        self._row_types.append(row.row_type)
+        if self.first_data_index == -1 and row.row_type == Row.ROW_DATA:
+            self.first_data_index = row.index
+        if (self.first_data_index != -1 and
+            self.header_separator_index != -1 and
+            (row.row_type == Row.ROW_SINGLE_SEPARATOR
+                or
+             row.row_type == Row.ROW_DOUBLE_SEPARATOR)
+            ):
+            self.header_separator_index = row.index
+
 
     def _extend_list(self, list, size, fill_value):
         assert len(list) < size
@@ -227,12 +241,6 @@ class TextTable:
             else:
                 new_row.cols = ['===' for col in new_row.cols]
                 new_row.row_type = Row.ROW_DOUBLE_SEPARATOR
-            if (not self._header_found and
-                Row.ROW_DATA in self._row_types):
-                for i, x in enumerate(self._row_types):
-                    if x == Row.ROW_DATA:
-                        new_row.header = True
-                    self._header_found = True
         elif (self.syntax.custom_column_alignment and
               new_row.is_custom_align_row()):
             new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
