@@ -336,8 +336,8 @@ class TextTable:
 
     def parse_row(self, line):
         line = line.strip()
-        #remove first '|' character
         assert line[0] in self.syntax.hline_borders
+        #remove first '|' character
         line = line[1:]
         #remove last '|' character
         if len(line) > 0 and line[-1] in self.syntax.hline_borders:
