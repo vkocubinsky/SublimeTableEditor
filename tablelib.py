@@ -261,23 +261,6 @@ class TextTable:
             self._col_lens.extend([0] * (len(new_col_lens) - len(self._col_lens)))
         self._col_lens = [max(x, y) for x, y in zip(self._col_lens, new_col_lens)]
 
-    def _split_line(self, line):
-        line = line.strip()
-
-        #remove first '|' character
-        assert line[0] in self.syntax.hline_borders
-
-        line = line[1:]
-
-        #remove last '|' character
-        if len(line) > 0 and line[-1] in self.syntax.hline_borders:
-
-            line = line[:-1]
-
-        if self.syntax.is_hline(line):
-            return re.split(self.syntax.hline_border_pattern(), line)
-        else:
-            return line.split(self.syntax.vline)
 
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
@@ -351,6 +334,22 @@ class TextTable:
             self._rows[row_ind].cols = out_row
 
 
+    def parse_row(self, line):
+        line = line.strip()
+        #remove first '|' character
+        assert line[0] in self.syntax.hline_borders
+        line = line[1:]
+        #remove last '|' character
+        if len(line) > 0 and line[-1] in self.syntax.hline_borders:
+            line = line[:-1]
+        if self.syntax.is_hline(line):
+            cols = re.split(self.syntax.hline_border_pattern(), line)
+        else:
+            cols = line.split(self.syntax.vline)
+        row = Row(self, cols)
+        return row
+
+
     def format_to_lines(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
@@ -360,8 +359,7 @@ class TextTable:
         else:
             prefix = ""
         for line in lines:
-            cols = self._split_line(line.strip())
-            row = Row(self, cols)
+            row = self.parse_row(line)
             self._merge(row)
         self._adjust_column_count()
         self._adjust_column_width()
