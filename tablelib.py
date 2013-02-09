@@ -182,6 +182,10 @@ class TextTable:
 
         self._header_found = False
 
+    def add_row(self, row):
+        row.index = len(self._rows)
+        self._rows.append(row)
+
     def _extend_list(self, list, size, fill_value):
         assert len(list) < size
         return list + [fill_value for x in range(size - len(list))]
@@ -240,7 +244,7 @@ class TextTable:
         else:
             new_row.cols = [self._norm_data(col) for col in new_row.cols]
             self._row_types.append(Row.ROW_DATA)
-        self._rows.append(new_row)
+        self.add_row(new_row)
         new_col_lens = [len(col) for col in new_row.cols]
         if len(new_col_lens) < len(self._col_lens):
             new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
