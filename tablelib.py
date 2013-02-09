@@ -287,7 +287,6 @@ class TextTable:
         return TextTable.ALIGN_RIGHT
 
     def _adjust_column_width(self):
-        out = []
         column_count = len(self._col_lens)
         row_count = len(self._rows)
         data_alignment = [None] * len(self._col_lens)
@@ -338,8 +337,8 @@ class TextTable:
                     elif data_alignment[col_ind] == TextTable.ALIGN_CENTER:
                         col = col.center(col_len, ' ')
                 out_row.append(col)
-            out.append(Row(self, out_row))
-        self._rows = out
+            self._rows[row_ind].cols = out_row
+
 
     def format_to_lines(self):
         lines = self.text.splitlines()
