@@ -128,6 +128,7 @@ class Row:
         self.table = table
         self.cols = cols
         self.header = False
+        self.row_type = None
 
     def is_single_row_separator(self):
         for col in self.cols:
@@ -185,6 +186,7 @@ class TextTable:
     def add_row(self, row):
         row.index = len(self._rows)
         self._rows.append(row)
+        self._row_types.append(row.row_type)
 
     def _extend_list(self, list, size, fill_value):
         assert len(list) < size
@@ -221,10 +223,10 @@ class TextTable:
             new_row.is_double_row_separator()):
             if new_row.is_single_row_separator():
                 new_row.cols = ['---' for col in new_row.cols]
-                self._row_types.append(Row.ROW_SINGLE_SEPARATOR)
+                new_row.row_type = Row.ROW_SINGLE_SEPARATOR
             else:
                 new_row.cols = ['===' for col in new_row.cols]
-                self._row_types.append(Row.ROW_DOUBLE_SEPARATOR)
+                new_row.row_type = Row.ROW_DOUBLE_SEPARATOR
             if (not self._header_found and
                 Row.ROW_DATA in self._row_types):
                 for i, x in enumerate(self._row_types):
@@ -235,15 +237,14 @@ class TextTable:
               new_row.is_custom_align_row()):
             new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row.cols]
-            self._row_types.append(TextTable.ROW_CUSTOM_ALIGN)
         elif (self.syntax.multi_markdown_column_alignment
               and new_row.is_multi_markdown_align_row()):
             new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
                                                         for col in new_row.cols]
-            self._row_types.append(Row.ROW_MULTI_MARKDOWN_ALIGN)
+            new_row.row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
         else:
             new_row.cols = [self._norm_data(col) for col in new_row.cols]
-            self._row_types.append(Row.ROW_DATA)
+            new_row.row_type = Row.ROW_DATA
         self.add_row(new_row)
         new_col_lens = [len(col) for col in new_row.cols]
         if len(new_col_lens) < len(self._col_lens):
@@ -276,15 +277,14 @@ class TextTable:
             row.cols.extend(['   '] * (column_count - len(row.cols)))
 
     def _auto_detect_column(self, start_row_ind, col_ind):
-        for row, row_type in zip(self._rows[start_row_ind:],
-                                self._row_types[start_row_ind:]):
+        for row in self._rows[start_row_ind:]:
             if row.header:
                 continue
-            elif row_type == Row.ROW_CUSTOM_ALIGN:
+            elif row.row_type == Row.ROW_CUSTOM_ALIGN:
                 break
-            elif row_type == Row.ROW_SINGLE_SEPARATOR:
+            elif row.row_type == Row.ROW_SINGLE_SEPARATOR:
                 continue
-            elif row_type == Row.ROW_DOUBLE_SEPARATOR:
+            elif row.row_type == Row.ROW_DOUBLE_SEPARATOR:
                 continue
             if len(row.cols[col_ind].strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.cols[col_ind]):
                 return TextTable.ALIGN_LEFT
@@ -296,12 +296,11 @@ class TextTable:
         data_alignment = [None] * len(self._col_lens)
         for row_ind in range(row_count):
             row = self._rows[row_ind].cols
-            row_type = self._row_types[row_ind]
             out_row = []
             for col_ind in range(column_count):
                 col = row[col_ind]
                 col_len = self._col_lens[col_ind]
-
+                row_type = self._rows[row_ind].row_type
                 if row_type == Row.ROW_SINGLE_SEPARATOR:
                     col = '-' * col_len
                 elif row_type == Row.ROW_DOUBLE_SEPARATOR:
