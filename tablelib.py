@@ -117,9 +117,17 @@ textile_syntax = TableSyntax(hline_out_border='|',
 
 
 class Row:
+    ROW_DATA = 'd'
+    ROW_SINGLE_SEPARATOR = '-'
+    ROW_DOUBLE_SEPARATOR = '='
+    ROW_CUSTOM_ALIGN = '<>#'
+    ROW_MULTI_MARKDOWN_ALIGN = ':-:'
+
+
     def __init__(self, table, cols):
         self.table = table
         self.cols = cols
+        self.header = False
 
     def is_single_row_separator(self):
         for col in self.cols:
@@ -163,12 +171,6 @@ class TextTable:
     ALIGN_RIGHT = 'right'
     ALIGN_CENTER = 'center'
 
-    ROW_DATA = 'd'
-    ROW_SINGLE_SEPARATOR = '-'
-    ROW_DOUBLE_SEPARATOR = '='
-    ROW_HEADER = 'h'
-    ROW_CUSTOM_ALIGN = '<>#'
-    ROW_MULTI_MARKDOWN_ALIGN = ':-:'
 
     def __init__(self, text, syntax):
         self.text = text
@@ -215,15 +217,15 @@ class TextTable:
             new_row.is_double_row_separator()):
             if new_row.is_single_row_separator():
                 new_row.cols = ['---' for col in new_row.cols]
-                self._row_types.append(TextTable.ROW_SINGLE_SEPARATOR)
+                self._row_types.append(Row.ROW_SINGLE_SEPARATOR)
             else:
                 new_row.cols = ['===' for col in new_row.cols]
-                self._row_types.append(TextTable.ROW_DOUBLE_SEPARATOR)
+                self._row_types.append(Row.ROW_DOUBLE_SEPARATOR)
             if (not self._header_found and
-                TextTable.ROW_DATA in self._row_types):
+                Row.ROW_DATA in self._row_types):
                 for i, x in enumerate(self._row_types):
-                    if x == TextTable.ROW_DATA:
-                        self._row_types[i] = TextTable.ROW_HEADER
+                    if x == Row.ROW_DATA:
+                        new_row.header = True
                     self._header_found = True
         elif (self.syntax.custom_column_alignment and
               new_row.is_custom_align_row()):
@@ -234,10 +236,10 @@ class TextTable:
               and new_row.is_multi_markdown_align_row()):
             new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
                                                         for col in new_row.cols]
-            self._row_types.append(TextTable.ROW_MULTI_MARKDOWN_ALIGN)
+            self._row_types.append(Row.ROW_MULTI_MARKDOWN_ALIGN)
         else:
             new_row.cols = [self._norm_data(col) for col in new_row.cols]
-            self._row_types.append(TextTable.ROW_DATA)
+            self._row_types.append(Row.ROW_DATA)
         self._rows.append(new_row)
         new_col_lens = [len(col) for col in new_row.cols]
         if len(new_col_lens) < len(self._col_lens):
@@ -272,13 +274,13 @@ class TextTable:
     def _auto_detect_column(self, start_row_ind, col_ind):
         for row, row_type in zip(self._rows[start_row_ind:],
                                 self._row_types[start_row_ind:]):
-            if row_type == TextTable.ROW_CUSTOM_ALIGN:
+            if row.header:
+                continue
+            elif row_type == Row.ROW_CUSTOM_ALIGN:
                 break
-            elif row_type == TextTable.ROW_SINGLE_SEPARATOR:
+            elif row_type == Row.ROW_SINGLE_SEPARATOR:
                 continue
-            elif row_type == TextTable.ROW_DOUBLE_SEPARATOR:
-                continue
-            elif row_type == TextTable.ROW_HEADER:
+            elif row_type == Row.ROW_DOUBLE_SEPARATOR:
                 continue
             if len(row.cols[col_ind].strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.cols[col_ind]):
                 return TextTable.ALIGN_LEFT
@@ -297,13 +299,13 @@ class TextTable:
                 col = row[col_ind]
                 col_len = self._col_lens[col_ind]
 
-                if row_type == TextTable.ROW_SINGLE_SEPARATOR:
+                if row_type == Row.ROW_SINGLE_SEPARATOR:
                     col = '-' * col_len
-                elif row_type == TextTable.ROW_DOUBLE_SEPARATOR:
+                elif row_type == Row.ROW_DOUBLE_SEPARATOR:
                     col = '=' * col_len
-                elif row_type == TextTable.ROW_HEADER:
+                elif self._rows[row_ind].header:
                     col = col.center(col_len, ' ')
-                elif row_type == TextTable.ROW_CUSTOM_ALIGN:
+                elif row_type == Row.ROW_CUSTOM_ALIGN:
                     if '<' in col:
                         data_alignment[col_ind] = TextTable.ALIGN_LEFT
                         col = ' ' + '<' * (col_len - 2) + ' '
@@ -313,7 +315,7 @@ class TextTable:
                     elif '#' in col:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
                         col = ' ' + '#' * (col_len - 2) + ' '
-                elif row_type == TextTable.ROW_MULTI_MARKDOWN_ALIGN:
+                elif row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
                     if col.count(':') == 2:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
                         col = ' :' + '-' * (col_len - 4) + ': '
@@ -326,7 +328,7 @@ class TextTable:
                     else:
                         col = ' ' + '-' * (col_len - 2) + ' '
 
-                elif row_type == TextTable.ROW_DATA:
+                elif row_type == Row.ROW_DATA:
                     if (data_alignment[col_ind] is None):
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
                     if data_alignment[col_ind] == TextTable.ALIGN_RIGHT:
@@ -376,9 +378,7 @@ if __name__ == '__main__':
     raw_text = """      |-
                 | header 1 | header 2 |header 3 | header 4 |
                 | ------------ | ----------- | ---------- | ----- |
-                | :----------- | ----------: | :--------: | ----- |
-              |=
-              |a  |   b   | c |d |
+              |a  |   b   | c |1 |
               |1  |   2   | 3 |4 |
               |-"""
     syntax = multi_markdown_syntax
