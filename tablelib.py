@@ -159,6 +159,45 @@ class Row:
 
         return self._row_type
 
+
+    def _norm_data(self, col):
+        col = col.strip()
+        if len(col) == 0:
+            return '   '
+        if col[0] != ' ':
+            col = ' ' + col
+        if (col[-1] != ' '):
+            col = col + ' '
+        return col
+
+    def _norm_multi_markdown(self, col):
+        col = col.strip()
+        if col.count(':') == 2:
+            return ':-:'
+        elif col[0] == ':':
+            return ':-'
+        elif col[-1] == ':':
+            return '-:'
+        else:
+            return '-'
+
+    def norm(self):
+        if self.row_type == Row.ROW_SINGLE_SEPARATOR:
+            self.cols = ['---' for col in self.cols]
+        elif self.row_type == Row.ROW_DOUBLE_SEPARATOR:
+            self.cols = ['===' for col in self.cols]
+        elif self.row_type == Row.ROW_CUSTOM_ALIGN:
+            self.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
+                                                        for col in self.cols]
+        elif self.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
+            self.cols = [' ' + self._norm_multi_markdown(col) + ' '
+                                                        for col in self.cols]
+        elif self.row_type == Row.ROW_DATA:
+            self.cols = [self._norm_data(col) for col in self.cols]
+        else:
+            raise Error
+
+
     @property
     def header(self):
         return self.index < self.table.header_separator_index
@@ -246,43 +285,10 @@ class TextTable:
         assert len(col) < size
         return col.ljust(size, fillchar)
 
-    def _norm_data(self, col):
-        col = col.strip()
-        if len(col) == 0:
-            return '   '
-        if col[0] != ' ':
-            col = ' ' + col
-        if (col[-1] != ' '):
-            col = col + ' '
-        return col
-
-    def _norm_multi_markdown(self, col):
-        col = col.strip()
-        if col.count(':') == 2:
-            return ':-:'
-        elif col[0] == ':':
-            return ':-'
-        elif col[-1] == ':':
-            return '-:'
-        else:
-            return '-'
 
 
     def _merge(self, new_row):
-        if new_row.row_type == Row.ROW_SINGLE_SEPARATOR:
-            new_row.cols = ['---' for col in new_row.cols]
-        elif new_row.row_type == Row.ROW_DOUBLE_SEPARATOR:
-            new_row.cols = ['===' for col in new_row.cols]
-        elif new_row.row_type == Row.ROW_CUSTOM_ALIGN:
-            new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
-                                                        for col in new_row.cols]
-        elif new_row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
-            new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
-                                                        for col in new_row.cols]
-        elif new_row.row_type == Row.ROW_DATA:
-            new_row.cols = [self._norm_data(col) for col in new_row.cols]
-        else:
-            raise Error
+        new_row.norm()
         self.add_row(new_row)
 
 
