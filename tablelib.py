@@ -269,27 +269,20 @@ class TextTable:
 
 
     def _merge(self, new_row):
-        if (new_row.is_single_row_separator() or
-            new_row.is_double_row_separator()):
-            if new_row.is_single_row_separator():
-                new_row.cols = ['---' for col in new_row.cols]
-                new_row.row_type = Row.ROW_SINGLE_SEPARATOR
-            else:
-                new_row.cols = ['===' for col in new_row.cols]
-                new_row.row_type = Row.ROW_DOUBLE_SEPARATOR
-        elif (self.syntax.custom_column_alignment and
-              new_row.is_custom_align_row()):
+        if new_row.row_type == Row.ROW_SINGLE_SEPARATOR:
+            new_row.cols = ['---' for col in new_row.cols]
+        elif new_row.row_type == Row.ROW_DOUBLE_SEPARATOR:
+            new_row.cols = ['===' for col in new_row.cols]
+        elif new_row.row_type == Row.ROW_CUSTOM_ALIGN:
             new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row.cols]
-            new_row.row_type = Row.ROW_CUSTOM_ALIGN
-        elif (self.syntax.multi_markdown_column_alignment
-              and new_row.is_multi_markdown_align_row()):
+        elif new_row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
             new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
                                                         for col in new_row.cols]
-            new_row.row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
-        else:
+        elif new_row.row_type == Row.ROW_DATA:
             new_row.cols = [self._norm_data(col) for col in new_row.cols]
-            new_row.row_type = Row.ROW_DATA
+        else:
+            raise Error
         self.add_row(new_row)
 
 
