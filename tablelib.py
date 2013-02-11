@@ -121,8 +121,43 @@ class Column:
         self.row = row
         self.data = data
 
+    def _norm_data(self, col):
+        col = col.strip()
+        if len(col) == 0:
+            return '   '
+        if col[0] != ' ':
+            col = ' ' + col
+        if (col[-1] != ' '):
+            col = col + ' '
+        return col
+
+    def _norm_multi_markdown(self, col):
+        col = col.strip()
+        if col.count(':') == 2:
+            return ':-:'
+        elif col[0] == ':':
+            return ':-'
+        elif col[-1] == ':':
+            return '-:'
+        else:
+            return '-'
+
+
+
     def norm(self):
-        pass
+        if self.row.row_type == Row.ROW_SINGLE_SEPARATOR:
+            self.data = '---'
+        elif self.row.row_type == Row.ROW_DOUBLE_SEPARATOR:
+            self.data = '==='
+        elif self.row.row_type == Row.ROW_CUSTOM_ALIGN:
+            self.data = ' ' + re.search(r"[\<]|[\>]|[\#]", self.data).group(0) + ' '
+        elif self.row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
+            self.cols = ' ' + self._norm_multi_markdown(self.data) + ' '
+        elif self.row.row_type == Row.ROW_DATA:
+            self.cols = self._norm_data(self.data)
+        else:
+            raise Error
+
 
 class Row:
     ROW_DATA = 'd'
@@ -135,7 +170,6 @@ class Row:
     def __init__(self, table, cols):
         self.table = table
         self.columns = [Column(self,col) for col in cols]
-        self.cols = cols
         self._row_type = None
         self.index = 0
 
@@ -160,42 +194,9 @@ class Row:
         return self._row_type
 
 
-    def _norm_data(self, col):
-        col = col.strip()
-        if len(col) == 0:
-            return '   '
-        if col[0] != ' ':
-            col = ' ' + col
-        if (col[-1] != ' '):
-            col = col + ' '
-        return col
-
-    def _norm_multi_markdown(self, col):
-        col = col.strip()
-        if col.count(':') == 2:
-            return ':-:'
-        elif col[0] == ':':
-            return ':-'
-        elif col[-1] == ':':
-            return '-:'
-        else:
-            return '-'
-
     def norm(self):
-        if self.row_type == Row.ROW_SINGLE_SEPARATOR:
-            self.cols = ['---' for col in self.cols]
-        elif self.row_type == Row.ROW_DOUBLE_SEPARATOR:
-            self.cols = ['===' for col in self.cols]
-        elif self.row_type == Row.ROW_CUSTOM_ALIGN:
-            self.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
-                                                        for col in self.cols]
-        elif self.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
-            self.cols = [' ' + self._norm_multi_markdown(col) + ' '
-                                                        for col in self.cols]
-        elif self.row_type == Row.ROW_DATA:
-            self.cols = [self._norm_data(col) for col in self.cols]
-        else:
-            raise Error
+        for column in self.columns:
+            column.norm()
 
 
     @property
@@ -203,15 +204,15 @@ class Row:
         return self.index < self.table.header_separator_index
 
     def is_single_row_separator(self):
-        for col in self.cols:
-            if not re.match(r"^\s*[\-]+\s*$", col):
+        for column in self.columns:
+            if not re.match(r"^\s*[\-]+\s*$", column.data):
                 return False
         return True
 
 
     def is_double_row_separator(self):
-        for col in self.cols:
-            if not re.match(r"^\s*[\=]+\s*$", col):
+        for column in self.columns:
+            if not re.match(r"^\s*[\=]+\s*$", column.data):
                 return False
         return True
 
@@ -222,21 +223,26 @@ class Row:
         return True
 
     def is_multi_markdown_align_row(self):
-        for col in self.cols:
-            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
+        for column in self.columns:
+            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", column.data):
                 return False
         return True
+
+
+    @property
+    def str_cols(self):
+        return [column.data for column in self.columns]
 
     def render(self):
         syntax = self.table.syntax
         if (self.is_single_row_separator() or
             self.is_double_row_separator()):
             return (syntax.hline_out_border
-                + syntax.hline_in_border.join(self.cols)
+                + syntax.hline_in_border.join(self.str_cols)
                 + syntax.hline_out_border)
         else:
             vline = syntax.vline
-            return vline + vline.join(self.cols) + vline
+            return vline + vline.join(self.str_cols) + vline
 
 
 class TextTable:
@@ -269,7 +275,7 @@ class TextTable:
             ):
             self.header_separator_index = row.index
 
-        new_col_lens = [len(col) for col in row.cols]
+        new_col_lens = [len(column.data) for column in row.columns]
         if len(new_col_lens) < len(self._col_lens):
             new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
         elif len(self._col_lens) < len(new_col_lens):
@@ -295,7 +301,7 @@ class TextTable:
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
         for row in self._rows:
-            row.cols.extend(['   '] * (column_count - len(row.cols)))
+            row.columns.extend([Column(row,'   ')] * (column_count - len(row.columns)))
 
     def _auto_detect_column(self, start_row_ind, col_ind):
         for row in self._rows[start_row_ind:]:
@@ -307,7 +313,7 @@ class TextTable:
                 continue
             elif row.row_type == Row.ROW_DOUBLE_SEPARATOR:
                 continue
-            if len(row.cols[col_ind].strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.cols[col_ind]):
+            if len(row.columns[col_ind].data.strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data):
                 return TextTable.ALIGN_LEFT
         return TextTable.ALIGN_RIGHT
 
@@ -316,52 +322,48 @@ class TextTable:
         row_count = len(self._rows)
         data_alignment = [None] * len(self._col_lens)
         for row_ind in range(row_count):
-            row = self._rows[row_ind].cols
-            out_row = []
+            row = self._rows[row_ind]
             for col_ind in range(column_count):
-                col = row[col_ind]
+                column = row.columns[col_ind]
                 col_len = self._col_lens[col_ind]
-                row_type = self._rows[row_ind].row_type
-                if row_type == Row.ROW_SINGLE_SEPARATOR:
-                    col = '-' * col_len
-                elif row_type == Row.ROW_DOUBLE_SEPARATOR:
-                    col = '=' * col_len
-                elif self._rows[row_ind].header:
-                    col = col.center(col_len, ' ')
-                elif row_type == Row.ROW_CUSTOM_ALIGN:
-                    if '<' in col:
+                if row.row_type == Row.ROW_SINGLE_SEPARATOR:
+                    column.data = '-' * col_len
+                elif row.row_type == Row.ROW_DOUBLE_SEPARATOR:
+                    column.data = '=' * col_len
+                elif row.header:
+                    column.data = column.data.center(col_len, ' ')
+                elif row.row_type == Row.ROW_CUSTOM_ALIGN:
+                    if '<' in column.data:
                         data_alignment[col_ind] = TextTable.ALIGN_LEFT
-                        col = ' ' + '<' * (col_len - 2) + ' '
-                    elif '>' in col:
+                        column.data = ' ' + '<' * (col_len - 2) + ' '
+                    elif '>' in column.data:
                         data_alignment[col_ind] = TextTable.ALIGN_RIGHT
-                        col = ' ' + '>' * (col_len - 2) + ' '
-                    elif '#' in col:
+                        column.data = ' ' + '>' * (col_len - 2) + ' '
+                    elif '#' in column.data:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
-                        col = ' ' + '#' * (col_len - 2) + ' '
-                elif row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
-                    if col.count(':') == 2:
+                        column.data = ' ' + '#' * (col_len - 2) + ' '
+                elif row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
+                    if column.data.count(':') == 2:
                         data_alignment[col_ind] = TextTable.ALIGN_CENTER
-                        col = ' :' + '-' * (col_len - 4) + ': '
-                    elif col[1] == ':':
+                        column.data = ' :' + '-' * (col_len - 4) + ': '
+                    elif column.data[1] == ':':
                         data_alignment[col_ind] = TextTable.ALIGN_LEFT
-                        col = ' :' + '-' * (col_len - 3) + ' '
-                    elif col[-2] == ':':
+                        column.data = ' :' + '-' * (col_len - 3) + ' '
+                    elif column.data[-2] == ':':
                         data_alignment[col_ind] = TextTable.ALIGN_RIGHT
-                        col = ' ' + '-' * (col_len - 3) + ': '
+                        column.data = ' ' + '-' * (col_len - 3) + ': '
                     else:
-                        col = ' ' + '-' * (col_len - 2) + ' '
+                        column.data = ' ' + '-' * (col_len - 2) + ' '
 
-                elif row_type == Row.ROW_DATA:
+                elif row.row_type == Row.ROW_DATA:
                     if (data_alignment[col_ind] is None):
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
                     if data_alignment[col_ind] == TextTable.ALIGN_RIGHT:
-                        col = col.rjust(col_len, ' ')
+                        column.data = column.data.rjust(col_len, ' ')
                     elif data_alignment[col_ind] == TextTable.ALIGN_LEFT:
-                        col = col.ljust(col_len, ' ')
+                        column.data = column.data.ljust(col_len, ' ')
                     elif data_alignment[col_ind] == TextTable.ALIGN_CENTER:
-                        col = col.center(col_len, ' ')
-                out_row.append(col)
-            self._rows[row_ind].cols = out_row
+                        column.data = column.data.center(col_len, ' ')
 
 
     def parse_row(self, line):
