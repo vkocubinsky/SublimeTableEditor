@@ -120,6 +120,8 @@ class Column:
     def __init__(self, data):
         self.data = data
 
+    def norm(self):
+        pass
 
 class Row:
     ROW_DATA = 'd'
@@ -257,6 +259,7 @@ class TextTable:
               new_row.is_custom_align_row()):
             new_row.cols = [' ' + re.search(r"[\<]|[\>]|[\#]", col).group(0) + ' '
                                                         for col in new_row.cols]
+            new_row.row_type = Row.ROW_CUSTOM_ALIGN
         elif (self.syntax.multi_markdown_column_alignment
               and new_row.is_multi_markdown_align_row()):
             new_row.cols = [' ' + self._norm_multi_markdown(col) + ' '
