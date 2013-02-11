@@ -136,8 +136,28 @@ class Row:
         self.table = table
         self.columns = [Column(self,col) for col in cols]
         self.cols = cols
-        self.row_type = None
+        self._row_type = None
         self.index = 0
+
+    @property
+    def row_type(self):
+        if self._row_type:
+            return self._row_type
+
+        if self.is_single_row_separator():
+            self._row_type = Row.ROW_SINGLE_SEPARATOR
+        elif self.is_double_row_separator():
+            self._row_type = Row.ROW_DOUBLE_SEPARATOR
+        elif (self.table.syntax.custom_column_alignment and
+              self.is_custom_align_row()):
+            self._row_type = Row.ROW_CUSTOM_ALIGN
+        elif (self.table.syntax.multi_markdown_column_alignment
+              and self.is_multi_markdown_align_row()):
+            self._row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
+        else:
+            self._row_type = Row.ROW_DATA
+
+        return self._row_type
 
     @property
     def header(self):
