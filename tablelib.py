@@ -142,6 +142,10 @@ class Column:
         else:
             return '-'
 
+    def is_single_separator(self):
+        pass
+
+
 
 
     def norm(self):
