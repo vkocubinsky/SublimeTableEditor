@@ -117,7 +117,8 @@ textile_syntax = TableSyntax(hline_out_border='|',
 
 class Column:
 
-    def __init__(self, data):
+    def __init__(self, row, data):
+        self.row = row
         self.data = data
 
     def norm(self):
@@ -133,6 +134,7 @@ class Row:
 
     def __init__(self, table, cols):
         self.table = table
+        self.columns = [Column(self,col) for col in cols]
         self.cols = cols
         self.row_type = None
         self.index = 0
