@@ -117,20 +117,17 @@ textile_syntax = TableSyntax(hline_out_border='|',
 
 class Column:
 
-    def __init__(self, row, data):
+    def __init__(self, row):
         self.row = row
-        self.data = data
 
 
 class DataColumn(Column):
 
     def __init__(self, row, data):
-        Column.__init__(self, row, data)
+        Column.__init__(self, row)
+        self.data = self._norm(data)
 
-    def norm(self):
-        self.data = self._norm_data(self.data)
-
-    def _norm_data(self, col):
+    def _norm(self, col):
         col = col.strip()
         if len(col) == 0:
             return '   '
@@ -140,32 +137,36 @@ class DataColumn(Column):
             col = col + ' '
         return col
 
+    def new_empty_column(self):
+        return DataColumn(self.row,'')
 
 class SeparatorColumn(Column):
+    def __init__(self, row, separator):
+        Column.__init__(self, row)
+        self.separator = separator
+        self.data = separator * 3
+
+    def new_empty_column(self):
+        return SeparatorColumn(self.row,self.separator)
+
+
+class CustomAlignColumn(Column):
+
     def __init__(self, row, data):
-        Column.__init__(self, row, data)
+        Column.__init__(self, row)
+        self.align_char = re.search(r"[\<]|[\>]|[\#]", self.data).group(0)
+        self.data = ' ' + self.align_char + ' '
 
-    def norm(self):
-        self.data = self.data * 3
-
-class CustomAlign(Column):
-
-    def __init__(self, row, data):
-        Column.__init__(self, row, data)
-
-    def norm(self):
-        self.data = ' ' + re.search(r"[\<]|[\>]|[\#]", self.data).group(0) + ' '
-
+    def new_empty_column(self):
+        return CustomAlignColumn(self.row,'#')
 
 
 class MultiMarkdownAlignColumn(Column):
     def __init__(self, row, data):
-        Column.__init__(self, row, data)
+        Column.__init__(self, row)
+        self.data = ' ' + self._norm(data) + ' '
 
-    def norm(self):
-        self.data = ' ' + self._norm_multi_markdown(self.data) + ' '
-
-    def _norm_multi_markdown(self, col):
+    def _norm(self, col):
         col = col.strip()
         if col.count(':') == 2:
             return ':-:'
@@ -176,6 +177,9 @@ class MultiMarkdownAlignColumn(Column):
         else:
             return '-'
 
+
+    def new_empty_column(self):
+        return MultiMarkdownAlignColumn(self.row,'-')
 
 class Row:
     ROW_DATA = 'd'
@@ -212,12 +216,6 @@ class Row:
     @property
     def row_type(self):
         return self._row_type
-
-
-    def norm(self):
-        for column in self.columns:
-            column.norm()
-
 
     @property
     def header(self):
@@ -312,16 +310,11 @@ class TextTable:
         return col.ljust(size, fillchar)
 
 
-
-    def _merge(self, new_row):
-        new_row.norm()
-        self.add_row(new_row)
-
-
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
         for row in self._rows:
-            row.columns.extend([Column(row,'   ')] * (column_count - len(row.columns)))
+            column = row.columns[0]
+            row.columns.extend([column.new_empty_column()] * (column_count - len(row.columns)))
 
     def _auto_detect_column(self, start_row_ind, col_ind):
         for row in self._rows[start_row_ind:]:
@@ -412,7 +405,7 @@ class TextTable:
             prefix = ""
         for line in lines:
             row = self.parse_row(line)
-            self._merge(row)
+            self.add_row(row)
         self._adjust_column_count()
         self._adjust_column_width()
 
