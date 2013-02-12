@@ -121,6 +121,15 @@ class Column:
         self.row = row
         self.data = data
 
+
+class DataColumn(Column):
+
+    def __init__(self, row, data):
+        Column.__init__(self, row, data)
+
+    def norm(self):
+        self.data = self._norm_data(self.data)
+
     def _norm_data(self, col):
         col = col.strip()
         if len(col) == 0:
@@ -130,28 +139,6 @@ class Column:
         if (col[-1] != ' '):
             col = col + ' '
         return col
-
-    def _norm_multi_markdown(self, col):
-        col = col.strip()
-        if col.count(':') == 2:
-            return ':-:'
-        elif col[0] == ':':
-            return ':-'
-        elif col[-1] == ':':
-            return '-:'
-        else:
-            return '-'
-
-
-
-
-class DataColumn(Column):
-
-    def __init__(self, row, data):
-        Column.__init__(self, row, data)
-
-    def norm(self):
-        self.data = self._norm_data(self.data)
 
 
 class SeparatorColumn(Column):
@@ -170,12 +157,24 @@ class CustomAlign(Column):
         self.data = ' ' + re.search(r"[\<]|[\>]|[\#]", self.data).group(0) + ' '
 
 
+
 class MultiMarkdownAlignColumn(Column):
     def __init__(self, row, data):
         Column.__init__(self, row, data)
 
     def norm(self):
         self.data = ' ' + self._norm_multi_markdown(self.data) + ' '
+
+    def _norm_multi_markdown(self, col):
+        col = col.strip()
+        if col.count(':') == 2:
+            return ':-:'
+        elif col[0] == ':':
+            return ':-'
+        elif col[-1] == ':':
+            return '-:'
+        else:
+            return '-'
 
 
 class Row:
