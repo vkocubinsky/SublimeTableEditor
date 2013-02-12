@@ -120,6 +120,11 @@ class Column:
     def __init__(self, row):
         self.row = row
 
+    def render(self):
+        #pseudo code
+        col_len = self.row.table.col_len[self.index]
+        align = self.row.table.align(self.row.index, self.index)
+
 
 class DataColumn(Column):
 
@@ -273,12 +278,16 @@ class TextTable:
         self.text = text
         self.syntax = syntax
         self._rows = []
-        self._col_types = []
         self._col_lens = []
 
         self._header_found = False
         self.header_separator_index = -1
         self.first_data_index = -1
+
+
+    @property
+    def col_lens(self):
+        return self.col_lens
 
     def add_row(self, row):
         row.index = len(self._rows)
