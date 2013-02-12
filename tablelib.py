@@ -142,11 +142,6 @@ class Column:
         else:
             return '-'
 
-    def is_single_separator(self):
-        pass
-
-
-
 
     def norm(self):
         if self.row.row_type == Row.ROW_SINGLE_SEPARATOR:
@@ -161,6 +156,24 @@ class Column:
             self.cols = self._norm_data(self.data)
         else:
             raise Error
+
+
+class DataColumn(Column):
+
+    def __init__(self, row, data):
+        Column.__init__(self, row, data)
+
+
+
+class SeparatorColumn(Column):
+    def __init__(self, row, data):
+        Column.__init__(self, row, data)
+
+
+class CustomAlign(Column):
+    def __init__(self, row, data):
+        Column.__init__(self, row, data)
+
 
 
 class Row:
