@@ -190,11 +190,6 @@ class Row:
         self._row_type = None
         self.index = 0
 
-    @property
-    def row_type(self):
-        if self._row_type:
-            return self._row_type
-
         if self.is_single_row_separator():
             self._row_type = Row.ROW_SINGLE_SEPARATOR
         elif self.is_double_row_separator():
@@ -208,6 +203,9 @@ class Row:
         else:
             self._row_type = Row.ROW_DATA
 
+
+    @property
+    def row_type(self):
         return self._row_type
 
 
@@ -252,8 +250,8 @@ class Row:
 
     def render(self):
         syntax = self.table.syntax
-        if (self.is_single_row_separator() or
-            self.is_double_row_separator()):
+        if (self.row_type == Row.ROW_SINGLE_SEPARATOR or
+            self.row_type == Row.ROW_DOUBLE_SEPARATOR):
             return (syntax.hline_out_border
                 + syntax.hline_in_border.join(self.str_cols)
                 + syntax.hline_out_border)
