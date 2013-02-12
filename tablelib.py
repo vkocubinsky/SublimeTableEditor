@@ -143,19 +143,6 @@ class Column:
             return '-'
 
 
-    def norm(self):
-        if self.row.row_type == Row.ROW_SINGLE_SEPARATOR:
-            self.data = '---'
-        elif self.row.row_type == Row.ROW_DOUBLE_SEPARATOR:
-            self.data = '==='
-        elif self.row.row_type == Row.ROW_CUSTOM_ALIGN:
-            self.data = ' ' + re.search(r"[\<]|[\>]|[\#]", self.data).group(0) + ' '
-        elif self.row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
-            self.cols = ' ' + self._norm_multi_markdown(self.data) + ' '
-        elif self.row.row_type == Row.ROW_DATA:
-            self.cols = self._norm_data(self.data)
-        else:
-            raise Error
 
 
 class DataColumn(Column):
@@ -163,17 +150,32 @@ class DataColumn(Column):
     def __init__(self, row, data):
         Column.__init__(self, row, data)
 
+    def norm(self):
+        self.data = self._norm_data(self.data)
 
 
 class SeparatorColumn(Column):
     def __init__(self, row, data):
         Column.__init__(self, row, data)
 
+    def norm(self):
+        self.data = self.data * 3
 
 class CustomAlign(Column):
+
     def __init__(self, row, data):
         Column.__init__(self, row, data)
 
+    def norm(self):
+        self.data = ' ' + re.search(r"[\<]|[\>]|[\#]", self.data).group(0) + ' '
+
+
+class MultiMarkdownAlignColumn(Column):
+    def __init__(self, row, data):
+        Column.__init__(self, row, data)
+
+    def norm(self):
+        self.data = ' ' + self._norm_multi_markdown(self.data) + ' '
 
 
 class Row:
@@ -184,24 +186,28 @@ class Row:
     ROW_MULTI_MARKDOWN_ALIGN = ':-:'
 
 
-    def __init__(self, table, cols):
+    def __init__(self, table, str_cols):
         self.table = table
-        self.columns = [Column(self,col) for col in cols]
         self._row_type = None
         self.index = 0
 
-        if self.is_single_row_separator():
+        if self._is_single_row_separator(str_cols):
             self._row_type = Row.ROW_SINGLE_SEPARATOR
-        elif self.is_double_row_separator():
+            self.columns = [SeparatorColumn(self,'-') for col in str_cols]
+        elif self._is_double_row_separator(str_cols):
             self._row_type = Row.ROW_DOUBLE_SEPARATOR
+            self.columns = [SeparatorColumn(self,'=') for col in str_cols]
         elif (self.table.syntax.custom_column_alignment and
-              self.is_custom_align_row()):
+              self._is_custom_align_row(str_cols)):
             self._row_type = Row.ROW_CUSTOM_ALIGN
+            self.columns = [CustomAlignColumn(self,col) for col in str_cols]
         elif (self.table.syntax.multi_markdown_column_alignment
-              and self.is_multi_markdown_align_row()):
+              and self._is_multi_markdown_align_row(str_cols)):
             self._row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
+            self.columns = [MultiMarkdownAlignColumn(self,col) for col in str_cols]
         else:
             self._row_type = Row.ROW_DATA
+            self.columns = [DataColumn(self,col) for col in str_cols]
 
 
     @property
@@ -218,28 +224,28 @@ class Row:
     def header(self):
         return self.index < self.table.header_separator_index
 
-    def is_single_row_separator(self):
-        for column in self.columns:
-            if not re.match(r"^\s*[\-]+\s*$", column.data):
+    def _is_single_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\-]+\s*$", col):
                 return False
         return True
 
 
-    def is_double_row_separator(self):
-        for column in self.columns:
-            if not re.match(r"^\s*[\=]+\s*$", column.data):
+    def _is_double_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\=]+\s*$", col):
                 return False
         return True
 
-    def is_custom_align_row(self):
-        for col in self.cols:
+    def _is_custom_align_row(self, str_cols):
+        for col in str_cols:
             if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
                 return False
         return True
 
-    def is_multi_markdown_align_row(self):
-        for column in self.columns:
-            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", column.data):
+    def _is_multi_markdown_align_row(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
                 return False
         return True
 
@@ -435,6 +441,9 @@ if __name__ == '__main__':
                 | ------------ | ----------- | ---------- | ----- |
               |a  |   b   | c |1 |
               |1  |   2   | 3 |4 |
+              |>|<|<|>|
+              |=
+              |:-|
               |-"""
     syntax = multi_markdown_syntax
     print "Table:\n", format_to_text(raw_text, syntax)
