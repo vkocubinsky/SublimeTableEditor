@@ -318,6 +318,10 @@ class TextTable:
         assert len(col) < size
         return col.ljust(size, fillchar)
 
+    def pack(self):
+        self._adjust_column_count()
+        self._adjust_column_width()
+
 
     def _adjust_column_count(self):
         column_count = len(self._col_lens)
@@ -415,9 +419,7 @@ class TextTable:
         for line in lines:
             row = self.parse_row(line)
             self.add_row(row)
-        self._adjust_column_count()
-        self._adjust_column_width()
-
+        self.pack()
         return [prefix + row.render() for row in self._rows]
 
     def format_to_text(self):
