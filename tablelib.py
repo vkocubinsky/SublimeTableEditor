@@ -116,14 +116,14 @@ textile_syntax = TableSyntax(hline_out_border='|',
                            textile_cell_alignment=True)
 
 class Column:
+    ALIGN_LEFT = 'left'
+    ALIGN_RIGHT = 'right'
+    ALIGN_CENTER = 'center'
 
     def __init__(self, row):
         self.row = row
-
-    def render(self):
-        #pseudo code
-        col_len = self.row.table.col_len[self.index]
-        align = self.row.table.align(self.row.index, self.index)
+        self.col_len = 0
+        self.align =  Column.ALIGN_LEFT
 
 
 class DataColumn(Column):
@@ -145,6 +145,15 @@ class DataColumn(Column):
     def new_empty_column(self):
         return DataColumn(self.row,'')
 
+    def render(self):
+        if data_alignment[col_ind] == Column.ALIGN_RIGHT:
+            column.data = column.data.rjust(col_len, ' ')
+        elif data_alignment[col_ind] == Column.ALIGN_LEFT:
+            column.data = column.data.ljust(col_len, ' ')
+        elif data_alignment[col_ind] == Column.ALIGN_CENTER:
+            column.data = column.data.center(col_len, ' ')
+
+
 class SeparatorColumn(Column):
     def __init__(self, row, separator):
         Column.__init__(self, row)
@@ -154,16 +163,30 @@ class SeparatorColumn(Column):
     def new_empty_column(self):
         return SeparatorColumn(self.row,self.separator)
 
+    def render(self):
+        column.data = self.separator * col_len
+
 
 class CustomAlignColumn(Column):
+    ALIGN_MAP = {'<': Column.ALIGN_LEFT,
+                 '>': Column.ALIGN_RIGHT,
+                 '#': Column.ALIGN_CENTER}
 
     def __init__(self, row, data):
         Column.__init__(self, row)
         self.align_char = re.search(r"[\<]|[\>]|[\#]", self.data).group(0)
         self.data = ' ' + self.align_char + ' '
 
+    def align_follow(self):
+        return CustomAlignColumn.ALIGN_MAP[self.align_char]
+
     def new_empty_column(self):
         return CustomAlignColumn(self.row,'#')
+
+    def render(self):
+        column.data = ' ' + self.align_char * (col_len - 2) + ' '
+
+
 
 
 class MultiMarkdownAlignColumn(Column):
@@ -185,6 +208,20 @@ class MultiMarkdownAlignColumn(Column):
 
     def new_empty_column(self):
         return MultiMarkdownAlignColumn(self.row,'-')
+
+    def render(self):
+        if column.data.count(':') == 2:
+            data_alignment[col_ind] = Column.ALIGN_CENTER
+            column.data = ' :' + '-' * (col_len - 4) + ': '
+        elif column.data[1] == ':':
+            data_alignment[col_ind] = Column.ALIGN_LEFT
+            column.data = ' :' + '-' * (col_len - 3) + ' '
+        elif column.data[-2] == ':':
+            data_alignment[col_ind] = Column.ALIGN_RIGHT
+            column.data = ' ' + '-' * (col_len - 3) + ': '
+        else:
+            column.data = ' ' + '-' * (col_len - 2) + ' '
+
 
 class Row:
     ROW_DATA = 'd'
@@ -269,9 +306,6 @@ class Row:
 
 
 class TextTable:
-    ALIGN_LEFT = 'left'
-    ALIGN_RIGHT = 'right'
-    ALIGN_CENTER = 'center'
 
 
     def __init__(self, text, syntax):
@@ -310,16 +344,14 @@ class TextTable:
         self._col_lens = [max(x, y) for x, y in zip(self._col_lens, new_col_lens)]
 
 
-    def _extend_list(self, list, size, fill_value):
-        assert len(list) < size
-        return list + [fill_value for x in range(size - len(list))]
-
-    def _adjust_col(self, col, size, fillchar):
-        assert len(col) < size
-        return col.ljust(size, fillchar)
-
     def pack(self):
+
         self._adjust_column_count()
+
+        for row in self._rows:
+            for column, col_len in zip(row.columns, self._col_lens):
+                column.col_len = col_len
+
         self._adjust_column_width()
 
 
@@ -340,8 +372,8 @@ class TextTable:
             elif row.row_type == Row.ROW_DOUBLE_SEPARATOR:
                 continue
             if len(row.columns[col_ind].data.strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data):
-                return TextTable.ALIGN_LEFT
-        return TextTable.ALIGN_RIGHT
+                return Column.ALIGN_LEFT
+        return Column.ALIGN_RIGHT
 
     def _adjust_column_width(self):
         column_count = len(self._col_lens)
@@ -360,23 +392,23 @@ class TextTable:
                     column.data = column.data.center(col_len, ' ')
                 elif row.row_type == Row.ROW_CUSTOM_ALIGN:
                     if '<' in column.data:
-                        data_alignment[col_ind] = TextTable.ALIGN_LEFT
+                        data_alignment[col_ind] = Column.ALIGN_LEFT
                         column.data = ' ' + '<' * (col_len - 2) + ' '
                     elif '>' in column.data:
-                        data_alignment[col_ind] = TextTable.ALIGN_RIGHT
+                        data_alignment[col_ind] = Column.ALIGN_RIGHT
                         column.data = ' ' + '>' * (col_len - 2) + ' '
                     elif '#' in column.data:
-                        data_alignment[col_ind] = TextTable.ALIGN_CENTER
+                        data_alignment[col_ind] = Column.ALIGN_CENTER
                         column.data = ' ' + '#' * (col_len - 2) + ' '
                 elif row.row_type == Row.ROW_MULTI_MARKDOWN_ALIGN:
                     if column.data.count(':') == 2:
-                        data_alignment[col_ind] = TextTable.ALIGN_CENTER
+                        data_alignment[col_ind] = Column.ALIGN_CENTER
                         column.data = ' :' + '-' * (col_len - 4) + ': '
                     elif column.data[1] == ':':
-                        data_alignment[col_ind] = TextTable.ALIGN_LEFT
+                        data_alignment[col_ind] = Column.ALIGN_LEFT
                         column.data = ' :' + '-' * (col_len - 3) + ' '
                     elif column.data[-2] == ':':
-                        data_alignment[col_ind] = TextTable.ALIGN_RIGHT
+                        data_alignment[col_ind] = Column.ALIGN_RIGHT
                         column.data = ' ' + '-' * (col_len - 3) + ': '
                     else:
                         column.data = ' ' + '-' * (col_len - 2) + ' '
@@ -384,11 +416,11 @@ class TextTable:
                 elif row.row_type == Row.ROW_DATA:
                     if (data_alignment[col_ind] is None):
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
-                    if data_alignment[col_ind] == TextTable.ALIGN_RIGHT:
+                    if data_alignment[col_ind] == Column.ALIGN_RIGHT:
                         column.data = column.data.rjust(col_len, ' ')
-                    elif data_alignment[col_ind] == TextTable.ALIGN_LEFT:
+                    elif data_alignment[col_ind] == Column.ALIGN_LEFT:
                         column.data = column.data.ljust(col_len, ' ')
-                    elif data_alignment[col_ind] == TextTable.ALIGN_CENTER:
+                    elif data_alignment[col_ind] == Column.ALIGN_CENTER:
                         column.data = column.data.center(col_len, ' ')
 
 
