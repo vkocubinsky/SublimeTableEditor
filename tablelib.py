@@ -153,11 +153,11 @@ class DataColumn(Column):
 
     def render(self):
         if self.align == Column.ALIGN_RIGHT:
-            return self.data.rjust(self.col_len, ' ')
+            return ' ' + self.data.rjust(self.col_len - 2, ' ') + ' '
         elif self.align == Column.ALIGN_LEFT:
-            return self.data.ljust(self.col_len, ' ')
+            return ' ' + self.data.ljust(self.col_len - 2, ' ') + ' '
         elif self.align == Column.ALIGN_CENTER:
-            return self.data.center(self.col_len, ' ')
+            return ' ' + self.data.center(self.col_len - 2, ' ') + ' '
         else:
             raise AssertionError
 
@@ -329,10 +329,6 @@ class TextTable:
         self._rows = []
 
 
-    @property
-    def col_lens(self):
-        return self.col_lens
-
     def add_row(self, row):
         self._rows.append(row)
 
@@ -357,19 +353,21 @@ class TextTable:
         for row in self._rows:
             for column, col_len in zip(row.columns, col_lens):
                 column.col_len = col_len
+                print column.col_len,
+            print
 
         #find header
         header_separator_index = -1
         first_data_index = -1
         for row_ind,row in enumerate(self._rows):
             if first_data_index == -1 and row.row_type == Row.ROW_DATA:
-                self.first_data_index = row_ind
-            if (first_data_index != -1 and header_separator_index != -1 and
+                first_data_index = row_ind
+            if (first_data_index != -1 and header_separator_index == -1 and
                 row.is_header_separator()):
                 header_separator_index = row_ind
                 for header_index in range(first_data_index, header_separator_index):
-                    if self_.rows[header_index].row_type == Row.ROW_DATA:
-                        self_.rows[header_index].align = Row.ALIGN_CENTER
+                    if self._rows[header_index].row_type == Row.ROW_DATA:
+                        self._rows[header_index].align_all_columns(Column.ALIGN_CENTER)
 
         #set column alignment
         data_alignment = [None] * len(col_lens)
@@ -491,14 +489,14 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """      |-
+    raw_text = """      |-  | -
                 | header 1 | header 2 |header 3 | header 4 |
                 | ------------ | ----------- | ---------- | ----- |
-              |a  |   b   | c |1 |
+              |a  |   b   | c |12345678901234 |
               |1  |   2   | 3 |4 |
-              |>|<|<|>|
-              |=
-              |:-|
+              | 3 | 4
+              |1  |   2   | 3 |422 |
               |-"""
     syntax = multi_markdown_syntax
+    syntax.custom_column_alignment = True
     print "Table:\n", format_to_text(raw_text, syntax)
