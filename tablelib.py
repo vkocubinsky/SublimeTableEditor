@@ -161,6 +161,8 @@ class DataColumn(Column):
         else:
             raise AssertionError
 
+
+
 class SeparatorColumn(Column):
     def __init__(self, row, separator):
         Column.__init__(self, row)
@@ -223,9 +225,9 @@ class MultiMarkdownAlignColumn(Column):
     def render(self):
         if self._align_follow == Column.ALIGN_CENTER:
             return ' :' + '-' * (self.col_len - 4) + ': '
-        elif self.align_follow == Column.ALIGN_LEFT:
+        elif self._align_follow == Column.ALIGN_LEFT:
             return ' :' + '-' * (self.col_len - 4) + '- '
-        elif self.align_follow == Column.ALIGN_RIGHT:
+        elif self._align_follow == Column.ALIGN_RIGHT:
             return ' -' + '-' * (self.col_len - 4) + ': '
         else:
             return ' -' + '-' * (self.col_len - 4) + '- '
@@ -332,6 +334,14 @@ class TextTable:
     def add_row(self, row):
         self._rows.append(row)
 
+    def dump(self):
+        print "dump:"
+        for row in self._rows:
+            for column in row.columns:
+                print column
+            print
+        print "end dump"
+
     def pack(self):
         #calculate column lens
         col_lens = []
@@ -346,15 +356,16 @@ class TextTable:
         #adjust column count
         for row in self._rows:
             column = row.columns[0]
-            row.columns.extend([column.new_empty_column()] * (len(col_lens) - len(row.columns)))
+            diff = len(col_lens) - len(row.columns)
+            for i in range(diff):
+                row.columns.append(column.new_empty_column())
 
 
         #set column len
         for row in self._rows:
             for column, col_len in zip(row.columns, col_lens):
                 column.col_len = col_len
-                print column.col_len,
-            print
+
 
         #find header
         header_separator_index = -1
@@ -368,6 +379,7 @@ class TextTable:
                 for header_index in range(first_data_index, header_separator_index):
                     if self._rows[header_index].row_type == Row.ROW_DATA:
                         self._rows[header_index].align_all_columns(Column.ALIGN_CENTER)
+
 
         #set column alignment
         data_alignment = [None] * len(col_lens)
@@ -489,13 +501,13 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """      |-  | -
-                | header 1 | header 2 |header 3 | header 4 |
-                | ------------ | ----------- | ---------- | ----- |
+    raw_text = """| header 1 | header 2 |header 3 | header 4 |
+                  | -:
               |a  |   b   | c |12345678901234 |
               |1  |   2   | 3 |4 |
               | 3 | 4
               |1  |   2   | 3 |422 |
+              | :- | -: | :-: |
               |-"""
     syntax = multi_markdown_syntax
     syntax.custom_column_alignment = True
