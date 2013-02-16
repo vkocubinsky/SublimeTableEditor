@@ -115,7 +115,7 @@ textile_syntax = TableSyntax(hline_out_border='|',
                            multi_markdown_column_alignment=False,
                            textile_cell_alignment=True)
 
-class Column:
+class Column(object):
     ALIGN_LEFT = 'left'
     ALIGN_RIGHT = 'right'
     ALIGN_CENTER = 'center'
@@ -123,55 +123,58 @@ class Column:
     def __init__(self, row):
         self.row = row
         self.col_len = 0
-        self.align =  Column.ALIGN_LEFT
+        self.align = None
+
+    def min_len(self):
+        raise NotImplementedError
+
+    def render(self):
+        raise NotImplementedError
+
+    def align_follow(self):
+        return None
+
+    def new_empty_column(self):
+        raise NotImplementedError
 
 
 class DataColumn(Column):
 
     def __init__(self, row, data):
         Column.__init__(self, row)
-        self.data = self._norm(data)
-
-    def _norm(self, col):
-        col = col.strip()
-        if len(col) == 0:
-            return '   '
-        if col[0] != ' ':
-            col = ' ' + col
-        if (col[-1] != ' '):
-            col = col + ' '
-        return col
+        self.data = data.strip()
 
     def min_len(self):
-        return len(self.data)
+        # min of '   ' or ' xxxx '
+        return max(3, len(self.data) + 2)
 
     def new_empty_column(self):
         return DataColumn(self.row,'')
 
     def render(self):
-        if data_alignment[col_ind] == Column.ALIGN_RIGHT:
-            column.data = column.data.rjust(col_len, ' ')
-        elif data_alignment[col_ind] == Column.ALIGN_LEFT:
-            column.data = column.data.ljust(col_len, ' ')
-        elif data_alignment[col_ind] == Column.ALIGN_CENTER:
-            column.data = column.data.center(col_len, ' ')
-
+        if self.align == Column.ALIGN_RIGHT:
+            return self.data.rjust(self.col_len, ' ')
+        elif self.align == Column.ALIGN_LEFT:
+            return self.data.ljust(self.col_len, ' ')
+        elif self.align == Column.ALIGN_CENTER:
+            return self.data.center(self.col_len, ' ')
+        else:
+            raise AssertionError
 
 class SeparatorColumn(Column):
     def __init__(self, row, separator):
         Column.__init__(self, row)
         self.separator = separator
-        self.data = separator * 3
 
     def new_empty_column(self):
         return SeparatorColumn(self.row,self.separator)
 
     def min_len(self):
-        # |---| or |===| or +---+ or +===+
+        # '---' or '==='
         return 3
 
     def render(self):
-        column.data = self.separator * col_len
+        return self.separator * self.col_len
 
 
 class CustomAlignColumn(Column):
@@ -181,8 +184,7 @@ class CustomAlignColumn(Column):
 
     def __init__(self, row, data):
         Column.__init__(self, row)
-        self.align_char = re.search(r"[\<]|[\>]|[\#]", self.data).group(0)
-        self.data = ' ' + self.align_char + ' '
+        self.align_char = re.search(r"[\<]|[\>]|[\#]", data).group(0)
 
     def align_follow(self):
         return CustomAlignColumn.ALIGN_MAP[self.align_char]
@@ -195,26 +197,21 @@ class CustomAlignColumn(Column):
         return CustomAlignColumn(self.row,'#')
 
     def render(self):
-        column.data = ' ' + self.align_char * (col_len - 2) + ' '
-
-
+        return ' ' + self.align_char * (self.col_len - 2) + ' '
 
 
 class MultiMarkdownAlignColumn(Column):
     def __init__(self, row, data):
         Column.__init__(self, row)
-        self.data = ' ' + self._norm(data) + ' '
-
-    def _norm(self, col):
-        col = col.strip()
+        col = data.strip()
         if col.count(':') == 2:
-            return ':-:'
+            self._align_follow = Column.ALIGN_CENTER
         elif col[0] == ':':
-            return ':-'
+            self._align_follow = Column.ALIGN_LEFT
         elif col[-1] == ':':
-            return '-:'
+            self._align_follow = Column.ALIGN_RIGHT
         else:
-            return '-'
+            self._align_follow = None
 
     def min_len(self):
         # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
@@ -224,17 +221,14 @@ class MultiMarkdownAlignColumn(Column):
         return MultiMarkdownAlignColumn(self.row,'-')
 
     def render(self):
-        if column.data.count(':') == 2:
-            data_alignment[col_ind] = Column.ALIGN_CENTER
-            column.data = ' :' + '-' * (col_len - 4) + ': '
-        elif column.data[1] == ':':
-            data_alignment[col_ind] = Column.ALIGN_LEFT
-            column.data = ' :' + '-' * (col_len - 3) + ' '
-        elif column.data[-2] == ':':
-            data_alignment[col_ind] = Column.ALIGN_RIGHT
-            column.data = ' ' + '-' * (col_len - 3) + ': '
+        if self._align_follow == Column.ALIGN_CENTER:
+            return ' :' + '-' * (self.col_len - 4) + ': '
+        elif self.align_follow == Column.ALIGN_LEFT:
+            return ' :' + '-' * (self.col_len - 4) + '- '
+        elif self.align_follow == Column.ALIGN_RIGHT:
+            return ' -' + '-' * (self.col_len - 4) + ': '
         else:
-            column.data = ' ' + '-' * (col_len - 2) + ' '
+            return ' -' + '-' * (self.col_len - 4) + '- '
 
 
 class Row:
@@ -248,7 +242,6 @@ class Row:
     def __init__(self, table, str_cols):
         self.table = table
         self._row_type = None
-        self.index = 0
 
         if self._is_single_row_separator(str_cols):
             self._row_type = Row.ROW_SINGLE_SEPARATOR
@@ -273,9 +266,17 @@ class Row:
     def row_type(self):
         return self._row_type
 
-    @property
-    def header(self):
-        return self.index < self.table.header_separator_index
+
+    def is_header_separator(self):
+        return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
+                                  Row.ROW_DOUBLE_SEPARATOR,
+                                  Row.ROW_MULTI_MARKDOWN_ALIGN)
+
+
+    def align_all_columns(self, align):
+        for column in self.columns:
+            column.align = align
+
 
     def _is_single_row_separator(self, str_cols):
         for col in str_cols:
@@ -305,7 +306,7 @@ class Row:
 
     @property
     def str_cols(self):
-        return [column.data for column in self.columns]
+        return [column.render() for column in self.columns]
 
     def render(self):
         syntax = self.table.syntax
@@ -326,11 +327,6 @@ class TextTable:
         self.text = text
         self.syntax = syntax
         self._rows = []
-        self._col_lens = []
-
-        self._header_found = False
-        self.header_separator_index = -1
-        self.first_data_index = -1
 
 
     @property
@@ -338,54 +334,64 @@ class TextTable:
         return self.col_lens
 
     def add_row(self, row):
-        row.index = len(self._rows)
         self._rows.append(row)
-        if self.first_data_index == -1 and row.row_type == Row.ROW_DATA:
-            self.first_data_index = row.index
-        if (self.first_data_index != -1 and
-            self.header_separator_index != -1 and
-            (row.row_type == Row.ROW_SINGLE_SEPARATOR
-                or
-             row.row_type == Row.ROW_DOUBLE_SEPARATOR)
-            ):
-            self.header_separator_index = row.index
-
-        new_col_lens = [column.min_len() for column in row.columns]
-        if len(new_col_lens) < len(self._col_lens):
-            new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
-        elif len(self._col_lens) < len(new_col_lens):
-            self._col_lens.extend([0] * (len(new_col_lens) - len(self._col_lens)))
-        self._col_lens = [max(x, y) for x, y in zip(self._col_lens, new_col_lens)]
-
 
     def pack(self):
-
-        self._adjust_column_count()
-
+        #calculate column lens
+        col_lens = []
         for row in self._rows:
-            for column, col_len in zip(row.columns, self._col_lens):
-                column.col_len = col_len
+            new_col_lens = [column.min_len() for column in row.columns]
+            if len(new_col_lens) < len(col_lens):
+                new_col_lens.extend([0] * (len(col_lens) - len(new_col_lens)))
+            elif len(col_lens) < len(new_col_lens):
+                col_lens.extend([0] * (len(new_col_lens) - len(col_lens)))
+            col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
 
-        self._adjust_column_width()
-
-
-    def _adjust_column_count(self):
-        column_count = len(self._col_lens)
+        #adjust column count
         for row in self._rows:
             column = row.columns[0]
-            row.columns.extend([column.new_empty_column()] * (column_count - len(row.columns)))
+            row.columns.extend([column.new_empty_column()] * (len(col_lens) - len(row.columns)))
+
+
+        #set column len
+        for row in self._rows:
+            for column, col_len in zip(row.columns, col_lens):
+                column.col_len = col_len
+
+        #find header
+        header_separator_index = -1
+        first_data_index = -1
+        for row_ind,row in enumerate(self._rows):
+            if first_data_index == -1 and row.row_type == Row.ROW_DATA:
+                self.first_data_index = row_ind
+            if (first_data_index != -1 and header_separator_index != -1 and
+                row.is_header_separator()):
+                header_separator_index = row_ind
+                for header_index in range(first_data_index, header_separator_index):
+                    if self_.rows[header_index].row_type == Row.ROW_DATA:
+                        self_.rows[header_index].align = Row.ALIGN_CENTER
+
+        #set column alignment
+        data_alignment = [None] * len(col_lens)
+        for row_ind,row in enumerate(self._rows):
+            if row_ind < header_separator_index:
+                continue
+            for col_ind,column in enumerate(row.columns):
+                if row.row_type in (Row.ROW_CUSTOM_ALIGN, Row.ROW_MULTI_MARKDOWN_ALIGN):
+                    data_alignment[col_ind] = column.align_follow()
+                elif row.row_type == Row.ROW_DATA:
+                    if data_alignment[col_ind] is None:
+                        data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
+                    column.align = data_alignment[col_ind]
+
+
 
     def _auto_detect_column(self, start_row_ind, col_ind):
+        assert self._rows[start_row_ind].row_type == Row.ROW_DATA
         for row in self._rows[start_row_ind:]:
-            if row.header:
-                continue
-            elif row.row_type == Row.ROW_CUSTOM_ALIGN:
-                break
-            elif row.row_type == Row.ROW_SINGLE_SEPARATOR:
-                continue
-            elif row.row_type == Row.ROW_DOUBLE_SEPARATOR:
-                continue
-            if len(row.columns[col_ind].data.strip()) > 0 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data):
+            if (row.row_type == Row.ROW_DATA
+                and len(row.columns[col_ind].data.strip()) > 0
+                and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
                 return Column.ALIGN_LEFT
         return Column.ALIGN_RIGHT
 
