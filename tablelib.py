@@ -142,6 +142,9 @@ class DataColumn(Column):
             col = col + ' '
         return col
 
+    def min_len(self):
+        return len(self.data)
+
     def new_empty_column(self):
         return DataColumn(self.row,'')
 
@@ -163,6 +166,10 @@ class SeparatorColumn(Column):
     def new_empty_column(self):
         return SeparatorColumn(self.row,self.separator)
 
+    def min_len(self):
+        # |---| or |===| or +---+ or +===+
+        return 3
+
     def render(self):
         column.data = self.separator * col_len
 
@@ -179,6 +186,10 @@ class CustomAlignColumn(Column):
 
     def align_follow(self):
         return CustomAlignColumn.ALIGN_MAP[self.align_char]
+
+    def min_len(self):
+        # ' < ' or ' > ' or ' # '
+        return 3
 
     def new_empty_column(self):
         return CustomAlignColumn(self.row,'#')
@@ -205,6 +216,9 @@ class MultiMarkdownAlignColumn(Column):
         else:
             return '-'
 
+    def min_len(self):
+        # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
+        return 5
 
     def new_empty_column(self):
         return MultiMarkdownAlignColumn(self.row,'-')
@@ -336,7 +350,7 @@ class TextTable:
             ):
             self.header_separator_index = row.index
 
-        new_col_lens = [len(column.data) for column in row.columns]
+        new_col_lens = [column.min_len() for column in row.columns]
         if len(new_col_lens) < len(self._col_lens):
             new_col_lens.extend([0] * (len(self._col_lens) - len(new_col_lens)))
         elif len(self._col_lens) < len(new_col_lens):
