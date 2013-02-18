@@ -39,6 +39,7 @@ class TableSyntax:
         self.custom_column_alignment = custom_column_alignment
         self.multi_markdown_column_alignment = multi_markdown_column_alignment
         self.textile_cell_alignment = textile_cell_alignment
+        self.keep_spaces_left = False
 
     def __str__(self):
         return """
@@ -142,7 +143,12 @@ class DataColumn(Column):
 
     def __init__(self, row, data):
         Column.__init__(self, row)
-        self.data = data.strip()
+        if row.table.syntax.keep_spaces_left:
+            self.data = data.rstrip()
+            if self.data[:1] == ' ':
+                self.data = self.data[1:]
+        else:
+            self.data = data.strip()
 
     def min_len(self):
         # min of '   ' or ' xxxx '
@@ -445,12 +451,13 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """| header 1 | header 2 |header 3 | header 4 |
-                  |-:
-              |a  |   b   | c |12345678901234 |
-              |1  |   2   | 3 |4 |
-              | 3 | 4 | | |
+              |-
+              | a  | b   | c |12345678901234 |
+              |    1  |   2   | 3 |4 |
+              | 3 |   4 | | |
               |1  |   2   | 3 |422 |
               |-"""
     syntax = multi_markdown_syntax
     syntax.custom_column_alignment = True
+    #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)

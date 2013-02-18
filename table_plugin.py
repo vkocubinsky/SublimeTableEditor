@@ -71,6 +71,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().get("table_editor_textile_cell_alignment",
                                     False):
             syntax.textile_cell_alignment = True
+        if self.view.settings().get("table_editor_keep_spaces_left", False):
+            syntax.keep_spaces_left = True
         return syntax
 
     def auto_detect_syntax(self):
