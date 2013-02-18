@@ -232,6 +232,8 @@ class MultiMarkdownAlignColumn(Column):
         else:
             return ' -' + '-' * (self.col_len - 4) + '- '
 
+    def align_follow(self):
+        return self._align_follow
 
 class Row:
     ROW_DATA = 'd'
@@ -334,13 +336,6 @@ class TextTable:
     def add_row(self, row):
         self._rows.append(row)
 
-    def dump(self):
-        print "dump:"
-        for row in self._rows:
-            for column in row.columns:
-                print column
-            print
-        print "end dump"
 
     def pack(self):
         #calculate column lens
@@ -356,8 +351,8 @@ class TextTable:
         #adjust column count
         for row in self._rows:
             column = row.columns[0]
-            diff = len(col_lens) - len(row.columns)
-            for i in range(diff):
+            diff_count = len(col_lens) - len(row.columns)
+            for i in range(diff_count):
                 row.columns.append(column.new_empty_column())
 
 
@@ -379,7 +374,6 @@ class TextTable:
                 for header_index in range(first_data_index, header_separator_index):
                     if self._rows[header_index].row_type == Row.ROW_DATA:
                         self._rows[header_index].align_all_columns(Column.ALIGN_CENTER)
-
 
         #set column alignment
         data_alignment = [None] * len(col_lens)
