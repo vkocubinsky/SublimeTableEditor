@@ -496,12 +496,11 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """| header 1 | header 2 |header 3 | header 4 |
-                  | -:
+                  | < | > |> | >
               |a  |   b   | c |12345678901234 |
               |1  |   2   | 3 |4 |
-              | 3 | 4
+              | 3 | 4 | | |
               |1  |   2   | 3 |422 |
-              | :- | -: | :-: |
               |-"""
     syntax = multi_markdown_syntax
     syntax.custom_column_alignment = True
