@@ -404,7 +404,6 @@ class TextTable:
             if (row.row_type == Row.ROW_DATA
                 and len(row.columns[col_ind].data.strip()) > 0
                 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
-                print "auto detect left", row.columns[col_ind].data
                 return Column.ALIGN_LEFT
         return Column.ALIGN_RIGHT
 
