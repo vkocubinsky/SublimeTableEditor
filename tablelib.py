@@ -368,10 +368,10 @@ class TextTable:
                 column.col_len = col_len
 
 
-        #find header
+        #header
         header_separator_index = -1
         first_data_index = -1
-        #header
+
         for row_ind,row in enumerate(self._rows):
             if first_data_index == -1 and row.row_type == Row.ROW_DATA:
                 first_data_index = row_ind
@@ -387,11 +387,15 @@ class TextTable:
         data_alignment = [None] * len(col_lens)
         for row_ind,row in enumerate(self._rows):
             if row_ind < header_separator_index:
-                continue
-            for col_ind,column in enumerate(row.columns):
                 if row.row_type in (Row.ROW_CUSTOM_ALIGN, Row.ROW_MULTI_MARKDOWN_ALIGN):
+                    for col_ind,column in enumerate(row.columns):
+                        data_alignment[col_ind] = column.align_follow()
+                continue
+            elif row.row_type in (Row.ROW_CUSTOM_ALIGN, Row.ROW_MULTI_MARKDOWN_ALIGN):
+                for col_ind,column in enumerate(row.columns):
                     data_alignment[col_ind] = column.align_follow()
-                elif row.row_type == Row.ROW_DATA:
+            elif row.row_type == Row.ROW_DATA:
+                for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
                         data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
                     column.align = data_alignment[col_ind]
@@ -456,8 +460,10 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """| header 1 | header 2 |header 3 | header 4 |
+              | >
               |- |
               | a  | b   | c | 1234567890 |
+              |<
               |    1  |   2   | 3 |4 |
               | 3 |   4 | | |
               |    1  |   2   | 3 |422 |
