@@ -40,6 +40,7 @@ class TableSyntax:
         self.multi_markdown_column_alignment = multi_markdown_column_alignment
         self.textile_cell_alignment = textile_cell_alignment
         self.keep_spaces_left = False
+        self.auto_detect_alignment = True
 
     def __str__(self):
         return """
@@ -397,7 +398,10 @@ class TextTable:
             elif row.row_type == Row.ROW_DATA:
                 for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
-                        data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
+                        if self.syntax.auto_detect_alignment:
+                            data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
+                        else:
+                            data_alignment[col_ind] = Column.ALIGN_LEFT
                     column.align = data_alignment[col_ind]
 
 
@@ -460,15 +464,14 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     raw_text = """| header 1 | header 2 |header 3 | header 4 |
-              | >
               |- |
               | a  | b   | c | 1234567890 |
-              |<
               |    1  |   2   | 3 |4 |
               | 3 |   4 | | |
               |    1  |   2   | 3 |422 |
               |-"""
     syntax = multi_markdown_syntax
     syntax.custom_column_alignment = True
+    syntax.auto_detect_alignment = False
     #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
