@@ -30,6 +30,7 @@ class TableSyntax:
                        hline_in_border='|',
                        custom_column_alignment=False,
                        multi_markdown_column_alignment=False,
+                       textile_header = False,
                        textile_cell_alignment=False):
         self.vline = '|'
         self.hline_out_border = hline_out_border
@@ -38,6 +39,7 @@ class TableSyntax:
         self.hline_borders = ['+', '|']
         self.custom_column_alignment = custom_column_alignment
         self.multi_markdown_column_alignment = multi_markdown_column_alignment
+        self.textile_header = textile_header
         self.textile_cell_alignment = textile_cell_alignment
         self.keep_spaces_left = False
         self.auto_detect_alignment = True
@@ -81,41 +83,27 @@ class TableSyntax:
 
 
 simple_syntax = TableSyntax(hline_out_border='|',
-                          hline_in_border='|',
-                          custom_column_alignment=True,
-                          multi_markdown_column_alignment=False,
-                          textile_cell_alignment=False)
+                            hline_in_border='|',
+                            custom_column_alignment=True)
 
 emacs_org_mode_syntax = TableSyntax(hline_out_border='|',
-                          hline_in_border='+',
-                          custom_column_alignment=False,
-                          multi_markdown_column_alignment=False,
-                          textile_cell_alignment=False)
+                                    hline_in_border='+')
 
 pandoc_syntax = TableSyntax(hline_out_border='+',
-                          hline_in_border='+',
-                          custom_column_alignment=False,
-                          multi_markdown_column_alignment=False,
-                          textile_cell_alignment=False)
+                            hline_in_border='+')
 
 re_structured_text_syntax = TableSyntax(hline_out_border='+',
-                                      hline_in_border='+',
-                                      custom_column_alignment=False,
-                                      multi_markdown_column_alignment=False,
-                                      textile_cell_alignment=False)
+                                        hline_in_border='+')
 
 multi_markdown_syntax = TableSyntax(hline_out_border='|',
-                                  hline_in_border='|',
-                                  custom_column_alignment=False,
-                                  multi_markdown_column_alignment=True,
-                                  textile_cell_alignment=False)
+                                    hline_in_border='|',
+                                    multi_markdown_column_alignment=True)
 
 
 textile_syntax = TableSyntax(hline_out_border='|',
-                           hline_in_border='|',
-                           custom_column_alignment=False,
-                           multi_markdown_column_alignment=False,
-                           textile_cell_alignment=True)
+                             hline_in_border='|',
+                             textile_header=True,
+                             textile_cell_alignment=True)
 
 class Column(object):
     ALIGN_LEFT = 'left'
@@ -242,12 +230,30 @@ class MultiMarkdownAlignColumn(Column):
     def align_follow(self):
         return self._align_follow
 
+class TextileHeaderColumn(Column):
+    def __init__(self, row, data):
+        Column.__init__(self, row)
+        mo = re.match(r"^\s*\_\.(.*)$", data)
+        self.data = mo.group(1).strip()
+
+    def new_empty_column(self):
+        return TextileHeaderColumn(self.row,self.data)
+
+    def min_len(self):
+        # '_. header '
+        return len(self.data) + 4
+
+    def render(self):
+        return '_. ' + self.data.center(self.col_len - 4, ' ') + ' '
+
+
 class Row:
     ROW_DATA = 'd'
     ROW_SINGLE_SEPARATOR = '-'
     ROW_DOUBLE_SEPARATOR = '='
     ROW_CUSTOM_ALIGN = '<>#'
     ROW_MULTI_MARKDOWN_ALIGN = ':-:'
+    ROW_TEXTILE_HEADER = "._"
 
 
     def __init__(self, table, str_cols):
@@ -268,6 +274,10 @@ class Row:
               and self._is_multi_markdown_align_row(str_cols)):
             self._row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
             self.columns = [MultiMarkdownAlignColumn(self,col) for col in str_cols]
+        elif (self.table.syntax.textile_header and
+              self._is_textile_header(str_cols)):
+              self._row_type = Row.ROW_TEXTILE_HEADER
+              self.columns = [TextileHeaderColumn(self,col) for col in str_cols]
         else:
             self._row_type = Row.ROW_DATA
             self.columns = [DataColumn(self,col) for col in str_cols]
@@ -313,6 +323,13 @@ class Row:
             if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
                 return False
         return True
+
+    def _is_textile_header(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*\_\..*$", col):
+                return False
+        return True
+
 
 
     @property
@@ -463,15 +480,13 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
 
-    raw_text = """| header 1 | header 2 |header 3 | header 4 |
-              |- |
-              | a  | b   | c | 1234567890 |
-              |    1  |   2   | 3 |4 |
-              | 3 |   4 | | |
-              |    1  |   2   | 3 |422 |
-              |-"""
-    syntax = multi_markdown_syntax
-    syntax.custom_column_alignment = True
-    syntax.auto_detect_alignment = False
+    raw_text = """\
+|_. name |_. age of person |_. sex |
+| joan miller | 24 | f |
+| archie | 29 | m |
+| bella | 45 | f |"""
+    syntax = textile_syntax
+    #syntax.custom_column_alignment = True
+    #syntax.auto_detect_alignment = False
     #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
