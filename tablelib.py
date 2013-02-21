@@ -21,8 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 
+import re
 
 class TableSyntax:
 
@@ -37,12 +37,14 @@ class TableSyntax:
         self.hline_in_border = hline_in_border
         #characters from all styles correct switch from one style to other
         self.hline_borders = ['+', '|']
+
         self.custom_column_alignment = custom_column_alignment
         self.multi_markdown_column_alignment = multi_markdown_column_alignment
         self.textile_header = textile_header
         self.textile_cell_alignment = textile_cell_alignment
         self.keep_spaces_left = False
-        self.auto_detect_alignment = True
+        self.auto_align_number_columns = True
+        self.auto_align_header_rows = True
 
     def __str__(self):
         return """
@@ -237,7 +239,7 @@ class TextileHeaderColumn(Column):
         self.data = mo.group(1).strip()
 
     def new_empty_column(self):
-        return TextileHeaderColumn(self.row,self.data)
+        return TextileHeaderColumn(self.row,"_. ")
 
     def min_len(self):
         # '_. header '
@@ -415,7 +417,7 @@ class TextTable:
             elif row.row_type == Row.ROW_DATA:
                 for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
-                        if self.syntax.auto_detect_alignment:
+                        if self.syntax.auto_align_number_columns:
                             data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
                         else:
                             data_alignment[col_ind] = Column.ALIGN_LEFT
@@ -479,14 +481,13 @@ def format_to_lines(text, syntax):
 
 if __name__ == '__main__':
     # each line begin from '|'
-
     raw_text = """\
 |_. name |_. age of person |_. sex |
 | joan miller | 24 | f |
-| archie | 29 | m |
+| archie | 29 | m | d
 | bella | 45 | f |"""
     syntax = textile_syntax
     #syntax.custom_column_alignment = True
-    #syntax.auto_detect_alignment = False
+    #syntax.auto_align_number_columns = False
     #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
