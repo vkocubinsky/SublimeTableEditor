@@ -114,8 +114,11 @@ class Column(object):
 
     def __init__(self, row):
         self.row = row
+        self.table = row.table
+        self.syntax = row.table.syntax
         self.col_len = 0
         self.align = None
+        self.header = None
 
     def min_len(self):
         raise NotImplementedError
@@ -134,29 +137,40 @@ class DataColumn(Column):
 
     def __init__(self, row, data):
         Column.__init__(self, row)
-        if row.table.syntax.keep_spaces_left:
-            self.data = data.rstrip()
-            if self.data[:1] == ' ':
-                self.data = self.data[1:]
+        self.data = data
+
+    def _norm(self):
+        if self.syntax.keep_spaces_left:
+            if self.header and self.syntax.align_header_center :
+                norm = self.data.strip()
+            else:
+                norm = self.data.rstrip()
+                if norm[:1] == ' ':
+                     norm = norm[1:]
         else:
-            self.data = data.strip()
+            norm = self.data.strip()
+        return norm
+
 
     def min_len(self):
         # min of '   ' or ' xxxx '
-        return max(3, len(self.data) + 2)
+        return max(3, len(self._norm()) + 2)
 
     def new_empty_column(self):
         return DataColumn(self.row,'')
 
     def render(self):
+        norm = self._norm()
+
+        if self.header and self.syntax.align_header_center:
+            return ' ' + norm.center(self.col_len - 2, ' ') + ' '
+
         if self.align == Column.ALIGN_RIGHT:
-            return ' ' + self.data.rjust(self.col_len - 2, ' ') + ' '
-        elif self.align == Column.ALIGN_LEFT:
-            return ' ' + self.data.ljust(self.col_len - 2, ' ') + ' '
+            return ' ' + norm.rjust(self.col_len - 2, ' ') + ' '
         elif self.align == Column.ALIGN_CENTER:
-            return ' ' + self.data.center(self.col_len - 2, ' ') + ' '
+            return ' ' + norm.center(self.col_len - 2, ' ') + ' '
         else:
-            raise AssertionError
+            return ' ' + norm.ljust(self.col_len - 2, ' ') + ' '
 
 
 
@@ -296,11 +310,6 @@ class Row:
                                   Row.ROW_MULTI_MARKDOWN_ALIGN)
 
 
-    def align_all_columns(self, align):
-        for column in self.columns:
-            column.align = align
-
-
     def _is_single_row_separator(self, str_cols):
         for col in str_cols:
             if not re.match(r"^\s*[\-]+\s*$", col):
@@ -394,7 +403,8 @@ class TextTable:
                 header_separator_index = row_ind
                 for header_index in range(first_data_index, header_separator_index):
                     if self._rows[header_index].row_type == Row.ROW_DATA:
-                        self._rows[header_index].align_all_columns(Column.ALIGN_CENTER)
+                        for column in self._rows[header_index].columns:
+                            column.header = True
 
 
         #set column alignment
@@ -476,12 +486,13 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
     raw_text = """\
-|_. name |_. age of person |_. sex |
-| joan miller | 24 | f |
-| archie | 29 | m | d
-| bella | 45 | f |"""
+|    name | age  |sex |
+|=
+|   joan miller | 24 | f |
+|     - archie | 29 | m |
+|     - bella | 45 | f |"""
     syntax = textile_syntax
-    #syntax.custom_column_alignment = True
+    syntax.align_header_center = False
     #syntax.align_number_right = False
-    #syntax.keep_spaces_left = True
+    syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
