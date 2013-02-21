@@ -43,8 +43,8 @@ class TableSyntax:
         self.textile_header = textile_header
         self.textile_cell_alignment = textile_cell_alignment
         self.keep_spaces_left = False
-        self.auto_align_number_columns = True
-        self.auto_align_header_rows = True
+        self.align_number_right = True
+        self.align_header_center = True
 
     def __str__(self):
         return """
@@ -362,31 +362,25 @@ class TextTable:
     def add_row(self, row):
         self._rows.append(row)
 
-
     def pack(self):
-        #calculate column lens
-        col_lens = []
-        for row in self._rows:
-            new_col_lens = [column.min_len() for column in row.columns]
-            if len(new_col_lens) < len(col_lens):
-                new_col_lens.extend([0] * (len(col_lens) - len(new_col_lens)))
-            elif len(col_lens) < len(new_col_lens):
-                col_lens.extend([0] * (len(new_col_lens) - len(col_lens)))
-            col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
-
-        #adjust column count
+        column_count = max([len(row.columns) for row in self._rows])
+        #adjust/extend column count
         for row in self._rows:
             column = row.columns[0]
-            diff_count = len(col_lens) - len(row.columns)
+            diff_count = column_count - len(row.columns)
             for i in range(diff_count):
                 row.columns.append(column.new_empty_column())
 
+        #calculate column lens
+        col_lens = [0] * column_count
+        for row in self._rows:
+            new_col_lens = [column.min_len() for column in row.columns]
+            col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
 
         #set column len
         for row in self._rows:
             for column, col_len in zip(row.columns, col_lens):
                 column.col_len = col_len
-
 
         #header
         header_separator_index = -1
@@ -417,22 +411,22 @@ class TextTable:
             elif row.row_type == Row.ROW_DATA:
                 for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
-                        if self.syntax.auto_align_number_columns:
-                            data_alignment[col_ind] = self._auto_detect_column(row_ind, col_ind)
+                        if self.syntax.align_number_right and self._is_number_column(row_ind, col_ind):
+                            data_alignment[col_ind] = Column.ALIGN_LEFT
                         else:
                             data_alignment[col_ind] = Column.ALIGN_LEFT
                     column.align = data_alignment[col_ind]
 
 
 
-    def _auto_detect_column(self, start_row_ind, col_ind):
+    def _is_number_column(self, start_row_ind, col_ind):
         assert self._rows[start_row_ind].row_type == Row.ROW_DATA
         for row in self._rows[start_row_ind:]:
             if (row.row_type == Row.ROW_DATA
                 and len(row.columns[col_ind].data.strip()) > 0
                 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
-                return Column.ALIGN_LEFT
-        return Column.ALIGN_RIGHT
+                return False
+        return True
 
 
     def parse_row(self, line):
@@ -488,6 +482,6 @@ if __name__ == '__main__':
 | bella | 45 | f |"""
     syntax = textile_syntax
     #syntax.custom_column_alignment = True
-    #syntax.auto_align_number_columns = False
+    #syntax.align_number_right = False
     #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
