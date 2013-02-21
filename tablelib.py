@@ -422,7 +422,7 @@ class TextTable:
                 for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
                         if self.syntax.align_number_right and self._is_number_column(row_ind, col_ind):
-                            data_alignment[col_ind] = Column.ALIGN_LEFT
+                            data_alignment[col_ind] = Column.ALIGN_RIGHT
                         else:
                             data_alignment[col_ind] = Column.ALIGN_LEFT
                     column.align = data_alignment[col_ind]
@@ -488,11 +488,11 @@ if __name__ == '__main__':
     raw_text = """\
 |    name | age  |sex |
 |=
-|   joan miller | 24 | f |
+|   joan miller |    24 | f |
 |     - archie | 29 | m |
 |     - bella | 45 | f |"""
     syntax = textile_syntax
-    syntax.align_header_center = False
-    #syntax.align_number_right = False
+    syntax.align_header_center = True
+    syntax.align_number_right = True
     syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)
