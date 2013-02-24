@@ -326,9 +326,6 @@ class Row:
     def row_type(self):
         return self._row_type
 
-    def _is_textile_cell(self, str_col):
-        return re.match(r"\s*((\<\.)|(\>\.)|(\=\.)|(\<\>\.)|(\^\.)|(\~\.))", str_cols)
-
     def is_header_separator(self):
         return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
                                   Row.ROW_DOUBLE_SEPARATOR,
