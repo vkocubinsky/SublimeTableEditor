@@ -262,7 +262,7 @@ class TextileCellColumn(Column):
         return len(self.attr) + len(self.data) + 2
 
     def render(self):
-        if self.attr == '.>':
+        if self.attr == '>.':
             return self.attr + ' ' + self.data.rjust(self.col_len - len(self.attr) - 2, ' ') + ' '
         elif self.attr in ['_.','=.']:
             return self.attr + ' ' + self.data.center(self.col_len - len(self.attr) - 2, ' ') + ' '
@@ -508,7 +508,7 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
     raw_text = """\
-    |_. attribute list |
+    |_. attribute         list |
     |<. align left | |
     |>. align right|
     |=. center |
