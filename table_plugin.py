@@ -827,16 +827,14 @@ class TableEditorCsvToTable(AbstractTableCommand):
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
-    def run(self, args, property):
-        print "Disable", property, "for current view"
-        self.view.settings().set(property, False)
+    def run(self, args, prop):
+        self.view.settings().set(prop, False)
 
 
 class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
 
-    def run(self, args, property):
-        print "Enable", property, "for current view"
-        self.view.settings().set(property, True)
+    def run(self, args, prop):
+        self.view.settings().set(prop, True)
 
 
 class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
