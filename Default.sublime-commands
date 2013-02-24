@@ -6,13 +6,13 @@
       "command": "table_editor_disable_for_current_view" , "args": {"prop": "enable_table_editor"}},
 
 
-    { "caption": "Table Editor: Enable 'keep_spaces_left' for current view", 
+    { "caption": "Table Editor: Enable 'keep_space_left' for current view", 
       "command": "table_editor_enable_for_current_view", 
-      "args": {"prop": "table_editor_keep_spaces_left"} },
+      "args": {"prop": "table_editor_keep_space_left"} },
 
-    { "caption": "Table Editor: Disable 'keep_spaces_left' for current view", 
+    { "caption": "Table Editor: Disable 'keep_space_left' for current view", 
       "command": "table_editor_disable_for_current_view" , 
-      "args": {"prop": "table_editor_keep_spaces_left"}},
+      "args": {"prop": "table_editor_keep_space_left"}},
 
 
     { "caption": "Table Editor: Enable 'align_header_center' for current view", 

@@ -3,7 +3,7 @@
 ## Overview
 
 *Table Editor* is a package for the *Sublime Text 2* editor for edit text tables. 
-*Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. 
+*Table Editor* is has almost the same keys as Emacs-org mode table editor. 
 
 *Table Editor* allow on easy way edit text table, it allows:
 
@@ -27,8 +27,8 @@
     - Textile
 - auto detect table syntax by view syntax
 - switch between different table syntax on the fly
-- temporary disable/enable table editor
-- customize table syntax
+- temporary disable/enable table editor for current view
+- customize table syntax with settings
 - show demo film in scratch view
 
 ## Usage
@@ -397,34 +397,76 @@ as in next example
     | 2        |    row 2 |    c2    |
     | 3        |    row 3 |    c3    |
 
-You can change justification several times
-
-    | column 1 | column 2 | column 3 |
-    | <<<<<<<< | >>>>>>>> | ######## |
-    |----------|----------|----------|
-    | 1        |    row 1 |    c1    |
-    | 2        |    row 2 |    c2    |
-    | 3        |    row 3 |    c3    |
-    | ######## | <<<<<<<< | >>>>>>>> |
-    |    1     | row 1    |       c1 |
-    |    2     | row 2    |       c2 |
-    |    3     | row 3    |       c3 |
 
 ### Override MultiMarkdown custom column alignment
 
-This settings by default enabled only for MultiMarkdown Table Syntax, but you enable it for other syntax
+This settings by default enabled only for MultiMarkdown Table Syntax, but you can override it for other syntax
 
 ```javascript
 {
-    // If table_editor_multimarkdown_alignment is true, supports ":---", ":---:","---:" 
-    // column alignment
-    "table_editor_multi_markdown_column_alignment": true
+    // If table_editor_multi_markdown_header_syntax is true, supports ":---", ":---:","---:" 
+    "table_editor_multi_markdown_header_syntax": true
 }
 ```
 
+### Auto align number column to right
+
+By default a number column align to right, if you do not like this you can disable it 
 
 
-## Key binding
+```javascript
+{
+
+    "table_editor_align_number_right": false
+}
+
+Also you can temporary switch this setting with command palette:
+
+* Table Editor: Enable 'align_number_right' for current view
+* Table Editor: Disable 'align_number_right' for current view
+
+
+### Auto align header column to center
+
+By default a header column align to center, if you do not like this you can disable it 
+
+```javascript
+{
+
+    "table_editor_align_header_center": false
+}
+
+Also you can temporary switch this setting with command palette :
+
+* Table Editor: Enable 'align_header_center' for current view
+* Table Editor: Disable 'align_header_center' for current view
+
+### Keep space left
+
+Some time you do not like remove leading space from data in a column, as in below
+example
+
+
+    | Unordered  List |   Order List  |
+    |-----------------|---------------|
+    | - item 1        | # item 1      |
+    |   - subitem 1   |   # subitem 1 |
+    |   - subitem 2   | # item 2      |
+    | - item 2        |   # subitem 2 |
+    |                 |               |
+
+
+```javascript
+{
+    "table_editor_keep_space_left": true
+}
+
+Also you can temporary switch this setting with command palette:
+
+* Table Editor: Enable 'keep_space_left' for current view
+* Table Editor: Disable 'keep_space_left' for current view
+
+
 
 **ctrl+shift+a**
 
