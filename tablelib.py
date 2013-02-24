@@ -173,7 +173,6 @@ class DataColumn(Column):
             return ' ' + norm.ljust(self.col_len - 2, ' ') + ' '
 
 
-
 class SeparatorColumn(Column):
     def __init__(self, row, separator):
         Column.__init__(self, row)
@@ -246,21 +245,39 @@ class MultiMarkdownAlignColumn(Column):
     def align_follow(self):
         return self._align_follow
 
-class TextileHeaderColumn(Column):
+class TextileCellColumn(Column):
+    PATTERN = r"\s*((?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.))(.*)$"
+
     def __init__(self, row, data):
         Column.__init__(self, row)
-        mo = re.match(r"^\s*\_\.(.*)$", data)
-        self.data = mo.group(1).strip()
+        mo = re.match(TextileCellColumn.PATTERN, data)
+        self.attr = mo.group(1)
+        self.data = mo.group(2).strip()
 
+    def new_empty_column(self):
+        return DataColumn(self.row,"")
+
+    def min_len(self):
+        # '<. data '
+        return len(self.attr) + len(self.data) + 2
+
+    def render(self):
+        if self.attr == '.>':
+            return self.attr + ' ' + self.data.rjust(self.col_len - len(self.attr) - 2, ' ') + ' '
+        elif self.attr in ['_.','=.']:
+            return self.attr + ' ' + self.data.center(self.col_len - len(self.attr) - 2, ' ') + ' '
+        else:
+            return self.attr + ' ' + self.data.ljust(self.col_len - len(self.attr) - 2, ' ') + ' '
+
+    @staticmethod
+    def is_textile_cell(str_col):
+        return re.match(TextileCellColumn.PATTERN, str_col)
+
+class TextileHeaderColumn(TextileCellColumn):
     def new_empty_column(self):
         return TextileHeaderColumn(self.row,"_. ")
 
-    def min_len(self):
-        # '_. header '
-        return len(self.data) + 4
 
-    def render(self):
-        return '_. ' + self.data.center(self.col_len - 4, ' ') + ' '
 
 
 class Row:
@@ -296,13 +313,21 @@ class Row:
               self.columns = [TextileHeaderColumn(self,col) for col in str_cols]
         else:
             self._row_type = Row.ROW_DATA
-            self.columns = [DataColumn(self,col) for col in str_cols]
+            self.columns = []
+            for col in str_cols:
+                if TextileCellColumn.is_textile_cell(col):
+                    column = TextileCellColumn(self, col)
+                else:
+                    column = DataColumn(self,col)
+                self.columns.append(column)
 
 
     @property
     def row_type(self):
         return self._row_type
 
+    def _is_textile_cell(self, str_col):
+        return re.match(r"\s*((\<\.)|(\>\.)|(\=\.)|(\<\>\.)|(\^\.)|(\~\.))", str_cols)
 
     def is_header_separator(self):
         return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
@@ -486,11 +511,13 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
     raw_text = """\
-|    name | age  |sex |
-|=
-|   joan miller |    24 | f |
-|     - archie | 29 | m |
-|     - bella | 45 | f |"""
+    |_. attribute list |
+    |<. align left | |
+    |>. align right|
+    |=. center |
+    |<>. justify |
+    |^. valign top |
+    |~. bottom |"""
     syntax = textile_syntax
     syntax.align_header_center = True
     syntax.align_number_right = False
