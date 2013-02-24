@@ -42,7 +42,7 @@ class TableSyntax:
         self.multi_markdown_header_syntax = multi_markdown_header_syntax
         self.textile_header_syntax = textile_header_syntax
         self.textile_cell_syntax = textile_cell_syntax
-        self.keep_spaces_left = False
+        self.keep_space_left = False
         self.align_number_right = True
         self.align_header_center = True
 
@@ -140,7 +140,7 @@ class DataColumn(Column):
         self.data = data
 
     def _norm(self):
-        if self.syntax.keep_spaces_left:
+        if self.syntax.keep_space_left:
             if self.header and self.syntax.align_header_center :
                 norm = self.data.strip()
             else:
@@ -518,5 +518,5 @@ if __name__ == '__main__':
     syntax = textile_syntax
     syntax.align_header_center = True
     syntax.align_number_right = False
-    #syntax.keep_spaces_left = True
+    #syntax.keep_space_left = True
     print "Table:\n", format_to_text(raw_text, syntax)

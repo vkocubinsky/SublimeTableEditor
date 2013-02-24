@@ -74,8 +74,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().has("table_editor_textile_cell_syntax"):
             syntax.textile_cell_syntax = self.view.settings().get("table_editor_textile_cell_syntax")
 
-        if self.view.settings().has("table_editor_keep_spaces_left"):
-            syntax.keep_spaces_left = self.view.settings().get("table_editor_keep_spaces_left")
+        if self.view.settings().has("table_editor_keep_space_left"):
+            syntax.keep_space_left = self.view.settings().get("table_editor_keep_space_left")
 
         if self.view.settings().has("table_editor_align_number_right"):
             syntax.align_number_right = self.view.settings().get("table_editor_align_number_right")
