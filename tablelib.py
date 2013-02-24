@@ -508,15 +508,15 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
     raw_text = """\
-    |_. attribute         list |
-    |<. align left | |
-    |>. align right|
-    |=. center |
-    |<>. justify |
-    |^. valign top |
-    |~. bottom |"""
+    | column A | column B | column C |
+| <<<<<<<< | >>>>>>>> | ######## |
+|----------|----------|----------|
+| 1        |      one |   '1'    |
+| 2        |      two |   '2'    |
+| >>>>>>>> | <<<<<<<< | ######## |
+|        1 | one      |   '1'    |
+|        2 | two      |   '2'    |
+|          |          |          |"""
     syntax = textile_syntax
-    syntax.align_header_center = True
-    syntax.align_number_right = False
-    #syntax.keep_space_left = True
+    syntax.custom_column_alignment = True
     print "Table:\n", format_to_text(raw_text, syntax)
