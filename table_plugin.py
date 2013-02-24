@@ -68,12 +68,25 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                                "table_editor_multi_markdown_column_alignment",
                                False):
             syntax.multi_markdown_column_alignment = True
-        if self.view.settings().get("table_editor_textile_cell_alignment",
+        if self.view.settings().get("table_editor_textile_header_syntax",
                                     False):
-            syntax.textile_cell_alignment = True
+            syntax.textile_header_syntax = True
+
+        if self.view.settings().get("table_editor_textile_cell_syntax",
+                                    False):
+            syntax.textile_cell_syntax = True
+
         if self.view.settings().get("table_editor_keep_spaces_left", False):
             syntax.keep_spaces_left = True
+
+        if not self.view.settings().get("table_editor_align_number_right", True):
+            syntax.align_number_right = True
+
+        if not self.view.settings().get("table_editor_align_header_center", True):
+            syntax.align_header_center = True
+
         return syntax
+
 
     def auto_detect_syntax(self):
         view_syntax = self.view.settings().get('syntax')
