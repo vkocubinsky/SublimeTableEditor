@@ -493,6 +493,6 @@ if __name__ == '__main__':
 |     - bella | 45 | f |"""
     syntax = textile_syntax
     syntax.align_header_center = True
-    syntax.align_number_right = True
-    syntax.keep_spaces_left = True
+    syntax.align_number_right = False
+    #syntax.keep_spaces_left = True
     print "Table:\n", format_to_text(raw_text, syntax)

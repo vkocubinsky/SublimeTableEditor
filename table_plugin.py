@@ -61,29 +61,27 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             syntax.hline_out_border = '|'
             syntax.hline_in_border = '|'
 
-        if self.view.settings().get("table_editor_custom_column_alignment",
-                                    False):
-            syntax.custom_column_alignment = True
-        if self.view.settings().get(
-                               "table_editor_multi_markdown_column_alignment",
-                               False):
-            syntax.multi_markdown_column_alignment = True
-        if self.view.settings().get("table_editor_textile_header_syntax",
-                                    False):
-            syntax.textile_header_syntax = True
 
-        if self.view.settings().get("table_editor_textile_cell_syntax",
-                                    False):
-            syntax.textile_cell_syntax = True
+        if self.view.settings().has("table_editor_custom_column_alignment"):
+            syntax.custom_column_alignment = self.view.settings().get("table_editor_custom_column_alignment")
 
-        if self.view.settings().get("table_editor_keep_spaces_left", False):
-            syntax.keep_spaces_left = True
+        if self.view.settings().has("table_editor_multi_markdown_header_syntax"):
+            syntax.multi_markdown_header_syntax = self.view.settings().get("table_editor_multi_markdown_header_syntax")
 
-        if not self.view.settings().get("table_editor_align_number_right", True):
-            syntax.align_number_right = True
+        if self.view.settings().has("table_editor_textile_header_syntax"):
+            syntax.textile_header_syntax = self.view.settings().get("table_editor_textile_header_syntax")
 
-        if not self.view.settings().get("table_editor_align_header_center", True):
-            syntax.align_header_center = True
+        if self.view.settings().has("table_editor_textile_cell_syntax"):
+            syntax.textile_cell_syntax = self.view.settings().get("table_editor_textile_cell_syntax")
+
+        if self.view.settings().has("table_editor_keep_spaces_left"):
+            syntax.keep_spaces_left = self.view.settings().get("table_editor_keep_spaces_left")
+
+        if self.view.settings().has("table_editor_align_number_right"):
+            syntax.align_number_right = self.view.settings().get("table_editor_align_number_right")
+
+        if self.view.settings().has("table_editor_align_header_center"):
+            syntax.align_header_center = self.view.settings().get("table_editor_align_header_center")
 
         return syntax
 
@@ -829,14 +827,16 @@ class TableEditorCsvToTable(AbstractTableCommand):
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
 
-    def run(self, args):
-        self.view.settings().set("enable_table_editor", False)
+    def run(self, args, property):
+        print "Disable", property, "for current view"
+        self.view.settings().set(property, False)
 
 
 class TableEditorEnableForCurrentView(sublime_plugin.TextCommand):
 
-    def run(self, args):
-        self.view.settings().set("enable_table_editor", True)
+    def run(self, args, property):
+        print "Enable", property, "for current view"
+        self.view.settings().set(property, True)
 
 
 class TableEditorDisableForCurrentSyntax(sublime_plugin.TextCommand):
