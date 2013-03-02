@@ -3,7 +3,7 @@
 ## Overview
 
 *Table Editor* is a package for the *Sublime Text 2* editor for edit text tables. 
-*Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. 
+*Table Editor* is has almost the same keys as Emacs-org mode table editor. 
 
 *Table Editor* allow on easy way edit text table, it allows:
 
@@ -27,8 +27,8 @@
     - Textile
 - auto detect table syntax by view syntax
 - switch between different table syntax on the fly
-- temporary disable/enable table editor
-- customize table syntax
+- temporary disable/enable table editor for current view
+- customize table syntax with settings
 - show demo film in scratch view
 
 ## Usage
@@ -253,7 +253,7 @@ Then after you edit table you can disable Table Editor
 * Click *ctrl+shift+p* for show command palette
 * Select *Table Editor: Disable for current view*
 
-### Switch table syntax on the fly
+### Supported Syntaxes
 
 Table editor support next table syntax:
 
@@ -263,6 +263,53 @@ Table editor support next table syntax:
 - Multi Markdown
 - reStructuredText
 - Textile
+
+**Simple**
+
+    |    Name   | Age |
+    |-----------|-----|
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**EmacsOrgMode**
+
+    |    Name   | Age |
+    |-----------+-----|
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Pandoc**
+
+    |    Name   | Age |
+    +-----------+-----+
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Markdown**
+
+    |    Name   | Phone | Age Column |
+    | :-------- | :---: | ---------: |
+    | Anna      |   12  |         20 |
+    | Alexander |   13  |         27 |
+
+**RestrucuredText**
+
+    |    Name   | Age |
+    +-----------+-----+
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Textile**
+
+    |_.    Name   |_. Age |_. Custom Alignment Demo |
+    |   Anna      |    20 |<. left                  |
+    |   Alexander |    27 |>.                 right |
+    |   Misha     |    42 |=.         center        |
+    |             |       |                         |
+
+
+### Switch table syntax on the fly
+
 
 Table Editor syntax detected by user settings and if it is not specified recognized automatically by view syntax. But you can change table syntax on the fly with command palette:
 
@@ -397,34 +444,66 @@ as in next example
     | 2        |    row 2 |    c2    |
     | 3        |    row 3 |    c3    |
 
-You can change justification several times
 
-    | column 1 | column 2 | column 3 |
-    | <<<<<<<< | >>>>>>>> | ######## |
-    |----------|----------|----------|
-    | 1        |    row 1 |    c1    |
-    | 2        |    row 2 |    c2    |
-    | 3        |    row 3 |    c3    |
-    | ######## | <<<<<<<< | >>>>>>>> |
-    |    1     | row 1    |       c1 |
-    |    2     | row 2    |       c2 |
-    |    3     | row 3    |       c3 |
 
-### Override MultiMarkdown custom column alignment
+### Auto align number column to right
 
-This settings by default enabled only for MultiMarkdown Table Syntax, but you enable it for other syntax
+By default a number column align to right, if you do not like this you can disable it 
+
 
 ```javascript
 {
-    // If table_editor_multimarkdown_alignment is true, supports ":---", ":---:","---:" 
-    // column alignment
-    "table_editor_multi_markdown_column_alignment": true
+
+    "table_editor_align_number_right": false
 }
-```
+
+Also you can temporary switch this setting with command palette:
+
+* Table Editor: Enable 'align_number_right' for current view
+* Table Editor: Disable 'align_number_right' for current view
 
 
+### Detect header column to center
 
-## Key binding
+By default a header column align to center, if you do not like this you can disable it 
+
+```javascript
+{
+
+    "table_editor_detect_header": false
+}
+
+Also you can temporary switch this setting with command palette :
+
+* Table Editor: Enable 'detect_header' for current view
+* Table Editor: Disable 'detect_header' for current view
+
+### Keep space left
+
+Some time you do not like remove leading space from data in a column, as in below
+example
+
+
+    | Unordered  List |   Order List  |
+    |-----------------|---------------|
+    | - item 1        | # item 1      |
+    |   - subitem 1   |   # subitem 1 |
+    |   - subitem 2   | # item 2      |
+    | - item 2        |   # subitem 2 |
+    |                 |               |
+
+
+```javascript
+{
+    "table_editor_keep_space_left": true
+}
+
+Also you can temporary switch this setting with command palette:
+
+* Table Editor: Enable 'keep_space_left' for current view
+* Table Editor: Disable 'keep_space_left' for current view
+
+
 
 **ctrl+shift+a**
 
