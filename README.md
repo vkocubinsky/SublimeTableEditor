@@ -456,6 +456,7 @@ By default a number column align to right, if you do not like this you can disab
 
     "table_editor_align_number_right": false
 }
+```
 
 Also you can temporary switch this setting with command palette:
 
@@ -472,6 +473,7 @@ By default a header column align to center, if you do not like this you can disa
 
     "table_editor_detect_header": false
 }
+```
 
 Also you can temporary switch this setting with command palette :
 
@@ -497,6 +499,7 @@ example
 {
     "table_editor_keep_space_left": true
 }
+```
 
 Also you can temporary switch this setting with command palette:
 
