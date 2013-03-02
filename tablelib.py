@@ -437,7 +437,6 @@ class TextTable:
                 for col_ind, column in enumerate(row.columns):
                     if isinstance(column, TextileCellColumn):
                         textile_sizes[col_ind] = max(textile_sizes[col_ind], len(column.attr))
-            print textile_sizes
             for row in self._rows:
                 for left_size, column in zip(textile_sizes, row.columns):
                     if isinstance(column, DataColumn):
