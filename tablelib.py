@@ -167,7 +167,7 @@ class DataColumn(Column):
 
     def _norm(self):
         if self.syntax.keep_space_left:
-            if self.header and self.syntax.detect_header:
+            if self.header:
                 norm = self.data.strip()
             else:
                 norm = self.data.rstrip()
@@ -456,17 +456,17 @@ class TextTable:
         #header
         header_separator_index = -1
         first_data_index = -1
-
-        for row_ind,row in enumerate(self._rows):
-            if first_data_index == -1 and row.row_type == Row.ROW_DATA:
-                first_data_index = row_ind
-            if (first_data_index != -1 and header_separator_index == -1 and
-                row.is_header_separator()):
-                header_separator_index = row_ind
-                for header_index in range(first_data_index, header_separator_index):
-                    if self._rows[header_index].row_type == Row.ROW_DATA:
-                        for column in self._rows[header_index].columns:
-                            column.header = True
+        if self.syntax.detect_header:
+            for row_ind,row in enumerate(self._rows):
+                if first_data_index == -1 and row.row_type == Row.ROW_DATA:
+                    first_data_index = row_ind
+                if (first_data_index != -1 and header_separator_index == -1 and
+                    row.is_header_separator()):
+                    header_separator_index = row_ind
+                    for header_index in range(first_data_index, header_separator_index):
+                        if self._rows[header_index].row_type == Row.ROW_DATA:
+                            for column in self._rows[header_index].columns:
+                                column.header = True
 
 
         #set column alignment
