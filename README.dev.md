@@ -398,16 +398,6 @@ as in next example
     | 3        |    row 3 |    c3    |
 
 
-### Override MultiMarkdown custom column alignment
-
-This settings by default enabled only for MultiMarkdown Table Syntax, but you can override it for other syntax
-
-```javascript
-{
-    // If table_editor_multi_markdown_header_syntax is true, supports ":---", ":---:","---:" 
-    "table_editor_multi_markdown_header_syntax": true
-}
-```
 
 ### Auto align number column to right
 

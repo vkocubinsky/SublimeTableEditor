@@ -25,13 +25,18 @@
 import re
 
 class TableSyntax:
+    MUTLI_MARKDOWN_SYTAX = 'Multi Markdown'
+    TEXTILE_SYNTAX = "Textile"
+    EMACS_ORG_MODE_SYNTAX = "Emacs Org Mode"
+    RE_STRUCTURED_TEXT_SYNTAX = "Re Structured Text Syntax"
+    PANDOC_SYNTAX = "Pandoc Syntax"
+    SIMPLE_SYNTAX = "Simple Syntax"
 
-    def __init__(self, hline_out_border='|',
+    def __init__(self, syntax,
+                       hline_out_border='|',
                        hline_in_border='|',
-                       custom_column_alignment=False,
-                       multi_markdown_header_syntax=False,
-                       textile_header_syntax = False,
-                       textile_cell_syntax=False):
+                       custom_column_alignment=False):
+        self.syntax = syntax
         self.vline = '|'
         self.hline_out_border = hline_out_border
         self.hline_in_border = hline_in_border
@@ -39,12 +44,28 @@ class TableSyntax:
         self.hline_borders = ['+', '|']
 
         self.custom_column_alignment = custom_column_alignment
-        self.multi_markdown_header_syntax = multi_markdown_header_syntax
-        self.textile_header_syntax = textile_header_syntax
-        self.textile_cell_syntax = textile_cell_syntax
         self.keep_space_left = False
         self.align_number_right = True
         self.align_header_center = True
+
+    def multi_markdown_syntax(self):
+        return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
+
+    def textile_syntax(self):
+        return self.syntax == TableSyntax.TEXTILE_SYNTAX
+
+    def emacs_org_mode_syntax(self):
+        return self.syntax == TableSyntax.EMACS_ORG_MODE_SYNTAX
+
+    def re_structured_text_syntax(self):
+        return self.syntax == TableSyntax.RE_STRUCTURED_TEXT_SYNTAX
+
+    def pandoc_syntax(self):
+        return self.syntax == TableSyntax.PANDOC_SYNTAX
+
+    def simple_syntax(self):
+        return self.syntax == TableSyntax.SIMPLE_SYNTAX
+
 
     def __str__(self):
         return """
@@ -84,28 +105,31 @@ class TableSyntax:
         return self.is_single_hline(text) or self.is_double_hline(text)
 
 
-simple_syntax = TableSyntax(hline_out_border='|',
+simple_syntax = TableSyntax(syntax = TableSyntax.SIMPLE_SYNTAX,
+                            hline_out_border='|',
                             hline_in_border='|',
                             custom_column_alignment=True)
 
-emacs_org_mode_syntax = TableSyntax(hline_out_border='|',
+emacs_org_mode_syntax = TableSyntax(syntax = TableSyntax.EMACS_ORG_MODE_SYNTAX,
+                                    hline_out_border='|',
                                     hline_in_border='+')
 
-pandoc_syntax = TableSyntax(hline_out_border='+',
+pandoc_syntax = TableSyntax(syntax = TableSyntax.PANDOC_SYNTAX,
+                            hline_out_border='+',
                             hline_in_border='+')
 
-re_structured_text_syntax = TableSyntax(hline_out_border='+',
+re_structured_text_syntax = TableSyntax(syntax = TableSyntax.RE_STRUCTURED_TEXT_SYNTAX,
+                                        hline_out_border='+',
                                         hline_in_border='+')
 
-multi_markdown_syntax = TableSyntax(hline_out_border='|',
-                                    hline_in_border='|',
-                                    multi_markdown_header_syntax=True)
+multi_markdown_syntax = TableSyntax(syntax = TableSyntax.MUTLI_MARKDOWN_SYTAX,
+                                    hline_out_border='|',
+                                    hline_in_border='|')
 
 
-textile_syntax = TableSyntax(hline_out_border='|',
-                             hline_in_border='|',
-                             textile_header_syntax=True,
-                             textile_cell_syntax=True)
+textile_syntax = TableSyntax(syntax = TableSyntax.TEXTILE_SYNTAX,
+                             hline_out_border='|',
+                             hline_in_border='|')
 
 class Column(object):
     ALIGN_LEFT = 'left'
@@ -138,10 +162,12 @@ class DataColumn(Column):
     def __init__(self, row, data):
         Column.__init__(self, row)
         self.data = data
+        self.left_space = ' '
+        self.right_space = ' '
 
     def _norm(self):
         if self.syntax.keep_space_left:
-            if self.header and self.syntax.align_header_center :
+            if self.header and self.syntax.align_header_center:
                 norm = self.data.strip()
             else:
                 norm = self.data.rstrip()
@@ -154,23 +180,25 @@ class DataColumn(Column):
 
     def min_len(self):
         # min of '   ' or ' xxxx '
-        return max(3, len(self._norm()) + 2)
+        space_len = len(self.left_space) + len(self.right_space)
+        return max(space_len + 1, len(self._norm()) + space_len)
 
     def new_empty_column(self):
         return DataColumn(self.row,'')
 
     def render(self):
         norm = self._norm()
+        space_len = len(self.left_space) + len(self.right_space)
 
         if self.header and self.syntax.align_header_center:
-            return ' ' + norm.center(self.col_len - 2, ' ') + ' '
-
-        if self.align == Column.ALIGN_RIGHT:
-            return ' ' + norm.rjust(self.col_len - 2, ' ') + ' '
+            align_value =  norm.center(self.col_len - space_len, ' ')
+        elif self.align == Column.ALIGN_RIGHT:
+            align_value = norm.rjust(self.col_len - space_len, ' ')
         elif self.align == Column.ALIGN_CENTER:
-            return ' ' + norm.center(self.col_len - 2, ' ') + ' '
+            align_value = norm.center(self.col_len - space_len, ' ')
         else:
-            return ' ' + norm.ljust(self.col_len - 2, ' ') + ' '
+            align_value = norm.ljust(self.col_len - space_len, ' ')
+        return self.left_space + align_value + self.right_space
 
 
 class SeparatorColumn(Column):
@@ -303,11 +331,11 @@ class Row:
               self._is_custom_align_row(str_cols)):
             self._row_type = Row.ROW_CUSTOM_ALIGN
             self.columns = [CustomAlignColumn(self,col) for col in str_cols]
-        elif (self.table.syntax.multi_markdown_header_syntax
+        elif (self.table.syntax.multi_markdown_syntax()
               and self._is_multi_markdown_align_row(str_cols)):
             self._row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
             self.columns = [MultiMarkdownAlignColumn(self,col) for col in str_cols]
-        elif (self.table.syntax.textile_header_syntax and
+        elif (self.table.syntax.textile_syntax() and
               self._is_textile_header_syntax(str_cols)):
               self._row_type = Row.ROW_TEXTILE_HEADER_syntax
               self.columns = [TextileHeaderColumn(self,col) for col in str_cols]
@@ -315,7 +343,8 @@ class Row:
             self._row_type = Row.ROW_DATA
             self.columns = []
             for col in str_cols:
-                if TextileCellColumn.is_textile_cell(col):
+                if (self.table.syntax.textile_syntax() and
+                   TextileCellColumn.is_textile_cell(col)):
                     column = TextileCellColumn(self, col)
                 else:
                     column = DataColumn(self,col)
@@ -401,6 +430,18 @@ class TextTable:
             diff_count = column_count - len(row.columns)
             for i in range(diff_count):
                 row.columns.append(column.new_empty_column())
+
+        if self.syntax.textile_syntax():
+            textile_sizes = [0] * column_count
+            for row in self._rows:
+                for col_ind, column in enumerate(row.columns):
+                    if isinstance(column, TextileCellColumn):
+                        textile_sizes[col_ind] = max(textile_sizes[col_ind], len(column.attr))
+            print textile_sizes
+            for row in self._rows:
+                for left_size, column in zip(textile_sizes, row.columns):
+                    if isinstance(column, DataColumn):
+                        column.left_space = ' ' * (left_size + 1)
 
         #calculate column lens
         col_lens = [0] * column_count
@@ -508,15 +549,14 @@ def format_to_lines(text, syntax):
 if __name__ == '__main__':
     # each line begin from '|'
     raw_text = """\
-    | column A | column B | column C |
-| <<<<<<<< | >>>>>>>> | ######## |
-|----------|----------|----------|
-| 1        |      one |   '1'    |
-| 2        |      two |   '2'    |
-| >>>>>>>> | <<<<<<<< | ######## |
-|        1 | one      |   '1'    |
-|        2 | two      |   '2'    |
-|          |          |          |"""
+    |_. attribute list |
+|<. align left |
+| cell|
+|>. align right|
+|=. center |
+|<>. justify |
+|^. valign top |
+|~. bottom |"""
     syntax = textile_syntax
-    syntax.custom_column_alignment = True
+    #syntax.custom_column_alignment = True
     print "Table:\n", format_to_text(raw_text, syntax)
