@@ -70,8 +70,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().has("table_editor_align_number_right"):
             syntax.align_number_right = self.view.settings().get("table_editor_align_number_right")
 
-        if self.view.settings().has("table_editor_align_header_center"):
-            syntax.align_header_center = self.view.settings().get("table_editor_align_header_center")
+        if self.view.settings().has("table_editor_detect_header"):
+            syntax.align_header_center = self.view.settings().get("table_editor_detect_header")
 
         return syntax
 

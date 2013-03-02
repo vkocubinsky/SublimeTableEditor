@@ -253,7 +253,7 @@ Then after you edit table you can disable Table Editor
 * Click *ctrl+shift+p* for show command palette
 * Select *Table Editor: Disable for current view*
 
-### Switch table syntax on the fly
+### Supported Syntaxes
 
 Table editor support next table syntax:
 
@@ -263,6 +263,53 @@ Table editor support next table syntax:
 - Multi Markdown
 - reStructuredText
 - Textile
+
+**Simple**
+
+    |    Name   | Age |
+    |-----------|-----|
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**EmacsOrgMode**
+
+    |    Name   | Age |
+    |-----------+-----|
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Pandoc**
+
+    |    Name   | Age |
+    +-----------+-----+
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Markdown**
+
+    |    Name   | Phone | Age Column |
+    | :-------- | :---: | ---------: |
+    | Anna      |   12  |         20 |
+    | Alexander |   13  |         27 |
+
+**RestrucuredText**
+
+    |    Name   | Age |
+    +-----------+-----+
+    | Anna      |  20 |
+    | Alexander |  27 |
+
+**Textile**
+
+    |_.    Name   |_. Age |_. Custom Alignment Demo |
+    |   Anna      |    20 |<. left                  |
+    |   Alexander |    27 |>.                 right |
+    |   Misha     |    42 |=.         center        |
+    |             |       |                         |
+
+
+### Switch table syntax on the fly
+
 
 Table Editor syntax detected by user settings and if it is not specified recognized automatically by view syntax. But you can change table syntax on the fly with command palette:
 
@@ -416,20 +463,20 @@ Also you can temporary switch this setting with command palette:
 * Table Editor: Disable 'align_number_right' for current view
 
 
-### Auto align header column to center
+### Detect header column to center
 
 By default a header column align to center, if you do not like this you can disable it 
 
 ```javascript
 {
 
-    "table_editor_align_header_center": false
+    "table_editor_detect_header": false
 }
 
 Also you can temporary switch this setting with command palette :
 
-* Table Editor: Enable 'align_header_center' for current view
-* Table Editor: Disable 'align_header_center' for current view
+* Table Editor: Enable 'detect_header' for current view
+* Table Editor: Disable 'detect_header' for current view
 
 ### Keep space left
 

@@ -15,13 +15,13 @@
       "args": {"prop": "table_editor_keep_space_left"}},
 
 
-    { "caption": "Table Editor: Enable 'align_header_center' for current view", 
+    { "caption": "Table Editor: Enable 'detect_header' for current view", 
       "command": "table_editor_enable_for_current_view", 
-      "args": {"prop": "table_editor_align_header_center"} },
+      "args": {"prop": "table_editor_detect_header"} },
 
-    { "caption": "Table Editor: Disable 'align_header_center' for current view", 
+    { "caption": "Table Editor: Disable 'detect_header' for current view", 
       "command": "table_editor_disable_for_current_view" , 
-      "args": {"prop": "table_editor_align_header_center"}},
+      "args": {"prop": "table_editor_detect_header"}},
 
     { "caption": "Table Editor: Enable 'align_number_right' for current view", 
       "command": "table_editor_enable_for_current_view", 

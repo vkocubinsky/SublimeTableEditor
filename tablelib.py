@@ -46,7 +46,7 @@ class TableSyntax:
         self.custom_column_alignment = custom_column_alignment
         self.keep_space_left = False
         self.align_number_right = True
-        self.align_header_center = True
+        self.detect_header = True
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
@@ -167,7 +167,7 @@ class DataColumn(Column):
 
     def _norm(self):
         if self.syntax.keep_space_left:
-            if self.header and self.syntax.align_header_center:
+            if self.header and self.syntax.detect_header:
                 norm = self.data.strip()
             else:
                 norm = self.data.rstrip()
@@ -190,7 +190,7 @@ class DataColumn(Column):
         norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
 
-        if self.header and self.syntax.align_header_center:
+        if self.header and self.syntax.detect_header:
             align_value =  norm.center(self.col_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
             align_value = norm.rjust(self.col_len - space_len, ' ')
@@ -557,5 +557,5 @@ if __name__ == '__main__':
 |^. valign top |
 |~. bottom |"""
     syntax = textile_syntax
-    #syntax.custom_column_alignment = True
+    syntax.detect_header = False
     print "Table:\n", format_to_text(raw_text, syntax)
