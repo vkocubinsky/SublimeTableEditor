@@ -174,6 +174,93 @@ class SimpleSyntaxTest(BaseTableTest):
         t.delete_row(4)
         self.assert_table_equals(expected,t.render())
 
+    def testInsertEmptyColumn(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |   |    Gender   |      Age      |
+| Text Column |   | Char Column | Number Column |
+|-------------|---|-------------|---------------|
+| Alisa       |   | F           |            21 |
+| Alex        |   | M           |            22 |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.insert_empty_column(1)
+        self.assert_table_equals(expected,t.render())
+
+    def testInsertEmptyRow(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+|             |             |               |
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.insert_empty_row(3)
+        self.assert_table_equals(expected,t.render())
+
+    def testInsertSeparatorRow(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.insert_separator_row(2)
+        self.assert_table_equals(expected,t.render())
+
+
+    def testInsertDoubleSeparatorRow(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|=============|=============|===============|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.insert_double_separator_row(2)
+        self.assert_table_equals(expected,t.render())
 
 class TextileSyntaxTest(BaseTableTest):
 

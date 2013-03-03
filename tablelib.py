@@ -512,6 +512,28 @@ class TextTable:
         for row in self._rows:
             row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
 
+    def insert_empty_column(self, i):
+        assert i >= 0
+        for row in self._rows:
+            row.columns.insert(i, row.columns[0].new_empty_column())
+        self._pack()
+
+
+    def insert_empty_row(self, i):
+        assert i >= 0
+        self._rows.insert(i, Row(self,['']))
+        self._pack()
+
+    def insert_separator_row(self, i):
+        assert i >= 0
+        self._rows.insert(i, Row(self,['-']))
+        self._pack()
+
+    def insert_double_separator_row(self, i):
+        assert i >= 0
+        self._rows.insert(i, Row(self,['=']))
+        self._pack()
+
 
     def swap_rows(self, i, j):
         assert 0 <= i < len(self._rows) and 0 <= j < len(self._rows)
@@ -522,6 +544,8 @@ class TextTable:
         assert 0 <= i < len(self._rows)
         del self._rows[i]
         self._pack()
+
+
 
     def _is_number_column(self, start_row_ind, col_ind):
         assert self._rows[start_row_ind].row_type == Row.ROW_DATA
@@ -588,5 +612,5 @@ if __name__ == '__main__':
 """
     syntax = simple_syntax()
     t = TextTable(text.rstrip(), syntax)
-    t.delete_row(1)
+    t.insert_double_separator_row(15)
     print "Table:\n", t.render()
