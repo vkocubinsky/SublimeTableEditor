@@ -85,6 +85,51 @@ class SimpleSyntaxTest(BaseTableTest):
         formatted = tablelib.format_to_text(unformatted, self.syntax)
         self.assert_table_equals(expected, formatted)
 
+    def testSwapColumn(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |      Age      |    Gender   |
+| Text Column | Number Column | Char Column |
+|-------------|---------------|-------------|
+| Alisa       |            21 | F           |
+| Alex        |            22 | M           |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.swap_columns(1,2)
+        self.assert_table_equals(expected,t.render())
+
+
+    def testDeleteColumn(self):
+        text = """\
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.rstrip()
+
+        expected = """\
+|     Name    |      Age      |
+| Text Column | Number Column |
+|-------------|---------------|
+| Alisa       |            21 |
+| Alex        |            22 |
+        """.rstrip()
+
+
+        t = tablelib.TextTable(text, self.syntax)
+        t.delete_column(1)
+        self.assert_table_equals(expected,t.render())
+
 
 class TextileSyntaxTest(BaseTableTest):
 

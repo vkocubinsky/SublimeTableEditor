@@ -425,12 +425,13 @@ class TextTable:
         self.text = text
         self.syntax = syntax
         self._rows = []
-
+        self._parse()
+        self._pack()
 
     def add_row(self, row):
         self._rows.append(row)
 
-    def pack(self):
+    def _pack(self):
         column_count = max([len(row.columns) for row in self._rows])
         #adjust/extend column count
         for row in self._rows:
@@ -498,6 +499,19 @@ class TextTable:
                     column.align = data_alignment[col_ind]
 
 
+    def delete_column(self, i):
+        column_count = len(self._rows[0].columns)
+        assert i < column_count
+        for row in self._rows:
+            del row.columns[i]
+
+
+    def swap_columns(self, i, j):
+        column_count = len(self._rows[0].columns)
+        assert i < column_count and j < column_count
+        for row in self._rows:
+            row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
+
 
     def _is_number_column(self, start_row_ind, col_ind):
         assert self._rows[start_row_ind].row_type == Row.ROW_DATA
@@ -525,45 +539,44 @@ class TextTable:
         return row
 
 
-    def format_to_lines(self):
+    def _parse(self):
         lines = self.text.splitlines()
         assert len(lines) > 0, "Table is empty"
         mo = re.search(r"[^\s]", lines[0])
         if mo:
-            prefix = lines[0][:mo.start()]
+            self.prefix = lines[0][:mo.start()]
         else:
-            prefix = ""
+            self.prefix = ""
         for line in lines:
             row = self.parse_row(line)
             self.add_row(row)
-        self.pack()
-        return [prefix + row.render() for row in self._rows]
 
-    def format_to_text(self):
-        return "\n".join(self.format_to_lines())
+    def render_lines(self):
+        return [self.prefix + row.render() for row in self._rows]
+
+    def render(self):
+        return "\n".join(self.render_lines())
 
 
 def format_to_text(text, syntax=simple_syntax):
     table = TextTable(text, syntax)
-    return table.format_to_text()
+    return table.render()
 
 
 def format_to_lines(text, syntax):
     table = TextTable(text, syntax)
-    return table.format_to_lines()
+    return table.render_lines()
 
 
 if __name__ == '__main__':
     # each line begin from '|'
-    raw_text = """\
-    |_. attribute list |
-|<. align left |
-| cell|
-|>. align right|
-|=. center |
-|<>. justify |
-|^. valign top |
-|~. bottom |"""
-    syntax = textile_syntax()
-    syntax.detect_header = False
-    print "Table:\n", format_to_text(raw_text, syntax)
+    text = """\
+|  a  |  b  |   c   |
+|-----|-----|-------|
+| 1   | 2   | 3     |
+| one | two | three |
+"""
+    syntax = simple_syntax()
+    t = TextTable(text.rstrip(), syntax)
+    t.swap_columns(1,2)
+    print "Table:\n", t.render()
