@@ -105,31 +105,39 @@ class TableSyntax:
         return self.is_single_hline(text) or self.is_double_hline(text)
 
 
-simple_syntax = TableSyntax(syntax = TableSyntax.SIMPLE_SYNTAX,
-                            hline_out_border='|',
-                            hline_in_border='|',
-                            custom_column_alignment=True)
 
-emacs_org_mode_syntax = TableSyntax(syntax = TableSyntax.EMACS_ORG_MODE_SYNTAX,
-                                    hline_out_border='|',
-                                    hline_in_border='+')
-
-pandoc_syntax = TableSyntax(syntax = TableSyntax.PANDOC_SYNTAX,
-                            hline_out_border='+',
-                            hline_in_border='+')
-
-re_structured_text_syntax = TableSyntax(syntax = TableSyntax.RE_STRUCTURED_TEXT_SYNTAX,
-                                        hline_out_border='+',
-                                        hline_in_border='+')
-
-multi_markdown_syntax = TableSyntax(syntax = TableSyntax.MUTLI_MARKDOWN_SYTAX,
-                                    hline_out_border='|',
-                                    hline_in_border='|')
+def simple_syntax():
+    return TableSyntax(syntax = TableSyntax.SIMPLE_SYNTAX,
+                       hline_out_border='|',
+                       hline_in_border='|',
+                       custom_column_alignment=True)
 
 
-textile_syntax = TableSyntax(syntax = TableSyntax.TEXTILE_SYNTAX,
-                             hline_out_border='|',
-                             hline_in_border='|')
+def emacs_org_mode_syntax():
+    return TableSyntax(syntax = TableSyntax.EMACS_ORG_MODE_SYNTAX,
+                       hline_out_border='|',
+                       hline_in_border='+')
+
+def pandoc_syntax():
+    return TableSyntax(syntax = TableSyntax.PANDOC_SYNTAX,
+                       hline_out_border='+',
+                       hline_in_border='+')
+
+def re_structured_text_syntax():
+    return TableSyntax(syntax = TableSyntax.RE_STRUCTURED_TEXT_SYNTAX,
+                       hline_out_border='+',
+                       hline_in_border='+')
+
+def multi_markdown_syntax():
+    return TableSyntax(syntax = TableSyntax.MUTLI_MARKDOWN_SYTAX,
+                       hline_out_border='|',
+                       hline_in_border='|')
+
+
+def textile_syntax():
+    return TableSyntax(syntax = TableSyntax.TEXTILE_SYNTAX,
+                       hline_out_border='|',
+                       hline_in_border='|')
 
 class Column(object):
     ALIGN_LEFT = 'left'
@@ -556,6 +564,6 @@ if __name__ == '__main__':
 |<>. justify |
 |^. valign top |
 |~. bottom |"""
-    syntax = textile_syntax
+    syntax = textile_syntax()
     syntax.detect_header = False
     print "Table:\n", format_to_text(raw_text, syntax)

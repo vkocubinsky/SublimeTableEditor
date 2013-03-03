@@ -34,17 +34,17 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def syntax(self):
         syntax_name = self.view.settings().get("table_editor_syntax")
         if syntax_name == "Simple":
-            syntax = tablelib.simple_syntax
+            syntax = tablelib.simple_syntax()
         elif syntax_name == "EmacsOrgMode":
-            syntax = tablelib.emacs_org_mode_syntax
+            syntax = tablelib.emacs_org_mode_syntax()
         elif syntax_name == "Pandoc":
-            syntax = tablelib.pandoc_syntax
+            syntax = tablelib.pandoc_syntax()
         elif syntax_name == "MultiMarkdown":
-            syntax = tablelib.multi_markdown_syntax
+            syntax = tablelib.multi_markdown_syntax()
         elif syntax_name == "reStructuredText":
-            syntax = tablelib.re_structured_text_syntax
+            syntax = tablelib.re_structured_text_syntax()
         elif syntax_name == "Textile":
-            syntax = tablelib.textile_syntax
+            syntax = tablelib.textile_syntax()
         else:
             syntax = self.auto_detect_syntax()
         border_style = (self.view.settings().get("table_editor_border_style",
@@ -80,14 +80,14 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         view_syntax = self.view.settings().get('syntax')
         if (view_syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
             view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
-            return tablelib.multi_markdown_syntax
+            return tablelib.multi_markdown_syntax()
         elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
-            return tablelib.textile_syntax
+            return tablelib.textile_syntax()
         elif (view_syntax ==
                      'Packages/RestructuredText/reStructuredText.tmLanguage'):
-            return tablelib.re_structured_text_syntax
+            return tablelib.re_structured_text_syntax()
         else:
-            return tablelib.simple_syntax
+            return tablelib.simple_syntax()
         #'Packages/Text/Plain text.tmLanguage':
         #
 

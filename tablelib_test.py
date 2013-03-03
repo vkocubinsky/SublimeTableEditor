@@ -43,7 +43,7 @@ class BaseTableTest(unittest.TestCase):
 class SimpleSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.simple_syntax
+        self.syntax = tablelib.simple_syntax()
 
     def testBasic(self):
         unformatted = """\
@@ -65,10 +65,31 @@ class SimpleSyntaxTest(BaseTableTest):
         formatted = tablelib.format_to_text(unformatted, self.syntax)
         self.assert_table_equals(expected, formatted)
 
+    def testCustomAlignment(self):
+        unformatted = """\
+| Name | Gender | Age |
+| > | # | < |
+|---|---|---|
+| Alisa | F | 21 |
+| Alex | M | 22 |
+""".rstrip()
+
+        expected = """\
+|  Name | Gender | Age |
+| >>>>> | ###### | <<< |
+|-------|--------|-----|
+| Alisa |   F    | 21  |
+|  Alex |   M    | 22  |
+""".rstrip()
+
+        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        self.assert_table_equals(expected, formatted)
+
+
 class TextileSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.textile_syntax
+        self.syntax = tablelib.textile_syntax()
 
     def testBasic(self):
         unformatted = """\
@@ -100,7 +121,7 @@ class TextileSyntaxTest(BaseTableTest):
 class MultiMarkdownSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.multi_markdown_syntax
+        self.syntax = tablelib.multi_markdown_syntax()
 
     def testBasic(self):
         unformatted = """\
@@ -126,8 +147,7 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
 class ReStructuredTextSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.re_structured_text_syntax
-        self.syntax.keep_space_left = False
+        self.syntax = tablelib.re_structured_text_syntax()
 
     def testBasic(self):
         unformatted = """\
