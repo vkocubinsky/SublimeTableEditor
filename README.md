@@ -448,7 +448,7 @@ as in next example
 
 ### Auto align number column to right
 
-By default a number column align to right, if you do not like this you can disable it 
+By default a number column aligns to right, if you do not like this you can disable it 
 
 
 ```javascript
@@ -466,7 +466,7 @@ Also you can temporary switch this setting with command palette:
 
 ### Detect header column to center
 
-By default a header column align to center, if you do not like this you can disable it 
+By default a header column aligns to center, if you do not like this you can disable it 
 
 ```javascript
 {
@@ -482,7 +482,7 @@ Also you can temporary switch this setting with command palette :
 
 ### Keep space left
 
-Some time you do not like remove leading space from data in a column, as in below
+Some time you do not like remove leading space from a data in a column, as in next
 example
 
 
