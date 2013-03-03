@@ -513,6 +513,16 @@ class TextTable:
             row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
 
 
+    def swap_rows(self, i, j):
+        assert 0 <= i < len(self._rows) and 0 <= j < len(self._rows)
+        self._rows[i], self._rows[j] = self._rows[j], self._rows[i]
+        self._pack()
+
+    def delete_row(self, i ):
+        assert 0 <= i < len(self._rows)
+        del self._rows[i]
+        self._pack()
+
     def _is_number_column(self, start_row_ind, col_ind):
         assert self._rows[start_row_ind].row_type == Row.ROW_DATA
         for row in self._rows[start_row_ind:]:
@@ -578,5 +588,5 @@ if __name__ == '__main__':
 """
     syntax = simple_syntax()
     t = TextTable(text.rstrip(), syntax)
-    t.swap_columns(1,2)
+    t.delete_row(1)
     print "Table:\n", t.render()
