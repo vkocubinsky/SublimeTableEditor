@@ -234,32 +234,36 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
 class AbstractTableMultiSelect(AbstractTableCommand):
 
-    def get_table_region(self, edit, sel):
-        first_table_row = self.get_first_table_row(self.get_row(sel.begin()))
-        last_table_row = self.get_last_table_row(self.get_row(sel.begin()))
+    def get_table_text(self, first_table_row, last_table_row):
         begin_point = self.view.line(
                                      self.view.text_point(first_table_row, 0)
                                     ).begin()
         end_point = self.view.line(
                                    self.view.text_point(last_table_row, 0)
                                    ).end()
+        return self.view.substr(sublime.Region(begin_point, end_point))
 
-        return sublime.Region(begin_point, end_point)
-
-    def merge(self, edit, table_region, new_lines):
-        line_regions = self.view.lines(table_region)
-        for region, new_text in zip(line_regions, new_lines):
+    def merge(self, edit, first_table_row, last_table_row, new_lines):
+        rows = range(first_table_row, last_table_row + 1)
+        for row, new_text in zip(rows, new_lines):
+            region = self.view.line(self.view.text_point(row, 0))
             old_text = self.view.substr(region)
+            print "old_text:", old_text
             if old_text != new_text:
+                print "replace:", region, new_text
                 self.view.replace(edit, region, new_text)
 
         #case 1: some lines deleted
-        if len(line_regions) < new_lines:
-            for new_text in new_lines[len(line_regions):]:
-                self.view.insert(edit, table_region.end() + 1, new_text)
+        if len(rows) < len(new_lines):
+            print "case 1: some lines deleted"
+            end_point = self.view.full_line(self.view.text_point(row, 0)).end()
+            for new_text in new_lines[len(rows):]:
+                self.view.insert(edit, end_point, new_text)
         #case 2: some lines inserted
-        elif len(line_regions) > new_lines:
-            for region in line_regions[len(new_lines):]:
+        elif len(rows) > len(new_lines):
+            print "case 2: some lines inserted"
+            for row in rows[len(new_lines):]:
+                region = self.view.line(self.view.text_point(row, 0))
                 self.view.erase(edit, region)
 
 
@@ -454,11 +458,12 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         field_num = self.get_unformatted_field_num(sel_row, sel_col)
         if field_num == 0:
             return sel
-        table_region = self.get_table_region(edit, sel)
-        table_text = self.view.substr(table_region)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
         table.swap_columns(field_num, field_num - 1)
-        self.merge(edit,table_region, table.render_lines())
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num - 1)
         return sublime.Region(pt, pt)
 
@@ -474,11 +479,12 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
         field_num = self.get_unformatted_field_num(sel_row, sel_col)
         if field_num == self.get_field_count(sel_row) - 1:
             return sel
-        table_region = self.get_table_region(edit, sel)
-        table_text = self.view.substr(table_region)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
         table.swap_columns(field_num, field_num + 1)
-        self.merge(edit,table_region, table.render_lines())
+        self.merge(edit,first_table_row, last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num + 1)
         return sublime.Region(pt, pt)
 
@@ -532,43 +538,14 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
         first_table_row = self.get_first_table_row(sel_row)
         last_table_row = self.get_last_table_row(sel_row)
-        row = first_table_row
-        while row <= last_table_row:
-            text = self.get_text(row)
-            if self.syntax.is_single_hline(text):
-                cell = "---"
-            elif self.syntax.is_double_hline(text):
-                cell = "==="
-            else:
-                cell = "   "
-            i1 = self.find_border(text, field_num + 1)
-            if self.syntax.is_hline(text):
-                if field_num == 0:
-                    vline = self.syntax.hline_out_border
-                else:
-                    vline = self.syntax.hline_in_border
-                new_text = (text[0:i1]
-                            + vline
-                            + cell
-                            + self.syntax.hline_in_border
-                            + text[i1 + 1:])
-            else:
-                new_text = (text[0:i1]
-                            + self.syntax.vline
-                            + cell
-                            + self.syntax.vline
-                            + text[i1 + 1:])
-            self.view.replace(edit,
-                    self.view.line(self.view.text_point(row, sel_col)),
-                    new_text)
-
-            row += 1
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.insert_empty_column(field_num)
+        self.merge(edit,first_table_row, last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
