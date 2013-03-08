@@ -419,36 +419,50 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
     Move the current column right.
     """
 
+    def get_table_region(self, edit, sel):
+        first_table_row = self.get_first_table_row(self.get_row(sel.begin()))
+        last_table_row = self.get_last_table_row(self.get_row(sel.begin()))
+        begin_point = self.view.line(
+                                     self.view.text_point(first_table_row, 0)
+                                    ).begin()
+        end_point = self.view.line(
+                                   self.view.text_point(last_table_row, 0)
+                                   ).end()
+
+        return sublime.Region(begin_point, end_point)
+
+    def merge(self, edit, table_region, new_lines):
+        line_regions = self.view.lines(table_region)
+        for region, new_text in zip(line_regions, new_lines):
+            old_text = self.view.substr(region)
+            if old_text != new_text:
+                self.view.replace(edit, region, new_text)
+
+        #case 1: some lines deleted
+        if len(line_regions) < new_lines:
+            for new_text in new_lines[len(line_regions):]:
+                self.view.insert(edit, table_region.end() + 1, new_text)
+        #case 2: some lines inserted
+        elif len(line_regions) > new_lines:
+            for region in line_regions[len(new_lines):]:
+                self.view.erase(edit, region)
+
+
+
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         field_num = self.get_field_num(sel_row, sel_col)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+
         if field_num == 0:
             return sel
-        start_row = self.get_first_table_row(sel_row)
-        end_row = self.get_last_table_row(sel_row)
-        row = start_row
-        while row <= end_row:
-            if self.is_hline_row(row):
-                in_border = self.syntax.hline_in_border
-            else:
-                in_border = self.syntax.vline
 
-            text = self.get_text(row)
-            i1 = self.find_border(text, field_num + 0)
-            i2 = self.find_border(text, field_num + 1)
-            i3 = self.find_border(text, field_num + 2)
-            new_text = (text[0:i1 + 1]
-                        + text[i2 + 1:i3]
-                        + in_border
-                        + text[i1 + 1:i2]
-                        + text[i3:]
-                        )
-            self.view.replace(edit,
-                        self.view.line(self.view.text_point(row, sel_col)),
-                        new_text
-                            )
-            row += 1
+        table_region = self.get_table_region(edit, sel)
+        table_text = self.view.substr(table_region)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.swap_columns(field_num, field_num - 1)
+        new_lines = table.render_lines()
+        self.merge(edit,table_region, new_lines)
         pt = self.get_field_default_point(sel_row, field_num - 1)
         return sublime.Region(pt, pt)
 
