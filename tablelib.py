@@ -425,25 +425,35 @@ class TextTable:
         self.text = text
         self.syntax = syntax
         self._rows = []
+        self.column_count = 0
         self._parse()
         self._pack()
+
 
     def add_row(self, row):
         self._rows.append(row)
 
+
     def _pack(self):
         if len(self._rows) == 0:
+            self.column_count = 0
             return
-        column_count = max([len(row.columns) for row in self._rows])
+
+        self.column_count = max([len(row.columns) for row in self._rows])
+
+        if self.column_count == 0:
+            self._rows = []
+            return
+
         #adjust/extend column count
         for row in self._rows:
             column = row.columns[0]
-            diff_count = column_count - len(row.columns)
+            diff_count = self.column_count - len(row.columns)
             for i in range(diff_count):
                 row.columns.append(column.new_empty_column())
 
         if self.syntax.textile_syntax():
-            textile_sizes = [0] * column_count
+            textile_sizes = [0] * self.column_count
             for row in self._rows:
                 for col_ind, column in enumerate(row.columns):
                     if isinstance(column, TextileCellColumn):
@@ -454,7 +464,7 @@ class TextTable:
                         column.left_space = ' ' * (left_size + 1)
 
         #calculate column lens
-        col_lens = [0] * column_count
+        col_lens = [0] * self.column_count
         for row in self._rows:
             new_col_lens = [column.min_len() for column in row.columns]
             col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
@@ -502,15 +512,14 @@ class TextTable:
 
 
     def delete_column(self, i):
-        column_count = len(self._rows[0].columns)
-        assert i < column_count
+        assert i < self.column_count
         for row in self._rows:
             del row.columns[i]
+        self._pack()
 
 
     def swap_columns(self, i, j):
-        column_count = len(self._rows[0].columns)
-        assert i < column_count and j < column_count
+        assert i < self.column_count and j < self.column_count
         for row in self._rows:
             row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
 

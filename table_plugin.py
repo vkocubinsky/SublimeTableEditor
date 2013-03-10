@@ -248,9 +248,9 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         for row, new_text in zip(rows, new_lines):
             region = self.view.line(self.view.text_point(row, 0))
             old_text = self.view.substr(region)
-            print "old_text:", old_text
+            #print "old_text:", old_text
             if old_text != new_text:
-                print "replace:", region, new_text
+                #print "replace:", region, new_text
                 self.view.replace(edit, region, new_text)
 
         #case 1: some lines deleted
@@ -489,7 +489,7 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
         last_table_row = self.get_last_table_row(sel_row)
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
-        if field_num < self.get_field_count(sel_row) - 1:
+        if field_num < table.column_count - 1:
             table.swap_columns(field_num, field_num + 1)
             field_num = field_num + 1
         self.merge(edit,first_table_row, last_table_row, table.render_lines())
@@ -504,39 +504,22 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
         first_table_row = self.get_first_table_row(sel_row)
         last_table_row = self.get_last_table_row(sel_row)
-        row = first_table_row
-        field_count = self.get_field_count(sel_row)
-        while row <= last_table_row:
-            text = self.get_text(row)
-            i1 = self.find_border(text, field_num + 1)
-            i2 = self.find_border(text, field_num + 2)
-            if field_count > 1:
-                if self.syntax.is_hline(text):
-                    if field_num == 0 or field_num == field_count - 1:
-                        vline = self.syntax.hline_out_border
-                    else:
-                        vline = self.syntax.hline_in_border
-                else:
-                    vline = self.syntax.vline
-                self.view.replace(edit,
-                        self.view.line(self.view.text_point(row, sel_col)),
-                        text[0:i1] + vline + text[i2 + 1:])
-            else:
-                self.view.replace(edit,
-                        self.view.line(self.view.text_point(row, sel_col)),
-                        text[0:i1] + text[i2 + 1:])
-
-            row += 1
-        if field_num == self.get_field_count(sel_row):
-            field_num -= 1
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.delete_column(field_num)
+        print field_num, table.column_count
+        if field_num == table.column_count:
+            print "last column"
+            field_num = field_num - 1
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
+
+
 
 
 class TableEditorInsertColumn(AbstractTableMultiSelect):
