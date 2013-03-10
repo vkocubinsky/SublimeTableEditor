@@ -603,13 +603,16 @@ class TableEditorInsertSingleHline(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_as_hrow(edit, sel_row)
-        field_num = self.get_field_num(sel_row, sel_col)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.insert_single_separator_row(sel_row + 1)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
-
 
 class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
     """
@@ -618,10 +621,14 @@ class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_as_hrow(edit, sel_row, "=")
-        field_num = self.get_field_num(sel_row, sel_col)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.insert_double_separator_row(sel_row + 1)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 

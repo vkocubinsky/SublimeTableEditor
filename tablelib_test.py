@@ -237,7 +237,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = tablelib.TextTable(text, self.syntax)
-        t.insert_separator_row(2)
+        t.insert_single_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
 

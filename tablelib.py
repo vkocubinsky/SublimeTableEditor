@@ -535,7 +535,7 @@ class TextTable:
         self._rows.insert(i, Row(self,['']))
         self._pack()
 
-    def insert_separator_row(self, i):
+    def insert_single_separator_row(self, i):
         assert i >= 0
         self._rows.insert(i, Row(self,['-']))
         self._pack()
