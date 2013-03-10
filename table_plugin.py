@@ -553,38 +553,47 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableEditorMoveRowUp(AbstractTableCommand):
+class TableEditorMoveRowUp(AbstractTableMultiSelect):
     """
     Key: alt+up
     Move the current row up.
     """
 
-    def run(self, edit):
-        allow = True
-        for sel in self.view.sel():
-            row = self.get_row(sel.begin())
-            if row == self.get_first_table_row(row):
-                allow = False
-                break
-        if allow:
-            self.view.run_command("swap_line_up")
+    def run_one_sel(self, edit, sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        if sel_row > first_table_row:
+            table.swap_rows(sel_row, sel_row - 1)
+            sel_row = sel_row - 1
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
 
 
-class TableEditorMoveRowDown(AbstractTableCommand):
+
+class TableEditorMoveRowDown(AbstractTableMultiSelect):
     """
     Key: alt+down
     Move the current row down.
     """
 
-    def run(self, edit):
-        allow = True
-        for sel in self.view.sel():
-            row = self.get_row(sel.begin())
-            if row == self.get_last_table_row(row):
-                allow = False
-                break
-        if allow:
-            self.view.run_command("swap_line_down")
+    def run_one_sel(self, edit, sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        if sel_row < last_table_row:
+            table.swap_rows(sel_row, sel_row + 1)
+            sel_row = sel_row + 1
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
 
 
 class TableEditorInsertSingleHline(AbstractTableMultiSelect):
