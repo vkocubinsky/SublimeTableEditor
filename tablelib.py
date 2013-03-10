@@ -432,6 +432,8 @@ class TextTable:
         self._rows.append(row)
 
     def _pack(self):
+        if len(self._rows) == 0:
+            return
         column_count = max([len(row.columns) for row in self._rows])
         #adjust/extend column count
         for row in self._rows:
@@ -559,11 +561,11 @@ class TextTable:
 
     def parse_row(self, line):
         line = line.strip()
-        assert line[0] in self.syntax.hline_borders
         #remove first '|' character
-        line = line[1:]
+        if line[:1] in self.syntax.hline_borders:
+            line = line[1:]
         #remove last '|' character
-        if len(line) > 0 and line[-1] in self.syntax.hline_borders:
+        if line[-1:] in self.syntax.hline_borders:
             line = line[:-1]
         if self.syntax.is_hline(line):
             cols = re.split(self.syntax.hline_border_pattern(), line)
@@ -574,13 +576,12 @@ class TextTable:
 
 
     def _parse(self):
-        lines = self.text.splitlines()
-        assert len(lines) > 0, "Table is empty"
-        mo = re.search(r"[^\s]", lines[0])
+        mo = re.search(r"[^\s]", self.text)
         if mo:
-            self.prefix = lines[0][:mo.start()]
+            self.prefix = self.text[:mo.start()]
         else:
             self.prefix = ""
+        lines = self.text.strip().splitlines()
         for line in lines:
             row = self.parse_row(line)
             self.add_row(row)
@@ -610,7 +611,7 @@ if __name__ == '__main__':
 | 1   | 2   | 3     |
 | one | two | three |
 """
+    text = '  '
     syntax = simple_syntax()
-    t = TextTable(text.rstrip(), syntax)
-    t.insert_double_separator_row(15)
-    print "Table:\n", t.render()
+    t = TextTable(text, syntax)
+    print "Table:\n'{0}'".format(t.render())
