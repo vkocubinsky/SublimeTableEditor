@@ -248,20 +248,22 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         for row, new_text in zip(rows, new_lines):
             region = self.view.line(self.view.text_point(row, 0))
             old_text = self.view.substr(region)
-            #print "old_text:", old_text
             if old_text != new_text:
-                #print "replace:", region, new_text
                 self.view.replace(edit, region, new_text)
 
-        #case 1: some lines deleted
+        #case 1: some lines inserted
         if len(rows) < len(new_lines):
-            print "case 1: some lines deleted"
-            end_point = self.view.full_line(self.view.text_point(row, 0)).end()
+            print "case 1: some lines inserted"
+            end_point = self.view.line(self.view.text_point(row, 0)).end()
+            end_line = self.view.substr(sublime.Region(end_point, end_point))
+            if end_line != '\n':
+                self.view.insert(edit, end_point, '\n')
+            end_point = end_point + 1
             for new_text in new_lines[len(rows):]:
                 self.view.insert(edit, end_point, new_text)
-        #case 2: some lines inserted
+        #case 2: some lines deleted
         elif len(rows) > len(new_lines):
-            print "case 2: some lines inserted"
+            print "case 2: some lines deleted"
             for row in rows[len(new_lines):]:
                 region = self.view.line(self.view.text_point(row, 0))
                 self.view.erase(edit, region)
@@ -278,36 +280,13 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
     def align_one_sel(self, edit, sel):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-
-        first_table_row = self.get_first_table_row(self.get_row(sel.begin()))
-        last_table_row = self.get_last_table_row(self.get_row(sel.begin()))
-
-        begin_point = self.view.line(
-                            self.view.text_point(first_table_row, 0)
-                                    ).begin()
-        end_point = self.view.line(
-                            self.view.text_point(last_table_row, 0)
-                                    ).end()
-
-        table_region = sublime.Region(begin_point, end_point)
-        text = self.view.substr(table_region)
-        sel_field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        new_text_lines = tablelib.format_to_lines(text, self.syntax)
-        row = first_table_row
-        while row <= last_table_row:
-            if row - first_table_row >= len(new_text_lines):
-                break
-            point = self.view.text_point(row, 0)
-            region = self.view.line(point)
-            line_text = self.view.substr(region)
-            new_line_text = new_text_lines[row - first_table_row]
-            if line_text != new_line_text:
-                self.view.replace(edit, region, new_line_text)
-            row = row + 1
-        if len(new_text_lines) != last_table_row - first_table_row + 1:
-            print "WARN", "len formatted table", len(new_text_lines),
-            print "len sublime table", last_table_row - first_table_row + 1
-        pt = self.get_field_default_point(sel_row, sel_field_num)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
     def run(self, edit):
@@ -335,15 +314,7 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
-        pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt, pt)
+        return self.align_one_sel(edit, sel)
 
 
 class TableEditorNextField(AbstractTableMultiSelect):
@@ -511,9 +482,7 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
         table.delete_column(field_num)
-        print field_num, table.column_count
         if field_num == table.column_count:
-            print "last column"
             field_num = field_num - 1
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
@@ -572,13 +541,14 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-        line_region = self.view.line(sel)
-        text = self.view.substr(line_region)
-        new_text = self.clone_as_empty_line(text) + "\n"
-        self.view.insert(edit, line_region.begin(), new_text)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        table.insert_empty_row(sel_row - first_table_row)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
