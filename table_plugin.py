@@ -714,42 +714,24 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
     Join current row and next row into one if next row is not hline
     """
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-        vline = self.syntax.vline
-        if (sel_row < self.get_last_table_row(sel_row)
-                and not self.is_hline_row(sel_row)
-                and not self.is_hline_row(sel_row + 1)):
-            curr_line = self.get_text(sel_row)
-            next_line = self.get_text(sel_row + 1)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
 
-            i1 = curr_line.find(vline)
-            i2 = curr_line.rfind(vline)
-            prefix = curr_line[:i1]
+        sel_table_index = sel_row - first_table_row
+        if (sel_table_index < table.row_count
+            and table[sel_table_index].is_data()
+            and table[sel_table_index + 1].is_data()):
+            for curr_col, next_col in zip(table[sel_table_index].columns,
+                                          table[sel_table_index +1].columns):
+                curr_col.data = curr_col.data.rstrip() + " " + next_col.data.strip()
 
-            curr_line = curr_line[i1 + 1:i2]
-            next_line = next_line[i1 + 1:i2]
-
-            cols = [f1.strip() + " " + f2.strip()
-                for f1, f2 in zip(curr_line.split(vline),
-                                  next_line.split(vline))]
-            new_line = prefix + vline + vline.join(cols) + vline + "\n"
-
-            curr_region = self.view.full_line(
-                                self.view.text_point(sel_row, 0))
-            next_region = self.view.full_line(
-                    self.view.text_point(sel_row + 1, 0))
-
-            self.view.erase(edit, sublime.Region(
-                                                curr_region.begin(),
-                                                next_region.end()
-                                                ))
-            self.view.insert(edit, curr_region.begin(), new_line)
-            self.align_one_sel(edit, sublime.Region(
-                                                curr_region.begin(),
-                                                curr_region.begin()
-                                                    ))
+            table.delete_row(sel_table_index + 1)
+            self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 

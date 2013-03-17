@@ -375,6 +375,9 @@ class Row:
         return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
                                   Row.ROW_DOUBLE_SEPARATOR)
 
+    def is_data(self):
+        return self._row_type in (Row.ROW_DATA)
+
     def _is_single_row_separator(self, str_cols):
         for col in str_cols:
             if not re.match(r"^\s*[\-]+\s*$", col):
