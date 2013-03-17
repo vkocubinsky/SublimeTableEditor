@@ -717,28 +717,13 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         sel_row = sel_row + 1
         row_num = sel_row - first_table_row
         print table[row_num].render()
-        table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data
+        table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         print table.render()
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
-
-        sel = self.align_one_sel(edit, sel)
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
-        if (sel_row == self.get_last_table_row(sel_row)
-                or self.is_hline_row(sel_row + 1)):
-            self.duplicate_as_empty_row(edit, sel_row)
-            sel_row = sel_row + 1
-        else:
-            sel_row = sel_row + 1
-        pt = self.get_field_begin_point(sel_row, field_num)
-        self.view.insert(edit, pt, rest_data + " ")
-        sel = self.align_one_sel(edit, sel)
-        pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt, pt)
 
 
 class TableEditorJoinLines(AbstractTableMultiSelect):
@@ -761,7 +746,7 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
             and table[row_num + 1].is_data()):
             for curr_col, next_col in zip(table[row_num].columns,
                                           table[row_num +1].columns):
-                curr_col.data = curr_col.data.rstrip() + " " + next_col.data.strip()
+                curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
             table.delete_row(row_num + 1)
             self.merge(edit, first_table_row,last_table_row, table.render_lines())
