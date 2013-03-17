@@ -436,7 +436,7 @@ class TextTable:
         self._rows = []
         self.column_count = 0
         self._parse()
-        self._pack()
+        self.pack()
 
 
     def add_row(self, row):
@@ -450,7 +450,7 @@ class TextTable:
     def __getitem__(self, index):
         return self._rows[index]
 
-    def _pack(self):
+    def pack(self):
         if len(self._rows) == 0:
             self.column_count = 0
             return
@@ -531,7 +531,7 @@ class TextTable:
         assert i < self.column_count
         for row in self._rows:
             del row.columns[i]
-        self._pack()
+        self.pack()
 
 
     def swap_columns(self, i, j):
@@ -543,34 +543,34 @@ class TextTable:
         assert i >= 0
         for row in self._rows:
             row.columns.insert(i, row.columns[0].new_empty_column())
-        self._pack()
+        self.pack()
 
 
     def insert_empty_row(self, i):
         assert i >= 0
         self._rows.insert(i, Row(self,['']))
-        self._pack()
+        self.pack()
 
     def insert_single_separator_row(self, i):
         assert i >= 0
         self._rows.insert(i, Row(self,['-']))
-        self._pack()
+        self.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
         self._rows.insert(i, Row(self,['=']))
-        self._pack()
+        self.pack()
 
 
     def swap_rows(self, i, j):
         assert 0 <= i < len(self._rows) and 0 <= j < len(self._rows)
         self._rows[i], self._rows[j] = self._rows[j], self._rows[i]
-        self._pack()
+        self.pack()
 
     def delete_row(self, i ):
         assert 0 <= i < len(self._rows)
         del self._rows[i]
-        self._pack()
+        self.pack()
 
 
 
