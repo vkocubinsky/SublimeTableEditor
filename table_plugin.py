@@ -335,7 +335,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
 
         moved = False
         while True:
-            if self.is_hline_row(sel_row):
+            if table[sel_row - first_table_row].is_separator():
                 if sel_row < last_table_row:
                     sel_row = sel_row + 1
                     field_num = 0
@@ -343,13 +343,14 @@ class TableEditorNextField(AbstractTableMultiSelect):
                     continue
                 else:
                     #sel_row == last_table_row
-                    self.duplicate_as_empty_row(edit, sel_row)
+                    table.insert_empty_row(table.row_count)
+                    self.merge(edit, first_table_row,last_table_row, table.render_lines())
                     field_num = 0
                     sel_row += 1
                     break
             elif moved:
                 break
-            elif field_num + 1 < field_count:
+            elif field_num + 1 < table.column_count:
                 field_num = field_num + 1
                 break
             elif sel_row < last_table_row:
@@ -359,7 +360,8 @@ class TableEditorNextField(AbstractTableMultiSelect):
                 continue
             else:
                 #sel_row == last_table_row
-                self.duplicate_as_empty_row(edit, sel_row)
+                table.insert_empty_row(table.row_count)
+                self.merge(edit, first_table_row,last_table_row, table.render_lines())
                 field_num = 0
                 sel_row += 1
                 break
