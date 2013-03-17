@@ -132,17 +132,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         text = self.view.substr(region)
         return text
 
-    def get_full_text(self, row):
-        point = self.view.text_point(row, 0)
-        region = self.view.full_line(point)
-        text = self.view.substr(region)
-        return text
-
     def get_row(self, point):
         return self.view.rowcol(point)[0]
-
-    def is_hline_row(self, row):
-        return self.syntax.is_hline(self.get_text(row))
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
@@ -150,10 +141,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def get_field_num(self, row, col):
         return self.hline_count(self.get_text(row), 0, col) - 1
-
-    def get_field_count(self, row):
-        text = self.get_text(row)
-        return self.hline_count(text, 0, len(text)) - 1
 
     def get_last_buffer_row(self):
         return self.view.rowcol(self.view.size())[0]
@@ -193,43 +180,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             row = row - 1
         return first_table_row
 
-    def clone_as_empty_line(self, text):
-        if self.syntax.is_hline(text):
-            text = re.sub(self.syntax.hline_border_pattern(),
-                          self.syntax.vline, text)
 
-        i1 = self.find_border(text, 1)
-        return text[:i1] + re.sub(self.syntax.not_vline_pattern(),
-                                  ' ', text[i1:])
-
-    def clone_as_hline(self, text, hline='-'):
-        if self.syntax.is_hline(text):
-            return text[:]
-        i1 = text.find(self.syntax.vline)
-        i2 = text.rfind(self.syntax.vline)
-        in_text = text[i1 + 1:i2]
-        in_text = re.sub(self.syntax.not_vline_pattern(), hline, in_text)
-        in_text = re.sub(self.syntax.vline_pattern(),
-                         self.syntax.hline_in_border, in_text)
-        return (text[:i1]
-                + self.syntax.hline_out_border
-                + in_text
-                + self.syntax.hline_out_border
-                + text[i2 + 1:])
-
-    def duplicate_as_hrow(self, edit, row, hline='-'):
-        point = self.view.text_point(row, 0)
-        region = self.view.line(point)
-        text = self.view.substr(region)
-        new_text = "\n" + self.clone_as_hline(text, hline)
-        self.view.insert(edit, region.end(), new_text)
-
-    def duplicate_as_empty_row(self, edit, row):
-        point = self.view.text_point(row, 0)
-        region = self.view.line(point)
-        text = self.view.substr(region)
-        new_text = "\n" + self.clone_as_empty_line(text)
-        self.view.insert(edit, region.end(), new_text)
 
 
 class AbstractTableMultiSelect(AbstractTableCommand):
