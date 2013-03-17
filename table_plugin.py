@@ -245,6 +245,7 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
     def merge(self, edit, first_table_row, last_table_row, new_lines):
         rows = range(first_table_row, last_table_row + 1)
+        print "merge into ", rows
         for row, new_text in zip(rows, new_lines):
             region = self.view.line(self.view.text_point(row, 0))
             old_text = self.view.substr(region)
@@ -254,13 +255,11 @@ class AbstractTableMultiSelect(AbstractTableCommand):
         #case 1: some lines inserted
         if len(rows) < len(new_lines):
             print "case 1: some lines inserted"
-            end_point = self.view.line(self.view.text_point(row, 0)).end()
-            end_line = self.view.substr(sublime.Region(end_point, end_point))
-            if end_line != '\n':
-                self.view.insert(edit, end_point, '\n')
-            end_point = end_point + 1
+            row = last_table_row
             for new_text in new_lines[len(rows):]:
-                self.view.insert(edit, end_point, new_text)
+                end_point = self.view.line(self.view.text_point(row, 0)).end()
+                self.view.insert(edit, end_point, "\n" + new_text)
+                row = row + 1
         #case 2: some lines deleted
         elif len(rows) > len(new_lines):
             print "case 2: some lines deleted"
@@ -661,6 +660,30 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
+        last_table_row = self.get_last_table_row(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+
+        row_num = sel_row - first_table_row
+        table.insert_single_separator_row(row_num + 1)
+
+        if row_num + 2 < table.row_count:
+            if table[row_num + 2].is_separator():
+                table.insert_empty_row(row_num + 2)
+        else:
+            table.insert_empty_row(row_num + 2)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        print table.render()
+
+        sel_row = sel_row + 2
+        pt = self.get_field_default_point(sel_row, field_num)
+        return sublime.Region(pt, pt)
+
+#old
         sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.duplicate_as_hrow(edit, sel_row)
