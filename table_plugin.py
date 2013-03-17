@@ -722,15 +722,15 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         table = tablelib.TextTable(table_text, self.syntax)
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
 
-        sel_table_index = sel_row - first_table_row
-        if (sel_table_index < table.row_count
-            and table[sel_table_index].is_data()
-            and table[sel_table_index + 1].is_data()):
-            for curr_col, next_col in zip(table[sel_table_index].columns,
-                                          table[sel_table_index +1].columns):
+        row_num = sel_row - first_table_row
+        if (row_num < table.row_count
+            and table[row_num].is_data()
+            and table[row_num + 1].is_data()):
+            for curr_col, next_col in zip(table[row_num].columns,
+                                          table[row_num +1].columns):
                 curr_col.data = curr_col.data.rstrip() + " " + next_col.data.strip()
 
-            table.delete_row(sel_table_index + 1)
+            table.delete_row(row_num + 1)
             self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
