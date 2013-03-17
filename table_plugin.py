@@ -683,7 +683,7 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         print table.render()
 
         sel_row = sel_row + 2
-        pt = self.get_field_default_point(sel_row, field_num)
+        pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
 
 #old

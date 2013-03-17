@@ -373,7 +373,7 @@ Click ctrl+w to close this window""".format(len(tests))})
                         TableEditorTestSuite.COMMAND_TIMEOUT)
         else:
             text = self.get_buffer_text()
-            if text != tests[test_ind].expected_value():
+            if text.strip() != tests[test_ind].expected_value().strip():
                 self.view.run_command("move_to", {"extend": False, "to": "eof"})
                 self.view.run_command("insert", {"characters": """
 Test {0} failed:
