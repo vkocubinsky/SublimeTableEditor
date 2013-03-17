@@ -325,11 +325,14 @@ class TableEditorNextField(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        sel = self.align_one_sel(edit, sel)
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_field_num(sel_row, sel_col)
+        field_num = self.get_unformatted_field_num(sel_row, sel_col)
+        first_table_row = self.get_first_table_row(sel_row)
         last_table_row = self.get_last_table_row(sel_row)
-        field_count = self.get_field_count(sel_row)
+        table_text = self.get_table_text(first_table_row, last_table_row)
+        table = tablelib.TextTable(table_text, self.syntax)
+        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+
         moved = False
         while True:
             if self.is_hline_row(sel_row):

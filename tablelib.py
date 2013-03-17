@@ -322,7 +322,7 @@ class Row:
     ROW_DOUBLE_SEPARATOR = '='
     ROW_CUSTOM_ALIGN = '<>#'
     ROW_MULTI_MARKDOWN_ALIGN = ':-:'
-    ROW_TEXTILE_HEADER_syntax = "._"
+    ROW_TEXTILE_HEADER_SYNTAX = "._"
 
 
     def __init__(self, table, str_cols):
@@ -345,7 +345,7 @@ class Row:
             self.columns = [MultiMarkdownAlignColumn(self,col) for col in str_cols]
         elif (self.table.syntax.textile_syntax() and
               self._is_textile_header_syntax(str_cols)):
-              self._row_type = Row.ROW_TEXTILE_HEADER_syntax
+              self._row_type = Row.ROW_TEXTILE_HEADER_SYNTAX
               self.columns = [TextileHeaderColumn(self,col) for col in str_cols]
         else:
             self._row_type = Row.ROW_DATA
@@ -359,6 +359,9 @@ class Row:
                 self.columns.append(column)
 
 
+    def __getitem__(self, index):
+        return self.columns[index]
+
     @property
     def row_type(self):
         return self._row_type
@@ -368,6 +371,9 @@ class Row:
                                   Row.ROW_DOUBLE_SEPARATOR,
                                   Row.ROW_MULTI_MARKDOWN_ALIGN)
 
+    def is_separator(self):
+        return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
+                                  Row.ROW_DOUBLE_SEPARATOR)
 
     def _is_single_row_separator(self, str_cols):
         for col in str_cols:
@@ -433,6 +439,13 @@ class TextTable:
     def add_row(self, row):
         self._rows.append(row)
 
+
+    @property
+    def row_count(self):
+        return len(self._rows)
+
+    def __getitem__(self, index):
+        return self._rows[index]
 
     def _pack(self):
         if len(self._rows) == 0:
@@ -620,7 +633,6 @@ if __name__ == '__main__':
 | 1   | 2   | 3     |
 | one | two | three |
 """
-    text = '  '
     syntax = simple_syntax()
     t = TextTable(text, syntax)
     print "Table:\n'{0}'".format(t.render())
