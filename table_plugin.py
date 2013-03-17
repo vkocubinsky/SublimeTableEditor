@@ -686,19 +686,6 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         pt = self.get_field_default_point(sel_row, 0)
         return sublime.Region(pt, pt)
 
-#old
-        sel = self.align_one_sel(edit, sel)
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        self.duplicate_as_hrow(edit, sel_row)
-        if sel_row + 1 < self.get_last_table_row(sel_row):
-            if self.is_hline_row(sel_row + 2):
-                self.duplicate_as_empty_row(edit, sel_row + 1)
-        else:
-            self.duplicate_as_empty_row(edit, sel_row + 1)
-        sel_row = sel_row + 2
-        pt = self.get_field_default_point(sel_row, 0)
-        return sublime.Region(pt, pt)
-
 
 class TableEditorSplitColumnDown(AbstractTableMultiSelect):
     """
