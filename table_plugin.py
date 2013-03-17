@@ -245,7 +245,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
 
     def merge(self, edit, first_table_row, last_table_row, new_lines):
         rows = range(first_table_row, last_table_row + 1)
-        print "merge into ", rows
         for row, new_text in zip(rows, new_lines):
             region = self.view.line(self.view.text_point(row, 0))
             old_text = self.view.substr(region)
@@ -585,8 +584,9 @@ class TableEditorMoveRowUp(AbstractTableMultiSelect):
         last_table_row = self.get_last_table_row(sel_row)
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
+        row_num = sel_row - first_table_row
         if sel_row > first_table_row:
-            table.swap_rows(sel_row, sel_row - 1)
+            table.swap_rows(row_num, row_num - 1)
             sel_row = sel_row - 1
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
@@ -607,8 +607,9 @@ class TableEditorMoveRowDown(AbstractTableMultiSelect):
         last_table_row = self.get_last_table_row(sel_row)
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
+        row_num = sel_row - first_table_row
         if sel_row < last_table_row:
-            table.swap_rows(sel_row, sel_row + 1)
+            table.swap_rows(row_num, row_num + 1)
             sel_row = sel_row + 1
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
@@ -628,7 +629,8 @@ class TableEditorInsertSingleHline(AbstractTableMultiSelect):
         last_table_row = self.get_last_table_row(sel_row)
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
-        table.insert_single_separator_row(sel_row + 1)
+        row_num = sel_row - first_table_row
+        table.insert_single_separator_row(row_num + 1)
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -646,7 +648,8 @@ class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
         last_table_row = self.get_last_table_row(sel_row)
         table_text = self.get_table_text(first_table_row, last_table_row)
         table = tablelib.TextTable(table_text, self.syntax)
-        table.insert_double_separator_row(sel_row + 1)
+        row_num = sel_row - first_table_row
+        table.insert_double_separator_row(row_num + 1)
         self.merge(edit, first_table_row,last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
