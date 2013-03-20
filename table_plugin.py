@@ -27,6 +27,71 @@ import csv
 import re
 import tablelib
 
+class TableContext:
+
+    def __init__(self, view, sel, syntax):
+        self.view = view
+        (self.sel_row, self.sel_col) = self.view.rowcol(sel.begin())
+        self.syntax = syntax
+        self.field_num = self._get_unformatted_field_num()
+        self.first_table_row = self._get_first_table_row()
+        self.last_table_row = self._get_last_table_row()
+        self.table_text = self._get_table_text()
+
+    def _get_table_text(self):
+        begin_point = self.view.line(
+                                     self.view.text_point(self.first_table_row, 0)
+                                    ).begin()
+        end_point = self.view.line(
+                                   self.view.text_point(self.last_table_row, 0)
+                                   ).end()
+        return self.view.substr(sublime.Region(begin_point, end_point))
+
+    def _get_last_table_row(self):
+        row = self.sel_row
+        last_table_row = self.sel_row
+        last_line = self._get_last_buffer_row()
+        while (row <= last_line and self._is_table_row(row)):
+            last_table_row = row
+            row = row + 1
+        return last_table_row
+
+    def _get_first_table_row(self):
+        row = self.sel_row
+        first_table_row = self.sel_row
+        while (row >= 0 and self._is_table_row(row)):
+            first_table_row = row
+            row = row - 1
+        return first_table_row
+
+    def _is_table_row(self, row):
+        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
+                        self._get_text(row)) is not None
+
+    def _get_unformatted_field_num(self):
+        line_text = self._get_text(self.sel_row)
+        sel_field_num = self._hline_count(line_text, 0, self.sel_col) - 1
+        mo = re.compile(r"\s*$")
+        if sel_field_num > 0 and mo.match(line_text, self.sel_col):
+            sel_field_num = sel_field_num - 1
+        return sel_field_num
+
+    def _hline_count(self, text, start, end):
+        if self.syntax.is_hline(text):
+            return sum([text.count(ch, start, end)
+                                        for ch in self.syntax.hline_borders])
+        else:
+            return text.count(self.syntax.vline, start, end)
+
+    def _get_text(self, row):
+        point = self.view.text_point(row, 0)
+        region = self.view.line(point)
+        text = self.view.substr(region)
+        return text
+
+    def _get_last_buffer_row(self):
+        return self.view.rowcol(self.view.size())[0]
+
 
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
@@ -227,17 +292,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
             sel_field_num = sel_field_num - 1
         return sel_field_num
 
-    def align_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
-        pt = self.get_field_default_point(sel_row, field_num)
-        return sublime.Region(pt, pt)
-
     def run(self, edit):
         new_sels = []
         for sel in self.view.sel():
@@ -263,7 +317,11 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        return self.align_one_sel(edit, sel)
+        ctx = TableContext(self.view, sel, self.syntax)
+        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        pt = self.get_field_default_point(ctx.sel_row, ctx.field_num)
+        return sublime.Region(pt, pt)
 
 
 class TableEditorNextField(AbstractTableMultiSelect):
