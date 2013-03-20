@@ -220,15 +220,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         else:
             return self.view.text_point(row, i1 + 2)
 
-    def get_field_begin_point(self, row, field_num):
-        text = self.get_text(row)
-        i1 = self.find_border(text, field_num + 1)
-        i2 = self.find_border(text, field_num + 2)
-        match = re.compile(r"\s*([^\s]).*$").match(text, i1 + 1, i2)
-        if match:
-            return self.view.text_point(row, match.start(1))
-        else:
-            return self.view.text_point(row, i1 + 2)
 
 
 
