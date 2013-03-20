@@ -495,16 +495,16 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
+        ctx = TableContext(self.view, sel, self.syntax)
+        table = tablelib.TextTable(ctx.table_text, self.syntax)
+
+        sel_row = ctx.sel_row
+        field_num = ctx.field_num
+
         table.delete_column(field_num)
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
         if table.column_count == 0:
-            pt = self.view.text_point(first_table_row, 0)
+            pt = self.view.text_point(ctx.first_table_row, 0)
         else:
             if field_num == table.column_count:
                 field_num = field_num - 1
