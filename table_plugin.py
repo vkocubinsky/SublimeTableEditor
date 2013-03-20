@@ -382,18 +382,17 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
     """
 
     def run_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        ctx = TableContext(self.view, sel, self.syntax)
+        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+
+        sel_row = ctx.sel_row
+        field_num = ctx.field_num
 
         moved = False
         while True:
-            if table[sel_row - first_table_row].is_separator():
-                if sel_row > first_table_row:
+            if table[sel_row - ctx.first_table_row].is_separator():
+                if sel_row > ctx.first_table_row:
                     sel_row = sel_row - 1
                     field_num = table.column_count - 1
                     moved = True
@@ -407,7 +406,7 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
             elif field_num > 0:
                 field_num = field_num - 1
                 break
-            elif sel_row > first_table_row:
+            elif sel_row > ctx.first_table_row:
                 sel_row = sel_row - 1
                 field_num = table.column_count - 1
                 moved = True
