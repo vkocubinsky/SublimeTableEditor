@@ -236,7 +236,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 class AbstractTableMultiSelect(AbstractTableCommand):
 
 
-    def merge(self, edit, first_table_row, last_table_row, new_lines):
+    def merge(self, edit, ctx, table):
+        new_lines = table.render_lines()
+        first_table_row = ctx.first_table_row
+        last_table_row = ctx.last_table_row
         rows = range(first_table_row, last_table_row + 1)
         for row, new_text in zip(rows, new_lines):
             region = self.view.line(self.view.text_point(row, 0))
@@ -259,6 +262,8 @@ class AbstractTableMultiSelect(AbstractTableCommand):
                 region = self.view.line(self.view.text_point(row, 0))
                 self.view.erase(edit, region)
 
+    def create_table(self, ctx):
+        return tablelib.TextTable(ctx.table_text, ctx.syntax)
 
     def run(self, edit):
         new_sels = []
@@ -286,8 +291,8 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        table = self.create_table(ctx)
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(ctx.sel_row, ctx.field_num)
         return sublime.Region(pt, pt)
 
@@ -301,8 +306,8 @@ class TableEditorNextField(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        table = self.create_table(ctx)
+        self.merge(edit, ctx, table)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -318,7 +323,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
                 else:
                     #sel_row == last_table_row
                     table.insert_empty_row(table.row_count)
-                    self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+                    self.merge(edit, ctx, table)
                     field_num = 0
                     sel_row += 1
                     break
@@ -335,7 +340,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
             else:
                 #sel_row == last_table_row
                 table.insert_empty_row(table.row_count)
-                self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+                self.merge(edit, ctx, table)
                 field_num = 0
                 sel_row += 1
                 break
@@ -351,8 +356,8 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        table = self.create_table(ctx)
+        self.merge(edit, ctx, table)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -396,8 +401,8 @@ class TableEditorNextRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        table = self.create_table(ctx)
+        self.merge(edit, ctx, table)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -405,10 +410,10 @@ class TableEditorNextRow(AbstractTableMultiSelect):
         if sel_row < ctx.last_table_row:
             if table[sel_row - ctx.first_table_row + 1].is_separator():
                 table.insert_empty_row(sel_row - ctx.first_table_row + 1)
-                self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+                self.merge(edit, ctx, table)
         else:
             table.insert_empty_row(table.row_count)
-            self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+            self.merge(edit, ctx, table)
         sel_row += 1
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
@@ -422,7 +427,7 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -430,7 +435,7 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         if field_num > 0:
             table.swap_columns(field_num, field_num - 1)
             field_num = field_num - 1
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -443,7 +448,7 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -464,13 +469,13 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
         table.delete_column(field_num)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         if table.column_count == 0:
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
@@ -490,7 +495,7 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -509,7 +514,7 @@ class TableEditorKillRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -534,13 +539,13 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
         table.insert_empty_row(sel_row - ctx.first_table_row)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -553,7 +558,7 @@ class TableEditorMoveRowUp(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -562,7 +567,7 @@ class TableEditorMoveRowUp(AbstractTableMultiSelect):
         if sel_row > ctx.first_table_row:
             table.swap_rows(row_num, row_num - 1)
             sel_row = sel_row - 1
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -576,7 +581,7 @@ class TableEditorMoveRowDown(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -585,7 +590,7 @@ class TableEditorMoveRowDown(AbstractTableMultiSelect):
         if sel_row < ctx.last_table_row:
             table.swap_rows(row_num, row_num + 1)
             sel_row = sel_row + 1
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -598,14 +603,14 @@ class TableEditorInsertSingleHline(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
         row_num = sel_row - ctx.first_table_row
         table.insert_single_separator_row(row_num + 1)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -617,14 +622,14 @@ class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
         row_num = sel_row - ctx.first_table_row
         table.insert_double_separator_row(row_num + 1)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -638,12 +643,12 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
 
         row_num = sel_row - ctx.first_table_row
         table.insert_single_separator_row(row_num + 1)
@@ -653,7 +658,7 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
                 table.insert_empty_row(row_num + 2)
         else:
             table.insert_empty_row(row_num + 2)
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
 
         sel_row = sel_row + 2
         pt = self.get_field_default_point(sel_row, 0)
@@ -680,7 +685,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         rest_data = self.remove_rest_line(edit, sel)
 
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
@@ -691,7 +696,7 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         row_num = sel_row - ctx.first_table_row
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
@@ -704,12 +709,12 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
     """
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
-        table = tablelib.TextTable(ctx.table_text, self.syntax)
+        table = self.create_table(ctx)
 
         sel_row = ctx.sel_row
         field_num = ctx.field_num
 
-        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+        self.merge(edit, ctx, table)
 
         row_num = sel_row - ctx.first_table_row
         if (row_num < table.row_count
@@ -720,7 +725,7 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
             table.delete_row(row_num + 1)
-            self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+            self.merge(edit, ctx, table)
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
