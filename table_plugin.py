@@ -735,15 +735,15 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
     Join current row and next row into one if next row is not hline
     """
     def run_one_sel(self, edit, sel):
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
+        ctx = TableContext(self.view, sel, self.syntax)
+        table = tablelib.TextTable(ctx.table_text, self.syntax)
 
-        row_num = sel_row - first_table_row
+        sel_row = ctx.sel_row
+        field_num = ctx.field_num
+
+        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
+
+        row_num = sel_row - ctx.first_table_row
         if (row_num < table.row_count
             and table[row_num].is_data()
             and table[row_num + 1].is_data()):
@@ -752,7 +752,7 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
             table.delete_row(row_num + 1)
-            self.merge(edit, first_table_row,last_table_row, table.render_lines())
+            self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
