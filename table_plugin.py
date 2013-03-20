@@ -711,21 +711,19 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
 
-        (sel_row, sel_col) = self.view.rowcol(sel.begin())
-        field_num = self.get_unformatted_field_num(sel_row, sel_col)
-        first_table_row = self.get_first_table_row(sel_row)
-        last_table_row = self.get_last_table_row(sel_row)
-        table_text = self.get_table_text(first_table_row, last_table_row)
-        table = tablelib.TextTable(table_text, self.syntax)
-        if sel_row == last_table_row or table[sel_row - first_table_row + 1].is_separator():
-            table.insert_empty_row(sel_row - first_table_row + 1)
+        ctx = TableContext(self.view, sel, self.syntax)
+        table = tablelib.TextTable(ctx.table_text, self.syntax)
+
+        sel_row = ctx.sel_row
+        field_num = ctx.field_num
+
+        if sel_row == ctx.last_table_row or table[sel_row - ctx.first_table_row + 1].is_separator():
+            table.insert_empty_row(sel_row - ctx.first_table_row + 1)
         sel_row = sel_row + 1
-        row_num = sel_row - first_table_row
-        print table[row_num].render()
+        row_num = sel_row - ctx.first_table_row
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
-        self.merge(edit, first_table_row,last_table_row, table.render_lines())
-        print table.render()
+        self.merge(edit, ctx.first_table_row,ctx.last_table_row, table.render_lines())
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
