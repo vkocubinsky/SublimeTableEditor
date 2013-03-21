@@ -286,7 +286,8 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
-        pt = self.view.text_point(ctx.sel_row, table.get_cursor(ctx.row_num, ctx.field_num))
+        col = table.get_cursor(ctx.row_num, ctx.field_num)
+        pt = self.view.text_point(ctx.sel_row, col)
         return sublime.Region(pt, pt)
 
 
@@ -337,6 +338,7 @@ class TableEditorNextField(AbstractTableMultiSelect):
                 field_num = 0
                 sel_row += 1
                 break
+
         pt = self.get_field_default_point(sel_row, field_num)
         return sublime.Region(pt, pt)
 
