@@ -572,6 +572,25 @@ class TextTable:
         del self._rows[i]
         self.pack()
 
+    def get_cursor(self, row_ind, col_ind):
+        #
+        # '   |  1 |  2  |  3_| 4 |'
+        assert col_ind < self.column_count
+        base_len = (len(self.prefix) +
+                   sum([column.col_len for column, ind
+                                in zip(self[row_ind].columns, range(col_ind))]) +
+                   col_ind + 1 # count of '|'
+                   )
+        text = self[row_ind][col_ind].render()
+        match = re.search(r"([^\s])\s*$",text)
+        if match:
+            col_pos = match.end(1)
+        else:
+            col_pos = 1
+        print base_len, col_pos
+        return base_len + col_pos
+
+
 
 
     def _is_number_column(self, start_row_ind, col_ind):
@@ -638,4 +657,5 @@ if __name__ == '__main__':
 """
     syntax = simple_syntax()
     t = TextTable(text, syntax)
-    print "Table:\n'{0}'".format(t.render())
+    print "Table:'\n{0}\n'".format(t.render())
+    print t.get_cursor(0,1)

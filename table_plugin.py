@@ -33,10 +33,12 @@ class TableContext:
         self.view = view
         (self.sel_row, self.sel_col) = self.view.rowcol(sel.begin())
         self.syntax = syntax
-        self.field_num = self._get_unformatted_field_num()
         self.first_table_row = self._get_first_table_row()
         self.last_table_row = self._get_last_table_row()
         self.table_text = self._get_table_text()
+        self.field_num = self._get_unformatted_field_num()
+        self.row_num = self.sel_row - self.first_table_row
+
 
     def _get_table_text(self):
         begin_point = self.view.line(
@@ -284,7 +286,7 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(ctx.sel_row, ctx.field_num)
+        pt = self.view.text_point(ctx.sel_row, table.get_cursor(ctx.row_num, ctx.field_num))
         return sublime.Region(pt, pt)
 
 
