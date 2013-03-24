@@ -162,18 +162,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         #'Packages/Text/Plain text.tmLanguage':
         #
 
-    def csv2table(self, text):
-        lines = []
-        try:
-            vline = self.syntax.vline
-            dialect = csv.Sniffer().sniff(text)
-            table_reader = csv.reader(text.splitlines(), dialect)
-            for row in table_reader:
-                lines.append(vline + vline.join(row) + vline)
-        except csv.Error:
-            for row in text.splitlines():
-                lines.append(vline + row + vline)
-        return "\n".join(lines)
 
     def find_border(self, text, num):
         if self.syntax.is_hline(text):
@@ -759,6 +747,19 @@ class TableEditorCsvToTable(AbstractTableCommand):
             self.view.sel().add(sel)
             self.view.show(sel, False)
         self.view.run_command("table_editor_align")
+
+    def csv2table(self, text):
+        lines = []
+        try:
+            vline = self.syntax.vline
+            dialect = csv.Sniffer().sniff(text)
+            table_reader = csv.reader(text.splitlines(), dialect)
+            for row in table_reader:
+                lines.append(vline + vline.join(row) + vline)
+        except csv.Error:
+            for row in text.splitlines():
+                lines.append(vline + row + vline)
+        return "\n".join(lines)
 
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):
