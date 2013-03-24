@@ -303,7 +303,6 @@ class TableEditorNextField(AbstractTableMultiSelect):
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
         row_num = ctx.row_num
 
@@ -356,19 +355,19 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
         moved = False
         while True:
-            if table[sel_row - ctx.first_table_row].is_separator():
-                if sel_row > ctx.first_table_row:
-                    sel_row = sel_row - 1
+            if table[row_num].is_separator():
+                if row_num > 0:
+                    row_num = row_num - 1
                     field_num = table.column_count - 1
                     moved = True
                     continue
                 else:
-                    #sel_row == first_table_row:
+                    #row_num == 0
                     field_num = 0
                     break
             elif moved:
@@ -376,15 +375,17 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
             elif field_num > 0:
                 field_num = field_num - 1
                 break
-            elif sel_row > ctx.first_table_row:
-                sel_row = sel_row - 1
+            elif row_num > 0:
+                row_num = row_num - 1
                 field_num = table.column_count - 1
                 moved = True
                 continue
             else:
-                #sel_row == first_table_row:
+                #row_num == 0
                 break
-        pt = self.get_field_default_point(sel_row, field_num)
+
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
