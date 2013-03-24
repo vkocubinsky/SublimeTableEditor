@@ -473,8 +473,8 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
         table.delete_column(field_num)
         self.merge(edit, ctx, table)
@@ -483,7 +483,8 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
         else:
             if field_num == table.column_count:
                 field_num = field_num - 1
-            pt = self.get_field_default_point(sel_row, field_num)
+            col = table.get_cursor(row_num, field_num)
+            pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -499,12 +500,13 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
+        row_num = ctx.row_num
         field_num = ctx.field_num
 
         table.insert_empty_column(field_num)
-        self.merge(edit,ctx.first_table_row, ctx.last_table_row, table.render_lines())
-        pt = self.get_field_default_point(sel_row, field_num)
+        self.merge(edit, ctx, table)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
