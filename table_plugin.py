@@ -402,18 +402,20 @@ class TableEditorNextRow(AbstractTableMultiSelect):
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        if sel_row < ctx.last_table_row:
-            if table[sel_row - ctx.first_table_row + 1].is_separator():
-                table.insert_empty_row(sel_row - ctx.first_table_row + 1)
+        if row_num + 1 < table.row_count:
+            if table[row_num + 1].is_header_separator():
+                table.insert_empty_row(row_num + 1)
                 self.merge(edit, ctx, table)
         else:
             table.insert_empty_row(table.row_count)
             self.merge(edit, ctx, table)
-        sel_row += 1
-        pt = self.get_field_default_point(sel_row, field_num)
+        row_num = row_num + 1
+
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -427,14 +429,15 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
         if field_num > 0:
             table.swap_columns(field_num, field_num - 1)
             field_num = field_num - 1
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -448,14 +451,15 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
         if field_num < table.column_count - 1:
             table.swap_columns(field_num, field_num + 1)
             field_num = field_num + 1
-        self.merge(edit,ctx.first_table_row, ctx.last_table_row, table.render_lines())
-        pt = self.get_field_default_point(sel_row, field_num)
+        self.merge(edit,ctx, table)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
