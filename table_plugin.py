@@ -612,14 +612,15 @@ class TableEditorInsertSingleHline(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        row_num = sel_row - ctx.first_table_row
         table.insert_single_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
+
 
 class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
     """
@@ -631,13 +632,13 @@ class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        row_num = sel_row - ctx.first_table_row
         table.insert_double_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
