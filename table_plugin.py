@@ -513,24 +513,25 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
 class TableEditorKillRow(AbstractTableMultiSelect):
     """
     Key : alt+shift+up
-    Kill the current row or horizontal line.
+    Kill the current row.
     """
 
     def run_one_sel(self, edit, sel):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
+        row_num = ctx.row_num
         field_num = ctx.field_num
 
-        table.delete_row(sel_row - ctx.first_table_row)
-        self.merge(edit,ctx.first_table_row, ctx.last_table_row, table.render_lines())
-        if ctx.first_table_row == ctx.last_table_row:
-            pt = self.view.text_point(sel_row, 0)
+        table.delete_row(row_num)
+        self.merge(edit, ctx, table)
+        if table.row_count == 0:
+            pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            if sel_row == ctx.last_table_row:
-                sel_row = sel_row - 1
-            pt = self.get_field_default_point(sel_row, field_num)
+            if row_num == table.row_count: # just deleted one row
+                row_num = row_num - 1
+            col = table.get_cursor(row_num, field_num)
+            pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -545,12 +546,14 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        table.insert_empty_row(sel_row - ctx.first_table_row)
+        table.insert_empty_row(row_num)
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
