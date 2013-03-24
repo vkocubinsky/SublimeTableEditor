@@ -567,15 +567,15 @@ class TableEditorMoveRowUp(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        row_num = sel_row - ctx.first_table_row
-        if sel_row > ctx.first_table_row:
+        if row_num > 0:
             table.swap_rows(row_num, row_num - 1)
-            sel_row = sel_row - 1
+            row_num = row_num - 1
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -590,15 +590,15 @@ class TableEditorMoveRowDown(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        row_num = sel_row - ctx.first_table_row
-        if sel_row < ctx.last_table_row:
+        if row_num + 1 < table.row_count:
             table.swap_rows(row_num, row_num + 1)
-            sel_row = sel_row + 1
+            row_num = row_num + 1
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
