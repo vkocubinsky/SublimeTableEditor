@@ -160,9 +160,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         #
 
 
-class AbstractTableMultiSelect(AbstractTableCommand):
-
-
     def merge(self, edit, ctx, table):
         new_lines = table.render_lines()
         first_table_row = ctx.first_table_row
@@ -205,8 +202,16 @@ class AbstractTableMultiSelect(AbstractTableCommand):
     def run_one_sel(self, edit, sel):
         return sel
 
+    def cell_sel(self, ctx, table, row_num, field_num):
+        if table.empty():
+            pt = self.view.text_point(ctx.first_table_row, 0)
+        else:
+            col = table.get_cursor(row_num, field_num)
+            pt = self.view.text_point(ctx.first_table_row + row_num, col)
+        return sublime.Region(pt, pt)
 
-class TableEditorAlignCommand(AbstractTableMultiSelect):
+
+class TableEditorAlignCommand(AbstractTableCommand):
     """
     Key: ctrl+shift+a
     Re-align the table without change the current table field.
@@ -217,12 +222,10 @@ class TableEditorAlignCommand(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
-        col = table.get_cursor(ctx.row_num, ctx.field_num)
-        pt = self.view.text_point(ctx.sel_row, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, ctx.row_num, ctx.field_num)
 
 
-class TableEditorNextField(AbstractTableMultiSelect):
+class TableEditorNextField(AbstractTableCommand):
     """
     Key: tab
     Re-align the table, move to the next field.
@@ -270,12 +273,10 @@ class TableEditorNextField(AbstractTableMultiSelect):
                 row_num = row_num + 1
                 break
 
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorPreviousField(AbstractTableMultiSelect):
+class TableEditorPreviousField(AbstractTableCommand):
     """
     Key: shift+tab
     Re-align, move to previous field.
@@ -315,12 +316,10 @@ class TableEditorPreviousField(AbstractTableMultiSelect):
                 #row_num == 0
                 break
 
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorNextRow(AbstractTableMultiSelect):
+class TableEditorNextRow(AbstractTableCommand):
     """
     Key: enter
     Re-align the table and move down to next row.
@@ -345,12 +344,10 @@ class TableEditorNextRow(AbstractTableMultiSelect):
             self.merge(edit, ctx, table)
         row_num = row_num + 1
 
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
+class TableEditorMoveColumnLeft(AbstractTableCommand):
     """
     Key: alt+left
     Move the current column right.
@@ -367,12 +364,11 @@ class TableEditorMoveColumnLeft(AbstractTableMultiSelect):
             table.swap_columns(field_num, field_num - 1)
             field_num = field_num - 1
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorMoveColumnRight(AbstractTableMultiSelect):
+class TableEditorMoveColumnRight(AbstractTableCommand):
     """
     Key: alt+right
     Move the current column right.
@@ -389,12 +385,11 @@ class TableEditorMoveColumnRight(AbstractTableMultiSelect):
             table.swap_columns(field_num, field_num + 1)
             field_num = field_num + 1
         self.merge(edit,ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorDeleteColumn(AbstractTableMultiSelect):
+class TableEditorDeleteColumn(AbstractTableCommand):
     """
     Key: alt+shift+left
     Kill the current column.
@@ -409,19 +404,12 @@ class TableEditorDeleteColumn(AbstractTableMultiSelect):
 
         table.delete_column(field_num)
         self.merge(edit, ctx, table)
-        if table.column_count == 0:
-            pt = self.view.text_point(ctx.first_table_row, 0)
-        else:
-            if field_num == table.column_count:
-                field_num = field_num - 1
-            col = table.get_cursor(row_num, field_num)
-            pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        if field_num == table.column_count:
+            field_num = field_num - 1
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-
-
-class TableEditorInsertColumn(AbstractTableMultiSelect):
+class TableEditorInsertColumn(AbstractTableCommand):
     """
     Keys: alt+shift+right
     Insert a new column to the left of the cursor position.
@@ -436,12 +424,10 @@ class TableEditorInsertColumn(AbstractTableMultiSelect):
 
         table.insert_empty_column(field_num)
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorKillRow(AbstractTableMultiSelect):
+class TableEditorKillRow(AbstractTableCommand):
     """
     Key : alt+shift+up
     Kill the current row.
@@ -456,18 +442,13 @@ class TableEditorKillRow(AbstractTableMultiSelect):
 
         table.delete_row(row_num)
         self.merge(edit, ctx, table)
-        if table.row_count == 0:
-            pt = self.view.text_point(ctx.first_table_row, 0)
-        else:
-            if row_num == table.row_count: # just deleted one row
-                row_num = row_num - 1
-            col = table.get_cursor(row_num, field_num)
-            pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        if row_num == table.row_count: # just deleted one row
+            row_num = row_num - 1
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
 
-class TableEditorInsertRow(AbstractTableMultiSelect):
+class TableEditorInsertRow(AbstractTableCommand):
     """
     Key: alt+shift+down
     Insert a new row above the current row.
@@ -483,12 +464,10 @@ class TableEditorInsertRow(AbstractTableMultiSelect):
         table.insert_empty_row(row_num)
         self.merge(edit, ctx, table)
 
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorMoveRowUp(AbstractTableMultiSelect):
+class TableEditorMoveRowUp(AbstractTableCommand):
     """
     Key: alt+up
     Move the current row up.
@@ -505,13 +484,11 @@ class TableEditorMoveRowUp(AbstractTableMultiSelect):
             table.swap_rows(row_num, row_num - 1)
             row_num = row_num - 1
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
 
-class TableEditorMoveRowDown(AbstractTableMultiSelect):
+class TableEditorMoveRowDown(AbstractTableCommand):
     """
     Key: alt+down
     Move the current row down.
@@ -528,12 +505,10 @@ class TableEditorMoveRowDown(AbstractTableMultiSelect):
             table.swap_rows(row_num, row_num + 1)
             row_num = row_num + 1
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorInsertSingleHline(AbstractTableMultiSelect):
+class TableEditorInsertSingleHline(AbstractTableCommand):
     """
     Key: ctrl+k,-
     Insert single horizontal line below current row.
@@ -548,12 +523,10 @@ class TableEditorInsertSingleHline(AbstractTableMultiSelect):
 
         table.insert_single_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
+class TableEditorInsertDoubleHline(AbstractTableCommand):
     """
     Key: ctrl+k,=
     Insert double horizontal line below current row.
@@ -568,12 +541,10 @@ class TableEditorInsertDoubleHline(AbstractTableMultiSelect):
 
         table.insert_double_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorHlineAndMove(AbstractTableMultiSelect):
+class TableEditorHlineAndMove(AbstractTableCommand):
     """
     Key: ctrl+k, enter
     Insert a horizontal line below current row,
@@ -598,12 +569,10 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
 
         row_num = row_num + 2
         field_num = 0
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorSplitColumnDown(AbstractTableMultiSelect):
+class TableEditorSplitColumnDown(AbstractTableCommand):
     """
     Key: alt+enter
     Split rest of cell down from current cursor position,
@@ -634,13 +603,11 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
         self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
 
-class TableEditorJoinLines(AbstractTableMultiSelect):
+class TableEditorJoinLines(AbstractTableCommand):
     """
     Key: ctrl+j
     Join current row and next row into one if next row is not hline
@@ -663,12 +630,10 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
 
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
-        col = table.get_cursor(row_num, field_num)
-        pt = self.view.text_point(ctx.first_table_row + row_num, col)
-        return sublime.Region(pt, pt)
+        return self.cell_sel(ctx, table, row_num, field_num)
 
 
-class TableEditorCsvToTable(AbstractTableMultiSelect):
+class TableEditorCsvToTable(AbstractTableCommand):
     """
     Command: table_csv_to_table
     Key: ctrl+k, |
@@ -686,9 +651,7 @@ class TableEditorCsvToTable(AbstractTableMultiSelect):
             ctx = TableContext(self.view, sel, self.syntax)
             table = self.create_table(ctx)
             self.merge(edit, ctx, table)
-            col = table.get_cursor(ctx.row_num, ctx.field_num)
-            pt = self.view.text_point(ctx.sel_row, col)
-            return sublime.Region(pt, pt)
+            return self.cell_sel(ctx, table, 0, 0)
 
     def csv2table(self, text):
         lines = []

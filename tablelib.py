@@ -447,6 +447,9 @@ class TextTable:
     def row_count(self):
         return len(self._rows)
 
+    def empty(self):
+        return self.column_count == 0
+
     def __getitem__(self, index):
         return self._rows[index]
 
