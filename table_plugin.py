@@ -31,36 +31,36 @@ class TableContext:
 
     def __init__(self, view, sel, syntax):
         self.view = view
-        (self.sel_row, self.sel_col) = self.view.rowcol(sel.begin())
+        (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.syntax = syntax
-        self.first_table_row = self._get_first_table_row()
-        self.last_table_row = self._get_last_table_row()
-        self.table_text = self._get_table_text()
-        self.field_num = self._get_unformatted_field_num()
-        self.row_num = self.sel_row - self.first_table_row
+        self.first_table_row = self._get_first_table_row(sel_row, sel_col)
+        self.last_table_row = self._get_last_table_row(sel_row, sel_col)
+        self.table_text = self._get_table_text(self.first_table_row, self.last_table_row)
+        self.field_num = self._get_unformatted_field_num(sel_row, sel_col)
+        self.row_num = sel_row - self.first_table_row
 
 
-    def _get_table_text(self):
+    def _get_table_text(self, first_table_row, last_table_row):
         begin_point = self.view.line(
-                                     self.view.text_point(self.first_table_row, 0)
+                                     self.view.text_point(first_table_row, 0)
                                     ).begin()
         end_point = self.view.line(
-                                   self.view.text_point(self.last_table_row, 0)
+                                   self.view.text_point(last_table_row, 0)
                                    ).end()
         return self.view.substr(sublime.Region(begin_point, end_point))
 
-    def _get_last_table_row(self):
-        row = self.sel_row
-        last_table_row = self.sel_row
-        last_line = self._get_last_buffer_row()
+    def _get_last_table_row(self, sel_row, sel_col):
+        row = sel_row
+        last_table_row = sel_row
+        last_line = self.view.rowcol(self.view.size())[0]
         while (row <= last_line and self._is_table_row(row)):
             last_table_row = row
             row = row + 1
         return last_table_row
 
-    def _get_first_table_row(self):
-        row = self.sel_row
-        first_table_row = self.sel_row
+    def _get_first_table_row(self, sel_row, sel_col):
+        row = sel_row
+        first_table_row = sel_row
         while (row >= 0 and self._is_table_row(row)):
             first_table_row = row
             row = row - 1
@@ -70,17 +70,17 @@ class TableContext:
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
                         self._get_text(row)) is not None
 
-    def _get_unformatted_field_num(self):
-        line_text = self._get_text(self.sel_row)
-        sel_field_num = self._hline_count(line_text, 0, self.sel_col) - 1
+    def _get_unformatted_field_num(self, sel_row, sel_col):
+        line_text = self._get_text(sel_row)
+        sel_field_num = self._hline_count(line_text, 0, sel_col) - 1
         mo = re.compile(r"\s*$")
-        if sel_field_num > 0 and mo.match(line_text, self.sel_col):
+        if sel_field_num > 0 and mo.match(line_text, sel_col):
             sel_field_num = sel_field_num - 1
         return sel_field_num
 
     #not used
     def _get_field_num(self, row, col):
-        return self.hline_count(self.get_text(row), 0, col) - 1
+        return self._hline_count(self._get_text(row), 0, col) - 1
 
     def _hline_count(self, text, start, end):
         if self.syntax.is_hline(text):
@@ -94,9 +94,6 @@ class TableContext:
         region = self.view.line(point)
         text = self.view.substr(region)
         return text
-
-    def _get_last_buffer_row(self):
-        return self.view.rowcol(self.view.size())[0]
 
 
 class AbstractTableCommand(sublime_plugin.TextCommand):
@@ -161,57 +158,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             return tablelib.simple_syntax()
         #'Packages/Text/Plain text.tmLanguage':
         #
-
-
-    def find_border(self, text, num):
-        if self.syntax.is_hline(text):
-            pattern = self.syntax.hline_border_pattern()
-        else:
-            pattern = self.syntax.vline_pattern()
-        it = re.finditer(pattern, text)
-        index = -1
-        for i in range(num):
-            try:
-                mo = it.next()
-                index = mo.start()
-            except StopIteration:
-                index = -1
-        return index
-
-    def hline_count(self, text, start, end):
-        if self.syntax.is_hline(text):
-            return sum([text.count(ch, start, end)
-                                        for ch in self.syntax.hline_borders])
-        else:
-            return text.count(self.syntax.vline, start, end)
-
-    def get_text(self, row):
-        point = self.view.text_point(row, 0)
-        region = self.view.line(point)
-        text = self.view.substr(region)
-        return text
-
-    def get_row(self, point):
-        return self.view.rowcol(point)[0]
-
-    def is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
-                        self.get_text(row)) is not None
-
-
-
-    def get_field_default_point(self, row, field_num):
-        text = self.get_text(row)
-        i1 = self.find_border(text, field_num + 1)
-        i2 = self.find_border(text, field_num + 2)
-        match = re.compile(r"([^\s])\s*$").search(text, i1 + 1, i2)
-        if match:
-            return self.view.text_point(row, match.start(1) + 1)
-        else:
-            return self.view.text_point(row, i1 + 2)
-
-
-
 
 
 class AbstractTableMultiSelect(AbstractTableCommand):
