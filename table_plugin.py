@@ -693,17 +693,17 @@ class TableEditorSplitColumnDown(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
-        if sel_row == ctx.last_table_row or table[sel_row - ctx.first_table_row + 1].is_separator():
-            table.insert_empty_row(sel_row - ctx.first_table_row + 1)
-        sel_row = sel_row + 1
-        row_num = sel_row - ctx.first_table_row
+        if row_num + 1 == table.row_count or table[row_num + 1].is_separator():
+            table.insert_empty_row(row_num + 1)
+        row_num = row_num + 1
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
         self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
@@ -717,13 +717,12 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         ctx = TableContext(self.view, sel, self.syntax)
         table = self.create_table(ctx)
 
-        sel_row = ctx.sel_row
         field_num = ctx.field_num
+        row_num = ctx.row_num
 
         self.merge(edit, ctx, table)
 
-        row_num = sel_row - ctx.first_table_row
-        if (row_num < table.row_count
+        if (row_num + 1 < table.row_count
             and table[row_num].is_data()
             and table[row_num + 1].is_data()):
             for curr_col, next_col in zip(table[row_num].columns,
@@ -732,7 +731,8 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
 
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
-        pt = self.get_field_default_point(sel_row, field_num)
+        col = table.get_cursor(row_num, field_num)
+        pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
 
