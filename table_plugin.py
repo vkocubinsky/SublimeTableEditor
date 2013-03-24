@@ -597,6 +597,7 @@ class TableEditorHlineAndMove(AbstractTableMultiSelect):
         self.merge(edit, ctx, table)
 
         row_num = row_num + 2
+        field_num = 0
         col = table.get_cursor(row_num, field_num)
         pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
