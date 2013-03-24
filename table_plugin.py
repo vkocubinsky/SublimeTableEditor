@@ -249,9 +249,6 @@ class AbstractTableMultiSelect(AbstractTableCommand):
     def run(self, edit):
         new_sels = []
         for sel in self.view.sel():
-            if not self.is_table_row(self.get_row(sel.begin())):
-                new_sels.append(sel)
-                continue
             new_sel = self.run_one_sel(edit, sel)
             new_sels.append(new_sel)
         self.view.sel().clear()
@@ -724,29 +721,27 @@ class TableEditorJoinLines(AbstractTableMultiSelect):
         return sublime.Region(pt, pt)
 
 
-class TableEditorCsvToTable(AbstractTableCommand):
+class TableEditorCsvToTable(AbstractTableMultiSelect):
     """
     Command: table_csv_to_table
     Key: ctrl+k, |
     Convert selected CSV region into table
     """
-    def run(self, edit):
-        new_sels = []
-        for sel in self.view.sel():
-            (sel_row, sel_col) = self.view.rowcol(sel.begin())
-            if sel.empty():
-                new_sels.append(sel)
-            else:
-                text = self.view.substr(sel)
-                new_text = self.csv2table(text)
-                self.view.replace(edit, sel, new_text)
-                pt = self.get_field_default_point(sel_row, 0)
-                new_sels.append(sublime.Region(pt, pt))
-        self.view.sel().clear()
-        for sel in new_sels:
-            self.view.sel().add(sel)
-            self.view.show(sel, False)
-        self.view.run_command("table_editor_align")
+
+    def run_one_sel(self, edit, sel):
+        text = self.view.substr(sel)
+        if sel.empty():
+            return sel
+        else:
+            new_text = self.csv2table(text)
+            self.view.replace(edit, sel, new_text)
+
+            ctx = TableContext(self.view, sel, self.syntax)
+            table = self.create_table(ctx)
+            self.merge(edit, ctx, table)
+            col = table.get_cursor(ctx.row_num, ctx.field_num)
+            pt = self.view.text_point(ctx.sel_row, col)
+            return sublime.Region(pt, pt)
 
     def csv2table(self, text):
         lines = []
