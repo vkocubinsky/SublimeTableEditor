@@ -21,8 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import re
+import csv
 
 class TableSyntax:
     MUTLI_MARKDOWN_SYTAX = 'Multi Markdown'
@@ -430,12 +430,11 @@ class Row:
 class TextTable:
 
 
-    def __init__(self, text, syntax):
-        self.text = text
+    def __init__(self, syntax):
         self.syntax = syntax
+        self.prefix = ""
         self._rows = []
         self.column_count = 0
-        self._parse()
         self.pack()
 
 
@@ -605,8 +604,19 @@ class TextTable:
                 return False
         return True
 
+    def render_lines(self):
+        return [self.prefix + row.render() for row in self._rows]
 
-    def parse_row(self, line):
+    def render(self):
+        return "\n".join(self.render_lines())
+
+
+class TableParser:
+
+    def __init__(self, syntax):
+        self.syntax = syntax
+
+    def parse_row(self, table, line):
         line = line.strip()
         #remove first '|' character
         if line[:1] in self.syntax.hline_borders:
@@ -618,36 +628,48 @@ class TextTable:
             cols = re.split(self.syntax.hline_border_pattern(), line)
         else:
             cols = line.split(self.syntax.vline)
-        row = Row(self, cols)
+        row = Row(table, cols)
         return row
 
+    def is_table_row(self, row):
+        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
+                        row) is not None
 
-    def _parse(self):
-        mo = re.search(r"[^\s]", self.text)
+
+    def parse_text(self, text):
+        table = TextTable(self.syntax)
+        mo = re.search(r"[^\s]", text)
         if mo:
-            self.prefix = self.text[:mo.start()]
+            table.prefix = text[:mo.start()]
         else:
-            self.prefix = ""
-        lines = self.text.strip().splitlines()
+            table.prefix = ""
+        lines = text.strip().splitlines()
         for line in lines:
-            row = self.parse_row(line)
-            self.add_row(row)
+            row = self.parse_row(table, line)
+            table.add_row(row)
+        table.pack()
+        return table
 
-    def render_lines(self):
-        return [self.prefix + row.render() for row in self._rows]
+    def parse_csv(self, text):
+        lines = []
+        try:
+            table = TextTable(syntax)
+            vline = self.syntax.vline
+            dialect = csv.Sniffer().sniff(text)
+            table_reader = csv.reader(text.splitlines(), dialect)
+            for row in table_reader:
+                table.add_row(Row(table, row))
+        except csv.Error:
+            table = TextTable(syntax)
+            for row in text.splitlines():
+                table.add_row(self, Row(table, [row]))
+        table.pack()
+        return table
 
-    def render(self):
-        return "\n".join(self.render_lines())
-
-
-def format_to_text(text, syntax=simple_syntax):
-    table = TextTable(text, syntax)
-    return table.render()
-
-
-def format_to_lines(text, syntax):
-    table = TextTable(text, syntax)
-    return table.render_lines()
+def parse_table(syntax, text):
+    parser = TableParser(syntax)
+    table = parser.parse_text(text)
+    return table
 
 
 if __name__ == '__main__':
@@ -658,7 +680,14 @@ if __name__ == '__main__':
 | 1   | 2   | 3     |
 | one | two | three |
 """
+
+    csv_text = """\
+1,2,3
+a,b,c
+"""
     syntax = simple_syntax()
-    t = TextTable(text, syntax)
+    p = TableParser(syntax)
+    t = p.parse_text(text)
+    t = p.parse_csv(csv_text)
     print "Table:'\n{0}\n'".format(t.render())
     print t.get_cursor(0,1)

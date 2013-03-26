@@ -67,8 +67,9 @@ class TableContext:
         return first_table_row
 
     def _is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
-                        self._get_text(row)) is not None
+        text = self._get_text(row)
+        return tablelib.TableParser(self.syntax).is_table_row(text)
+
 
     def _get_unformatted_field_num(self, sel_row, sel_col):
         line_text = self._get_text(sel_row)
@@ -187,7 +188,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 self.view.erase(edit, region)
 
     def create_table(self, ctx):
-        return tablelib.TextTable(ctx.table_text, ctx.syntax)
+        return tablelib.parse_table(ctx.syntax, ctx.table_text)
 
     def run(self, edit):
         new_sels = []

@@ -103,7 +103,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.swap_columns(1,2)
         self.assert_table_equals(expected,t.render())
 
@@ -126,7 +126,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.delete_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -149,7 +149,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.swap_rows(3,4)
         self.assert_table_equals(expected,t.render())
 
@@ -170,7 +170,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.delete_row(4)
         self.assert_table_equals(expected,t.render())
 
@@ -192,7 +192,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.insert_empty_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -215,7 +215,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.insert_empty_row(3)
         self.assert_table_equals(expected,t.render())
 
@@ -236,7 +236,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.insert_single_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
@@ -258,7 +258,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.rstrip()
 
 
-        t = tablelib.TextTable(text, self.syntax)
+        t = tablelib.parse_table(self.syntax, text)
         t.insert_double_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
