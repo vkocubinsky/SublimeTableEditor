@@ -616,7 +616,7 @@ class TableParser:
     def __init__(self, syntax):
         self.syntax = syntax
 
-    def parse_row(self, table, line):
+    def _split_row(self, table, line):
         line = line.strip()
         #remove first '|' character
         if line[:1] in self.syntax.hline_borders:
@@ -628,8 +628,7 @@ class TableParser:
             cols = re.split(self.syntax.hline_border_pattern(), line)
         else:
             cols = line.split(self.syntax.vline)
-        row = Row(table, cols)
-        return row
+        return cols
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
@@ -645,7 +644,8 @@ class TableParser:
             table.prefix = ""
         lines = text.strip().splitlines()
         for line in lines:
-            row = self.parse_row(table, line)
+            cols = self._split_row(table, line)
+            row = Row(table, cols)
             table.add_row(row)
         table.pack()
         return table
