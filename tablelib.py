@@ -491,17 +491,23 @@ class TextTable:
 
     def insert_empty_row(self, i):
         assert i >= 0
-        self._rows.insert(i, Row(self,['']))
+        row = Row(self, Row.ROW_DATA)
+        row.columns.append(DataColumn(row, ''))
+        self._rows.insert(i, row)
         self.pack()
 
     def insert_single_separator_row(self, i):
         assert i >= 0
-        self._rows.insert(i, Row(self,['-']))
+        row = Row(self, Row.ROW_SINGLE_SEPARATOR)
+        row.columns.append(SeparatorColumn(row, '-'))
+        self._rows.insert(i, row)
         self.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
-        self._rows.insert(i, Row(self,['=']))
+        row = Row(self, Row.ROW_DOUBLE_SEPARATOR)
+        row.columns.append(SeparatorColumn(row, '='))
+        self._rows.insert(i, row)
         self.pack()
 
 

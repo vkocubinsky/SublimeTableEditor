@@ -62,7 +62,8 @@ class SimpleSyntaxTest(BaseTableTest):
 | Alex        | M           |            22 |
 """.rstrip()
 
-        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
     def testCustomAlignment(self):
@@ -82,7 +83,8 @@ class SimpleSyntaxTest(BaseTableTest):
 |  Alex |   M    | 22  |
 """.rstrip()
 
-        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
     def testSwapColumn(self):
@@ -290,7 +292,8 @@ class TextileSyntaxTest(BaseTableTest):
 |~. bottom         |
 """.rstrip()
 
-        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
 
@@ -316,7 +319,8 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
 |        Alex |      M      | 22            |
 """.rstrip()
 
-        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
 
@@ -347,7 +351,8 @@ class ReStructuredTextSyntaxTest(BaseTableTest):
 """.rstrip()
 
         self.syntax.keep_space_left = True
-        formatted = tablelib.format_to_text(unformatted, self.syntax)
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
 
