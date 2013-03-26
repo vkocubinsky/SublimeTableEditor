@@ -325,89 +325,30 @@ class Row:
     ROW_TEXTILE_HEADER_SYNTAX = "._"
 
 
-    def __init__(self, table, str_cols):
+    def __init__(self, table, row_type):
         self.table = table
-        self._row_type = None
-
-        if self._is_single_row_separator(str_cols):
-            self._row_type = Row.ROW_SINGLE_SEPARATOR
-            self.columns = [SeparatorColumn(self,'-') for col in str_cols]
-        elif self._is_double_row_separator(str_cols):
-            self._row_type = Row.ROW_DOUBLE_SEPARATOR
-            self.columns = [SeparatorColumn(self,'=') for col in str_cols]
-        elif (self.table.syntax.custom_column_alignment and
-              self._is_custom_align_row(str_cols)):
-            self._row_type = Row.ROW_CUSTOM_ALIGN
-            self.columns = [CustomAlignColumn(self,col) for col in str_cols]
-        elif (self.table.syntax.multi_markdown_syntax()
-              and self._is_multi_markdown_align_row(str_cols)):
-            self._row_type = Row.ROW_MULTI_MARKDOWN_ALIGN
-            self.columns = [MultiMarkdownAlignColumn(self,col) for col in str_cols]
-        elif (self.table.syntax.textile_syntax() and
-              self._is_textile_header_syntax(str_cols)):
-              self._row_type = Row.ROW_TEXTILE_HEADER_SYNTAX
-              self.columns = [TextileHeaderColumn(self,col) for col in str_cols]
-        else:
-            self._row_type = Row.ROW_DATA
-            self.columns = []
-            for col in str_cols:
-                if (self.table.syntax.textile_syntax() and
-                   TextileCellColumn.is_textile_cell(col)):
-                    column = TextileCellColumn(self, col)
-                else:
-                    column = DataColumn(self,col)
-                self.columns.append(column)
+        self.row_type = row_type
+        self.columns = []
 
 
     def __getitem__(self, index):
         return self.columns[index]
 
-    @property
-    def row_type(self):
-        return self._row_type
+    def __len__(self):
+        return len(self.columns)
 
     def is_header_separator(self):
-        return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
+        return self.row_type in (Row.ROW_SINGLE_SEPARATOR,
                                   Row.ROW_DOUBLE_SEPARATOR,
                                   Row.ROW_MULTI_MARKDOWN_ALIGN)
 
     def is_separator(self):
-        return self._row_type in (Row.ROW_SINGLE_SEPARATOR,
+        return self.row_type in (Row.ROW_SINGLE_SEPARATOR,
                                   Row.ROW_DOUBLE_SEPARATOR)
 
     def is_data(self):
-        return self._row_type in (Row.ROW_DATA)
+        return self.row_type in (Row.ROW_DATA)
 
-    def _is_single_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\-]+\s*$", col):
-                return False
-        return True
-
-
-    def _is_double_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\=]+\s*$", col):
-                return False
-        return True
-
-    def _is_custom_align_row(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
-                return False
-        return True
-
-    def _is_multi_markdown_align_row(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
-                return False
-        return True
-
-    def _is_textile_header_syntax(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*\_\..*$", col):
-                return False
-        return True
 
 
 
@@ -457,7 +398,7 @@ class TextTable:
             self.column_count = 0
             return
 
-        self.column_count = max([len(row.columns) for row in self._rows])
+        self.column_count = max([len(row) for row in self._rows])
 
         if self.column_count == 0:
             self._rows = []
@@ -616,6 +557,67 @@ class TableParser:
     def __init__(self, syntax):
         self.syntax = syntax
 
+    def _is_single_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\-]+\s*$", col):
+                return False
+        return True
+
+    def _is_double_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\=]+\s*$", col):
+                return False
+        return True
+
+    def _is_custom_align_row(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
+                return False
+        return True
+
+    def _is_multi_markdown_align_row(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
+                return False
+        return True
+
+    def _is_textile_header_syntax(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*\_\..*$", col):
+                return False
+        return True
+
+    def _parse_row(self, table, str_cols):
+        if self._is_single_row_separator(str_cols):
+            row = Row(table, Row.ROW_SINGLE_SEPARATOR)
+            row.columns = [SeparatorColumn(row,'-') for col in str_cols]
+        elif self._is_double_row_separator(str_cols):
+            row = Row(table, Row.ROW_DOUBLE_SEPARATOR)
+            row.columns = [SeparatorColumn(row,'=') for col in str_cols]
+        elif (self.syntax.custom_column_alignment and
+              self._is_custom_align_row(str_cols)):
+            row = Row(table, Row.ROW_CUSTOM_ALIGN)
+            row.columns = [CustomAlignColumn(row,col) for col in str_cols]
+        elif (self.syntax.multi_markdown_syntax()
+              and self._is_multi_markdown_align_row(str_cols)):
+            row = Row(table, Row.ROW_MULTI_MARKDOWN_ALIGN)
+            row.columns = [MultiMarkdownAlignColumn(row,col) for col in str_cols]
+        elif (self.syntax.textile_syntax() and
+              self._is_textile_header_syntax(str_cols)):
+              row = Row(table, Row.ROW_TEXTILE_HEADER_SYNTAX)
+              row.columns = [TextileHeaderColumn(row,col) for col in str_cols]
+        else:
+            row = Row(table, Row.ROW_DATA)
+            for col in str_cols:
+                if (self.syntax.textile_syntax() and
+                   TextileCellColumn.is_textile_cell(col)):
+                    column = TextileCellColumn(row, col)
+                else:
+                    column = DataColumn(row,col)
+                row.columns.append(column)
+        return row
+
+
     def _split_row(self, table, line):
         line = line.strip()
         #remove first '|' character
@@ -645,7 +647,7 @@ class TableParser:
         lines = text.strip().splitlines()
         for line in lines:
             cols = self._split_row(table, line)
-            row = Row(table, cols)
+            row = self._parse_row(table, cols)
             table.add_row(row)
         table.pack()
         return table
@@ -657,12 +659,16 @@ class TableParser:
             vline = self.syntax.vline
             dialect = csv.Sniffer().sniff(text)
             table_reader = csv.reader(text.splitlines(), dialect)
-            for row in table_reader:
-                table.add_row(Row(table, row))
+            for cols in table_reader:
+                row = Row(table, Row.ROW_DATA)
+                row.columns = [DataColumn(row,col) for col in cols]
+                table.add_row(row)
         except csv.Error:
             table = TextTable(syntax)
-            for row in text.splitlines():
-                table.add_row(self, Row(table, [row]))
+            for line in text.splitlines():
+                row = Row(table, Row.ROW_DATA)
+                row.columns.append(DataColumn(row,line))
+                table.add_row(self, row)
         table.pack()
         return table
 
