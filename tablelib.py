@@ -349,6 +349,9 @@ class Row:
     def is_data(self):
         return self.row_type in (Row.ROW_DATA)
 
+    def is_align(self):
+        return self.row_type in (Row.ROW_CUSTOM_ALIGN,
+                                 Row.ROW_MULTI_MARKDOWN_ALIGN)
 
 
 
@@ -358,8 +361,7 @@ class Row:
 
     def render(self):
         syntax = self.table.syntax
-        if (self.row_type == Row.ROW_SINGLE_SEPARATOR or
-            self.row_type == Row.ROW_DOUBLE_SEPARATOR):
+        if self.is_separator():
             return (syntax.hline_out_border
                 + syntax.hline_in_border.join(self.str_cols)
                 + syntax.hline_out_border)
@@ -438,13 +440,13 @@ class TextTable:
         first_data_index = -1
         if self.syntax.detect_header:
             for row_ind,row in enumerate(self._rows):
-                if first_data_index == -1 and row.row_type == Row.ROW_DATA:
+                if first_data_index == -1 and row.is_data():
                     first_data_index = row_ind
                 if (first_data_index != -1 and header_separator_index == -1 and
                     row.is_header_separator()):
                     header_separator_index = row_ind
                     for header_index in range(first_data_index, header_separator_index):
-                        if self._rows[header_index].row_type == Row.ROW_DATA:
+                        if self._rows[header_index].is_data():
                             for column in self._rows[header_index].columns:
                                 column.header = True
 
@@ -453,14 +455,14 @@ class TextTable:
         data_alignment = [None] * len(col_lens)
         for row_ind,row in enumerate(self._rows):
             if row_ind < header_separator_index:
-                if row.row_type in (Row.ROW_CUSTOM_ALIGN, Row.ROW_MULTI_MARKDOWN_ALIGN):
+                if row.is_align():
                     for col_ind,column in enumerate(row.columns):
                         data_alignment[col_ind] = column.align_follow()
                 continue
-            elif row.row_type in (Row.ROW_CUSTOM_ALIGN, Row.ROW_MULTI_MARKDOWN_ALIGN):
+            elif row.is_align():
                 for col_ind,column in enumerate(row.columns):
                     data_alignment[col_ind] = column.align_follow()
-            elif row.row_type == Row.ROW_DATA:
+            elif row.is_data():
                 for col_ind,column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
                         if self.syntax.align_number_right and self._is_number_column(row_ind, col_ind):
@@ -543,9 +545,9 @@ class TextTable:
 
 
     def _is_number_column(self, start_row_ind, col_ind):
-        assert self._rows[start_row_ind].row_type == Row.ROW_DATA
+        assert self._rows[start_row_ind].is_data()
         for row in self._rows[start_row_ind:]:
-            if (row.row_type == Row.ROW_DATA
+            if (row.is_data()
                 and len(row.columns[col_ind].data.strip()) > 0
                 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
                 return False
@@ -697,9 +699,9 @@ if __name__ == '__main__':
 1,2,3
 a,b,c
 """
-    syntax = simple_syntax()
+    syntax = pandoc_syntax()
     p = TableParser(syntax)
     t = p.parse_text(text)
-    t = p.parse_csv(csv_text)
+#    t = p.parse_csv(csv_text)
     print "Table:'\n{0}\n'".format(t.render())
     print t.get_cursor(0,1)
