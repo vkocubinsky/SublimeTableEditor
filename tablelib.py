@@ -161,10 +161,6 @@ class Column(object):
     def align_follow(self):
         return None
 
-    def new_empty_column(self):
-        raise NotImplementedError
-
-
 class DataColumn(Column):
 
     def __init__(self, row, data):
@@ -191,8 +187,6 @@ class DataColumn(Column):
         space_len = len(self.left_space) + len(self.right_space)
         return max(space_len + 1, len(self._norm()) + space_len)
 
-    def new_empty_column(self):
-        return DataColumn(self.row,'')
 
     def render(self):
         norm = self._norm()
@@ -214,8 +208,6 @@ class SeparatorColumn(Column):
         Column.__init__(self, row)
         self.separator = separator
 
-    def new_empty_column(self):
-        return SeparatorColumn(self.row,self.separator)
 
     def min_len(self):
         # '---' or '==='
@@ -241,8 +233,6 @@ class CustomAlignColumn(Column):
         # ' < ' or ' > ' or ' # '
         return 3
 
-    def new_empty_column(self):
-        return CustomAlignColumn(self.row,'#')
 
     def render(self):
         return ' ' + self.align_char * (self.col_len - 2) + ' '
@@ -264,9 +254,6 @@ class MultiMarkdownAlignColumn(Column):
     def min_len(self):
         # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
         return 5
-
-    def new_empty_column(self):
-        return MultiMarkdownAlignColumn(self.row,'-')
 
     def render(self):
         if self._align_follow == Column.ALIGN_CENTER:
@@ -290,8 +277,6 @@ class TextileCellColumn(Column):
         self.attr = mo.group(1)
         self.data = mo.group(2).strip()
 
-    def new_empty_column(self):
-        return DataColumn(self.row,"")
 
     def min_len(self):
         # '<. data '
@@ -309,27 +294,11 @@ class TextileCellColumn(Column):
     def is_textile_cell(str_col):
         return re.match(TextileCellColumn.PATTERN, str_col)
 
-class TextileHeaderColumn(TextileCellColumn):
-    def new_empty_column(self):
-        return TextileHeaderColumn(self.row,"_. ")
-
-
-
-
 class Row:
-    ROW_DATA = 'd'
-    ROW_SINGLE_SEPARATOR = '-'
-    ROW_DOUBLE_SEPARATOR = '='
-    ROW_CUSTOM_ALIGN = '<>#'
-    ROW_MULTI_MARKDOWN_ALIGN = ':-:'
-    ROW_TEXTILE_HEADER_SYNTAX = "._"
 
-
-    def __init__(self, table, row_type):
+    def __init__(self, table):
         self.table = table
-        self.row_type = row_type
         self.columns = []
-
 
     def __getitem__(self, index):
         return self.columns[index]
@@ -338,26 +307,26 @@ class Row:
         return len(self.columns)
 
     def is_header_separator(self):
-        return self.row_type in (Row.ROW_SINGLE_SEPARATOR,
-                                  Row.ROW_DOUBLE_SEPARATOR,
-                                  Row.ROW_MULTI_MARKDOWN_ALIGN)
+        return False
 
     def is_separator(self):
-        return self.row_type in (Row.ROW_SINGLE_SEPARATOR,
-                                  Row.ROW_DOUBLE_SEPARATOR)
+        return False
 
     def is_data(self):
-        return self.row_type in (Row.ROW_DATA)
+        return False
 
     def is_align(self):
-        return self.row_type in (Row.ROW_CUSTOM_ALIGN,
-                                 Row.ROW_MULTI_MARKDOWN_ALIGN)
-
-
+        return False
 
     @property
     def str_cols(self):
         return [column.render() for column in self.columns]
+
+    def new_empty_column(self):
+        raise NotImplementedError
+
+    def append(column):
+        self.columns.append(column)
 
     def render(self):
         syntax = self.table.syntax
@@ -368,6 +337,53 @@ class Row:
         else:
             vline = syntax.vline
             return vline + vline.join(self.str_cols) + vline
+
+
+class SeparatorRow(Row):
+
+    def __init__(self, table, separator = '-', size = 0):
+        Row.__init__(self, table)
+        self.separator = separator
+        for i in range(size):
+            self.columns.append(SeparatorColumn(self, self.separator))
+
+    def new_empty_column(self):
+        return SeparatorColumn(self,self.separator)
+
+    def is_header_separator(self):
+        return True
+
+    def is_separator(self):
+        return True
+
+
+class DataRow(Row):
+
+    def new_empty_column(self):
+        return DataColumn(self,'')
+
+    def is_data(self):
+        return True
+
+class CustomAlignRow(Row):
+
+    def new_empty_column(self):
+        return CustomAlignColumn(self,'#')
+
+    def is_align(self):
+        return True
+
+
+class MultiMarkdownAlignRow(Row):
+
+    def new_empty_column(self):
+        return MultiMarkdownAlignColumn(self.row,'-')
+
+    def is_header_separator(self):
+        return True
+
+    def is_align(self):
+        return True
 
 
 class TextTable:
@@ -408,10 +424,9 @@ class TextTable:
 
         #adjust/extend column count
         for row in self._rows:
-            column = row.columns[0]
             diff_count = self.column_count - len(row.columns)
             for i in range(diff_count):
-                row.columns.append(column.new_empty_column())
+                row.columns.append(row.new_empty_column())
 
         if self.syntax.textile_syntax():
             textile_sizes = [0] * self.column_count
@@ -487,29 +502,23 @@ class TextTable:
     def insert_empty_column(self, i):
         assert i >= 0
         for row in self._rows:
-            row.columns.insert(i, row.columns[0].new_empty_column())
+            row.columns.insert(i, row.new_empty_column())
         self.pack()
 
 
     def insert_empty_row(self, i):
         assert i >= 0
-        row = Row(self, Row.ROW_DATA)
-        row.columns.append(DataColumn(row, ''))
-        self._rows.insert(i, row)
+        self._rows.insert(i, DataRow(self))
         self.pack()
 
     def insert_single_separator_row(self, i):
         assert i >= 0
-        row = Row(self, Row.ROW_SINGLE_SEPARATOR)
-        row.columns.append(SeparatorColumn(row, '-'))
-        self._rows.insert(i, row)
+        self._rows.insert(i, SeparatorRow(self, '-'))
         self.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
-        row = Row(self, Row.ROW_DOUBLE_SEPARATOR)
-        row.columns.append(SeparatorColumn(row, '='))
-        self._rows.insert(i, row)
+        self._rows.insert(i, SeparatorRow(self, '='))
         self.pack()
 
 
@@ -589,33 +598,22 @@ class TableParser:
                 return False
         return True
 
-    def _is_textile_header_syntax(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*\_\..*$", col):
-                return False
-        return True
 
     def _parse_row(self, table, str_cols):
         if self._is_single_row_separator(str_cols):
-            row = Row(table, Row.ROW_SINGLE_SEPARATOR)
-            row.columns = [SeparatorColumn(row,'-') for col in str_cols]
+            row = SeparatorRow(table, '-', len(str_cols))
         elif self._is_double_row_separator(str_cols):
-            row = Row(table, Row.ROW_DOUBLE_SEPARATOR)
-            row.columns = [SeparatorColumn(row,'=') for col in str_cols]
+            row = SeparatorRow(table, '=', len(str_cols))
         elif (self.syntax.custom_column_alignment and
               self._is_custom_align_row(str_cols)):
-            row = Row(table, Row.ROW_CUSTOM_ALIGN)
+            row = CustomAlignRow(table)
             row.columns = [CustomAlignColumn(row,col) for col in str_cols]
         elif (self.syntax.multi_markdown_syntax()
               and self._is_multi_markdown_align_row(str_cols)):
-            row = Row(table, Row.ROW_MULTI_MARKDOWN_ALIGN)
+            row = MultiMarkdownAlignRow(table)
             row.columns = [MultiMarkdownAlignColumn(row,col) for col in str_cols]
-        elif (self.syntax.textile_syntax() and
-              self._is_textile_header_syntax(str_cols)):
-              row = Row(table, Row.ROW_TEXTILE_HEADER_SYNTAX)
-              row.columns = [TextileHeaderColumn(row,col) for col in str_cols]
         else:
-            row = Row(table, Row.ROW_DATA)
+            row = DataRow(table)
             for col in str_cols:
                 if (self.syntax.textile_syntax() and
                    TextileCellColumn.is_textile_cell(col)):
