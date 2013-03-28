@@ -81,16 +81,9 @@ class TableSyntax:
     def hline_border_pattern(self):
         return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
 
-    def vline_pattern(self):
-        return "(?:" + re.escape(self.vline) + ")"
-
-    def not_vline_pattern(self):
-        return "([^" + re.escape(self.vline) + "])"
-
     def single_hline_pattern(self):
         return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
                                                 line=r"(\s*[\-]+\s*)")
-
     def double_hline_pattern(self):
         return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
                                                 line=r"(\s*[\=]+\s*)")
@@ -338,9 +331,6 @@ class Row:
 
     def new_empty_column(self):
         raise NotImplementedError
-
-    def append(column):
-        self.columns.append(column)
 
     def render(self):
         syntax = self.table.syntax
@@ -621,11 +611,13 @@ class TableParser:
         elif (self.syntax.custom_column_alignment and
               self._is_custom_align_row(str_cols)):
             row = CustomAlignRow(table)
-            row.columns = [CustomAlignColumn(row,col) for col in str_cols]
+            for col in str_cols:
+                row.columns.append(CustomAlignColumn(row,col))
         elif (self.syntax.multi_markdown_syntax()
               and self._is_multi_markdown_align_row(str_cols)):
             row = MultiMarkdownAlignRow(table)
-            row.columns = [MultiMarkdownAlignColumn(row,col) for col in str_cols]
+            for col in str_cols:
+                row.columns.append(MultiMarkdownAlignColumn(row,col))
         else:
             row = DataRow(table)
             for col in str_cols:
@@ -681,7 +673,8 @@ class TableParser:
             table_reader = csv.reader(text.splitlines(), dialect)
             for cols in table_reader:
                 row = Row(table, Row.ROW_DATA)
-                row.columns = [DataColumn(row,col) for col in cols]
+                for col in cols:
+                    row.columns.append(DataColumn(row,col))
                 table.add_row(row)
         except csv.Error:
             table = TextTable(syntax)
@@ -701,7 +694,7 @@ def parse_table(syntax, text):
 if __name__ == '__main__':
     # each line begin from '|'
     text = """\
-|  a  |  b  |   c   |
+|  a  |  b  |   c   | d
 |-----|-----|-------|
 | 1   | 2   | 3     |
 | one | two | three |
