@@ -222,6 +222,8 @@ class CustomAlignColumn(Column):
                  '>': Column.ALIGN_RIGHT,
                  '#': Column.ALIGN_CENTER}
 
+    PATTERN = r"^\s*((?:[\<]+)|(?:[\>]+)|(?:[\#]+))\s*$"
+
     def __init__(self, row, data):
         Column.__init__(self, row)
         self.align_char = re.search(r"[\<]|[\>]|[\#]", data).group(0)
@@ -237,8 +239,15 @@ class CustomAlignColumn(Column):
     def render(self):
         return ' ' + self.align_char * (self.col_len - 2) + ' '
 
+    @staticmethod
+    def match_cell(str_col):
+        return re.match(CustomAlignColumn.PATTERN, str_col)
+
+
 
 class MultiMarkdownAlignColumn(Column):
+    PATTERN = r"^\s*([\:]?[\-]+[\:]?)\s*$"
+
     def __init__(self, row, data):
         Column.__init__(self, row)
         col = data.strip()
@@ -268,6 +277,11 @@ class MultiMarkdownAlignColumn(Column):
     def align_follow(self):
         return self._align_follow
 
+    @staticmethod
+    def match_cell(str_col):
+        return re.match(MultiMarkdownAlignColumn.PATTERN, str_col)
+
+
 class TextileCellColumn(Column):
     PATTERN = r"\s*((?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.))(.*)$"
 
@@ -291,7 +305,7 @@ class TextileCellColumn(Column):
             return self.attr + ' ' + self.data.ljust(self.col_len - len(self.attr) - 2, ' ') + ' '
 
     @staticmethod
-    def is_textile_cell(str_col):
+    def match_cell(str_col):
         return re.match(TextileCellColumn.PATTERN, str_col)
 
 class Row:
@@ -588,13 +602,13 @@ class TableParser:
 
     def _is_custom_align_row(self, str_cols):
         for col in str_cols:
-            if not re.match(r"^\s*([\<]+|[\>]+|[\#]+)\s*$", col):
+            if not CustomAlignColumn.match_cell(col):
                 return False
         return True
 
     def _is_multi_markdown_align_row(self, str_cols):
         for col in str_cols:
-            if not re.match(r"^\s*([\:]?[\-]+[\:]?)\s*$", col):
+            if not MultiMarkdownAlignColumn.match_cell(col):
                 return False
         return True
 
@@ -616,7 +630,7 @@ class TableParser:
             row = DataRow(table)
             for col in str_cols:
                 if (self.syntax.textile_syntax() and
-                   TextileCellColumn.is_textile_cell(col)):
+                   TextileCellColumn.match_cell(col)):
                     column = TextileCellColumn(row, col)
                 else:
                     column = DataColumn(row,col)
