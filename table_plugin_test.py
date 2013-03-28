@@ -337,8 +337,8 @@ class CustomAlignTest(CallbackTest):
 
 
 class TableEditorTestSuite(sublime_plugin.TextCommand):
-    COMMAND_TIMEOUT = 250
-    TEST_TIMEOUT = 500
+    COMMAND_TIMEOUT = 250 - 249
+    TEST_TIMEOUT = 500 - 499
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
@@ -399,9 +399,11 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
 
     def run(self):
         view = self.window.new_file()
-        view.settings().set("table_editor_syntax", "simple")
         view.set_scratch(True)
-        view.run_command("table_editor_enable_for_current_view")
         view.set_name("Sublime Table Editor Film")
+
+        view.run_command("table_editor_enable_for_current_view", {"props": "enable_table_editor"})
+        view.run_command("table_editor_set_syntax", {"syntax": "Simple"})
+
         suite = TableEditorTestSuite(view)
         suite.run()
