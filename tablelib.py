@@ -667,12 +667,12 @@ class TableParser:
     def parse_csv(self, text):
         lines = []
         try:
-            table = TextTable(syntax)
+            table = TextTable(self.syntax)
             vline = self.syntax.vline
             dialect = csv.Sniffer().sniff(text)
             table_reader = csv.reader(text.splitlines(), dialect)
             for cols in table_reader:
-                row = Row(table, Row.ROW_DATA)
+                row = DataRow(table)
                 for col in cols:
                     row.columns.append(DataColumn(row,col))
                 table.add_row(row)
@@ -690,6 +690,12 @@ def parse_table(syntax, text):
     table = parser.parse_text(text)
     return table
 
+def parse_csv(syntax, text):
+    parser = TableParser(syntax)
+    table = parser.parse_csv(text)
+    return table
+
+
 
 if __name__ == '__main__':
     # each line begin from '|'
@@ -705,8 +711,7 @@ if __name__ == '__main__':
 a,b,c
 """
     syntax = pandoc_syntax()
-    p = TableParser(syntax)
-    t = p.parse_text(text)
-#    t = p.parse_csv(csv_text)
+    t = parse_table(syntax, text)
+    t = parse_csv(syntax, csv_text)
     print "Table:'\n{0}\n'".format(t.render())
     print t.get_cursor(0,1)

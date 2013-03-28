@@ -99,8 +99,7 @@ class TableContext:
 
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
-    @property
-    def syntax(self):
+    def detect_syntax(self):
         syntax_name = self.view.settings().get("table_editor_syntax")
         if syntax_name == "Simple":
             syntax = tablelib.simple_syntax()
@@ -190,6 +189,9 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def create_table(self, ctx):
         return tablelib.parse_table(ctx.syntax, ctx.table_text)
 
+    def create_context(self, sel):
+        return TableContext(self.view, sel, self.detect_syntax())
+
     def run(self, edit):
         new_sels = []
         for sel in self.view.sel():
@@ -220,7 +222,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
         return self.cell_sel(ctx, table, ctx.row_num, ctx.field_num)
@@ -234,7 +236,7 @@ class TableEditorNextField(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
@@ -284,7 +286,7 @@ class TableEditorPreviousField(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
@@ -329,7 +331,7 @@ class TableEditorNextRow(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
 
@@ -355,7 +357,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -376,7 +378,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -397,7 +399,7 @@ class TableEditorDeleteColumn(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -417,7 +419,7 @@ class TableEditorInsertColumn(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         row_num = ctx.row_num
@@ -435,7 +437,7 @@ class TableEditorKillRow(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         row_num = ctx.row_num
@@ -456,7 +458,7 @@ class TableEditorInsertRow(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -475,7 +477,7 @@ class TableEditorMoveRowUp(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -496,7 +498,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -516,7 +518,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -534,7 +536,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -553,7 +555,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -581,7 +583,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
     or if next line is hline
     """
     def remove_rest_line(self, edit, sel):
-        end_region = self.view.find(self.syntax.hline_border_pattern(),
+        end_region = self.view.find(self.detect_syntax().hline_border_pattern(),
                                     sel.begin())
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
@@ -592,7 +594,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
 
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -614,7 +616,7 @@ class TableEditorJoinLines(AbstractTableCommand):
     Join current row and next row into one if next row is not hline
     """
     def run_one_sel(self, edit, sel):
-        ctx = TableContext(self.view, sel, self.syntax)
+        ctx = self.create_context(sel)
         table = self.create_table(ctx)
 
         field_num = ctx.field_num
@@ -642,30 +644,16 @@ class TableEditorCsvToTable(AbstractTableCommand):
     """
 
     def run_one_sel(self, edit, sel):
-        text = self.view.substr(sel)
         if sel.empty():
             return sel
         else:
-            new_text = self.csv2table(text)
-            self.view.replace(edit, sel, new_text)
+            text = self.view.substr(sel)
+            table = tablelib.parse_csv(self.detect_syntax(), text)
+            self.view.replace(edit, sel, table.render())
 
-            ctx = TableContext(self.view, sel, self.syntax)
-            table = self.create_table(ctx)
-            self.merge(edit, ctx, table)
-            return self.cell_sel(ctx, table, 0, 0)
-
-    def csv2table(self, text):
-        lines = []
-        try:
-            vline = self.syntax.vline
-            dialect = csv.Sniffer().sniff(text)
-            table_reader = csv.reader(text.splitlines(), dialect)
-            for row in table_reader:
-                lines.append(vline + vline.join(row) + vline)
-        except csv.Error:
-            for row in text.splitlines():
-                lines.append(vline + row + vline)
-        return "\n".join(lines)
+            first_row = self.view.rowcol(sel.begin())[0]
+            pt = self.view.text_point(first_row, table.get_cursor(0, 0))
+            return sublime.Region(pt, pt)
 
 
 class TableEditorDisableForCurrentView(sublime_plugin.TextCommand):

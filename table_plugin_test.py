@@ -337,8 +337,8 @@ class CustomAlignTest(CallbackTest):
 
 
 class TableEditorTestSuite(sublime_plugin.TextCommand):
-    COMMAND_TIMEOUT = 250 - 249
-    TEST_TIMEOUT = 500 - 499
+    COMMAND_TIMEOUT = 250
+    TEST_TIMEOUT = 500
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
