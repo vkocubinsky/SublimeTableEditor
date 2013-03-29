@@ -551,7 +551,6 @@ class TextTable:
             col_pos = match.end(1)
         else:
             col_pos = 1
-        #print base_len, col_pos
         return base_len + col_pos
 
 

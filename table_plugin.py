@@ -173,7 +173,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
         #case 1: some lines inserted
         if len(rows) < len(new_lines):
-            print "case 1: some lines inserted"
             row = last_table_row
             for new_text in new_lines[len(rows):]:
                 end_point = self.view.line(self.view.text_point(row, 0)).end()
@@ -181,7 +180,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 row = row + 1
         #case 2: some lines deleted
         elif len(rows) > len(new_lines):
-            print "case 2: some lines deleted"
             for row in rows[len(new_lines):]:
                 region = self.view.line(self.view.text_point(row, 0))
                 self.view.erase(edit, region)
