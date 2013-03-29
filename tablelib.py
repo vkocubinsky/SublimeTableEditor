@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import re
 import csv
 
@@ -712,5 +714,5 @@ a,b,c
     syntax = pandoc_syntax()
     t = parse_table(syntax, text)
     t = parse_csv(syntax, csv_text)
-    print "Table:'\n{0}\n'".format(t.render())
-    print t.get_cursor(0,1)
+    print("Table:'\n{0}\n'".format(t.render()))
+    print(t.get_cursor(0,1))
