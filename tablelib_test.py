@@ -22,8 +22,12 @@
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import tablelib
 import difflib
+
+try:
+    from . import tablelib
+except ValueError:
+    import tablelib
 
 
 class BaseTableTest(unittest.TestCase):

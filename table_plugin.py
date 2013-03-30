@@ -25,7 +25,11 @@ import sublime
 import sublime_plugin
 import csv
 import re
-import tablelib
+
+try:
+    from . import tablelib
+except ValueError:
+    import tablelib
 
 class TableContext:
 

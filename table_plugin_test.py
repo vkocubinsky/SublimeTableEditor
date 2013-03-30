@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import sublime
 import sublime_plugin
 
@@ -365,7 +366,7 @@ Click ctrl+w to close this window""".format(len(tests))})
             return
         test = tests[test_ind]
         if command_ind == 0:
-            print "run test", test.name
+            print("run test", test.name)
         command = test.commands[command_ind]
         self.view.run_command(command.name, command.args)
         if command_ind + 1 < len(test.commands):
