@@ -146,6 +146,7 @@ class Column(object):
         self.col_len = 0
         self.align = None
         self.header = None
+        self.colspan = 1
 
     def min_len(self):
         raise NotImplementedError
@@ -278,14 +279,18 @@ class MultiMarkdownAlignColumn(Column):
 
 
 class TextileCellColumn(Column):
-    PATTERN = r"\s*((?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.))(.*)$"
+    PATTERN = (
+        r"\s*("
+        r"(?:\\[0-9]+.)|(?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.)"
+        r")\s(.*)$")
 
     def __init__(self, row, data):
         Column.__init__(self, row)
         mo = re.match(TextileCellColumn.PATTERN, data)
         self.attr = mo.group(1)
         self.data = mo.group(2).strip()
-
+        if self.attr[0] == '\\':
+            self.colspan = int(self.attr[1:-1])
 
     def min_len(self):
         # '<. data '
@@ -700,19 +705,12 @@ def parse_csv(syntax, text):
 
 if __name__ == '__main__':
     # each line begin from '|'
-    text = """\
-|  a  |  b  |   c   | d
-|-----|-----|-------|
-| 1   | 2   | 3     |
-| one | two | three |
+    text = r"""
+    | \2. spans two cols |
+    | >. col 1 | <. col 2 |
 """
 
-    csv_text = """\
-1,2,3
-a,b,c
-"""
-    syntax = pandoc_syntax()
-    t = parse_table(syntax, text)
-    t = parse_csv(syntax, csv_text)
+    syntax = textile_syntax()
+    t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     print(t.get_cursor(0,1))
