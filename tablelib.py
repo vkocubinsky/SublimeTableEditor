@@ -22,7 +22,9 @@
 # along with SublimeTableEditor.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
+from __future__ import division
 
+import math
 import re
 import csv
 
@@ -157,6 +159,9 @@ class Column(object):
     def align_follow(self):
         return None
 
+    def pseudo(self):
+        return False
+
 class DataColumn(Column):
 
     def __init__(self, row, data):
@@ -281,7 +286,8 @@ class MultiMarkdownAlignColumn(Column):
 class TextileCellColumn(Column):
     PATTERN = (
         r"\s*("
-        r"(?:\\[0-9]+.)|(?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.)"
+        r"(?:\\[0-9]+.)|(?:\/[0-9]+.)|"
+        r"(?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.)"
         r")\s(.*)$")
 
     def __init__(self, row, data):
@@ -292,21 +298,47 @@ class TextileCellColumn(Column):
         if self.attr[0] == '\\':
             self.colspan = int(self.attr[1:-1])
 
+        self.pseudo_columns = []
+
+
     def min_len(self):
+        return int(math.ceil(self.total_min_len()/self.colspan))
+
+    def total_min_len(self):
         # '<. data '
         return len(self.attr) + len(self.data) + 2
 
     def render(self):
+        # colspan -1 is count of '|'
+        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+
         if self.attr == '>.':
-            return self.attr + ' ' + self.data.rjust(self.col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.rjust(total_col_len - len(self.attr) - 2, ' ') + ' '
         elif self.attr in ['_.','=.']:
-            return self.attr + ' ' + self.data.center(self.col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.center(total_col_len - len(self.attr) - 2, ' ') + ' '
         else:
-            return self.attr + ' ' + self.data.ljust(self.col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.ljust(total_col_len - len(self.attr) - 2, ' ') + ' '
 
     @staticmethod
     def match_cell(str_col):
         return re.match(TextileCellColumn.PATTERN, str_col)
+
+
+class PseudoColumn(Column):
+
+    def __init__(self, row, master_column):
+        Column.__init__(self, row)
+        self.master_column = master_column
+        self.data = ''
+
+    def render(self):
+        return ''
+
+    def min_len(self):
+        return self.master_column.min_len()
+
+    def pseudo(self):
+        return True
 
 class Row:
 
@@ -332,22 +364,30 @@ class Row:
     def is_align(self):
         return False
 
-    @property
-    def str_cols(self):
-        return [column.render() for column in self.columns]
+    def append(self, column):
+        self.columns.append(column)
+        for i in range(0, column.colspan - 1):
+            psedo_column = PseudoColumn(self, column)
+            column.pseudo_columns.append(psedo_column)
+            self.columns.append(psedo_column)
+
 
     def new_empty_column(self):
         raise NotImplementedError
 
     def render(self):
+
+        def str_cols():
+            return [column.render() for column in self.columns if not column.pseudo()]
+
         syntax = self.table.syntax
         if self.is_separator():
             return (syntax.hline_out_border
-                + syntax.hline_in_border.join(self.str_cols)
+                + syntax.hline_in_border.join(str_cols())
                 + syntax.hline_out_border)
         else:
             vline = syntax.vline
-            return vline + vline.join(self.str_cols) + vline
+            return vline + vline.join(str_cols()) + vline
 
 
 class SeparatorRow(Row):
@@ -632,7 +672,7 @@ class TableParser:
                     column = TextileCellColumn(row, col)
                 else:
                     column = DataColumn(row,col)
-                row.columns.append(column)
+                row.append(column)
         return row
 
 
@@ -706,8 +746,8 @@ def parse_csv(syntax, text):
 if __name__ == '__main__':
     # each line begin from '|'
     text = r"""
-    | \2. spans two cols |
-    | >. col 1 | <. col 2 |
+    | \3. spans two cols |
+    | col 1 |  col 2 | col 3 |
 """
 
     syntax = textile_syntax()
