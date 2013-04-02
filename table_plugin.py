@@ -262,7 +262,7 @@ class TableEditorNextField(AbstractTableCommand):
                     break
             elif moved:
                 break
-            elif field_num + 1 < table.column_count:
+            elif field_num + 1 < table.nav_column_count(row_num):
                 field_num = field_num + 1
                 break
             elif row_num + 1 < table.row_count:
@@ -366,8 +366,11 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
         row_num = ctx.row_num
 
         if field_num > 0:
-            table.swap_columns(field_num, field_num - 1)
-            field_num = field_num - 1
+            if table.colspan(field_num) or table.colspan(field_num - 1):
+                sublime.status_message("Operation is not permitted for colspan column")
+            else:
+                table.swap_columns(field_num, field_num - 1)
+                field_num = field_num - 1
         self.merge(edit, ctx, table)
 
         return self.cell_sel(ctx, table, row_num, field_num)
@@ -387,8 +390,11 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
         row_num = ctx.row_num
 
         if field_num < table.column_count - 1:
-            table.swap_columns(field_num, field_num + 1)
-            field_num = field_num + 1
+            if table.colspan(field_num) or table.colspan(field_num + 1):
+                sublime.status_message("Operation is not permitted for colspan column")
+            else:
+                table.swap_columns(field_num, field_num + 1)
+                field_num = field_num + 1
         self.merge(edit,ctx, table)
 
         return self.cell_sel(ctx, table, row_num, field_num)
@@ -407,10 +413,13 @@ class TableEditorDeleteColumn(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        table.delete_column(field_num)
-        self.merge(edit, ctx, table)
-        if field_num == table.column_count:
-            field_num = field_num - 1
+        if table.colspan(field_num):
+            sublime.status_message("Operation is not permitted for colspan column")
+        else:
+            table.delete_column(field_num)
+            self.merge(edit, ctx, table)
+            if field_num == table.column_count:
+                field_num = field_num - 1
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -427,8 +436,11 @@ class TableEditorInsertColumn(AbstractTableCommand):
         row_num = ctx.row_num
         field_num = ctx.field_num
 
-        table.insert_empty_column(field_num)
-        self.merge(edit, ctx, table)
+        if table.colspan(field_num):
+            sublime.status_message("Operation is not permitted for colspan column")
+        else:
+            table.insert_empty_column(field_num)
+            self.merge(edit, ctx, table)
         return self.cell_sel(ctx, table, row_num, field_num)
 
 

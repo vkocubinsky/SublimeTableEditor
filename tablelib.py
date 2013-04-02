@@ -452,6 +452,16 @@ class TextTable:
         self._rows.append(row)
 
 
+    def nav_column_count(self, row):
+        return sum([1 for col in self[row].columns if not col.pseudo()])
+
+    def colspan(self, col):
+        for row in self._rows:
+            if row[col].pseudo() or row[col].colspan > 1:
+                return True
+        return False
+
+
     @property
     def row_count(self):
         return len(self._rows)
@@ -746,11 +756,15 @@ def parse_csv(syntax, text):
 if __name__ == '__main__':
     # each line begin from '|'
     text = r"""
-    | \3. spans two cols |
-    | col 1 |  col 2 | col 3 |
+     | n | \3. spans two cols |
+     | g | col 1 |  col 2 | col 3 |
 """
 
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
+    print("nav column count", t.nav_column_count(0))
+    print("nav_column_count", t.nav_column_count(1))
+    print("is colspan", t.colspan(0))
+    print("is colspan", t.colspan(1))
     print(t.get_cursor(0,1))
