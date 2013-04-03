@@ -215,6 +215,9 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
+    def status_message(self, message):
+        sublime.status_message(message)
+
 
 class TableEditorAlignCommand(AbstractTableCommand):
     """
@@ -227,6 +230,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
         ctx = self.create_context(sel)
         table = self.create_table(ctx)
         self.merge(edit, ctx, table)
+        self.status_message("Table Editor: Table aligned")
         return self.cell_sel(ctx, table, ctx.row_num, ctx.field_num)
 
 
@@ -277,7 +281,7 @@ class TableEditorNextField(AbstractTableCommand):
                 field_num = 0
                 row_num = row_num + 1
                 break
-
+        self.status_message("Table Editor: Cursor position changed")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -320,7 +324,7 @@ class TableEditorPreviousField(AbstractTableCommand):
             else:
                 #row_num == 0
                 break
-
+        self.status_message("Table Editor: Cursor position changed")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -348,7 +352,7 @@ class TableEditorNextRow(AbstractTableCommand):
             table.insert_empty_row(table.row_count)
             self.merge(edit, ctx, table)
         row_num = row_num + 1
-
+        self.status_message("Table Editor: Moved to next row")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -367,12 +371,14 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
 
         if field_num > 0:
             if table.colspan(field_num) or table.colspan(field_num - 1):
-                sublime.status_message("Operation is not permitted for colspan column")
+                self.status_message("Table Editor: Move column Left is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num - 1)
                 field_num = field_num - 1
+                self.status_message("Table Editor: Column moved")
+        else:
+            self.status_message("Table Editor: Move column left doesn't make sense for first column")
         self.merge(edit, ctx, table)
-
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -391,10 +397,13 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
 
         if field_num < table.column_count - 1:
             if table.colspan(field_num) or table.colspan(field_num + 1):
-                sublime.status_message("Operation is not permitted for colspan column")
+                self.status_message("Table Editor: Move column right is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num + 1)
+                self.status_message("Table Editor: Column moved")
                 field_num = field_num + 1
+        else:
+            self.status_message("Table Editor: Move column right doesn't make sense for first column")
         self.merge(edit,ctx, table)
 
         return self.cell_sel(ctx, table, row_num, field_num)
@@ -414,9 +423,10 @@ class TableEditorDeleteColumn(AbstractTableCommand):
         row_num = ctx.row_num
 
         if table.colspan(field_num):
-            sublime.status_message("Operation is not permitted for colspan column")
+            self.status_message("Table Editor: Delete column is not permitted for colspan column")
         else:
             table.delete_column(field_num)
+            self.status_message("Table Editor: Column deleted")
             self.merge(edit, ctx, table)
             if field_num == table.column_count:
                 field_num = field_num - 1
@@ -437,9 +447,10 @@ class TableEditorInsertColumn(AbstractTableCommand):
         field_num = ctx.field_num
 
         if table.colspan(field_num):
-            sublime.status_message("Operation is not permitted for colspan column")
+            self.status_message("Table Editor: Insert column is not permitted for colspan column")
         else:
             table.insert_empty_column(field_num)
+            self.status_message("Column inserted")
             self.merge(edit, ctx, table)
         return self.cell_sel(ctx, table, row_num, field_num)
 
@@ -461,6 +472,7 @@ class TableEditorKillRow(AbstractTableCommand):
         self.merge(edit, ctx, table)
         if row_num == table.row_count: # just deleted one row
             row_num = row_num - 1
+        self.status_message("Table Editor: Row deleted")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -480,7 +492,7 @@ class TableEditorInsertRow(AbstractTableCommand):
 
         table.insert_empty_row(row_num)
         self.merge(edit, ctx, table)
-
+        self.status_message("Table Editor: Row inserted")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -499,7 +511,10 @@ class TableEditorMoveRowUp(AbstractTableCommand):
 
         if row_num > 0:
             table.swap_rows(row_num, row_num - 1)
+            self.status_message("Table Editor: Row moved up")
             row_num = row_num - 1
+        else:
+            self.status_message("Table Editor: Move row up doesn't make sense for first row")
         self.merge(edit, ctx, table)
         return self.cell_sel(ctx, table, row_num, field_num)
 
@@ -520,7 +535,10 @@ class TableEditorMoveRowDown(AbstractTableCommand):
 
         if row_num + 1 < table.row_count:
             table.swap_rows(row_num, row_num + 1)
+            self.status_message("Table Editor: Row moved down")
             row_num = row_num + 1
+        else:
+            self.status_message("Table Editor: Move row down doesn't make sense for last row")
         self.merge(edit, ctx, table)
         return self.cell_sel(ctx, table, row_num, field_num)
 
@@ -540,6 +558,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
 
         table.insert_single_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
+        self.status_message("Table Editor: Single separator row inserted")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -558,6 +577,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
 
         table.insert_double_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
+        self.status_message("Table Editor: Double separator row inserted")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -582,10 +602,13 @@ class TableEditorHlineAndMove(AbstractTableCommand):
                 table.insert_empty_row(row_num + 2)
         else:
             table.insert_empty_row(row_num + 2)
+
+
         self.merge(edit, ctx, table)
 
         row_num = row_num + 2
         field_num = 0
+        self.status_message("Table Editor: Single separator row inserted")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -620,6 +643,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
         self.merge(edit, ctx, table)
+        self.status_message("Table Editor: Column splitted down")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -647,6 +671,7 @@ class TableEditorJoinLines(AbstractTableCommand):
 
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
+        self.status_message("Table Editor: Row joined")
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -667,6 +692,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
 
             first_row = self.view.rowcol(sel.begin())[0]
             pt = self.view.text_point(first_row, table.get_cursor(0, 0))
+            self.status_message("Table Editor: Table created from CSV")
             return sublime.Region(pt, pt)
 
 
@@ -713,5 +739,5 @@ class TableEditorSetSyntax(sublime_plugin.TextCommand):
     def run(self, edit, syntax):
         self.view.settings().set("enable_table_editor", True)
         self.view.settings().set("table_editor_syntax", syntax)
-        sublime.status_message("Table Editor: set syntax to '{0}'"
+        self.status_message("Table Editor: set syntax to '{0}'"
                                .format(syntax))
