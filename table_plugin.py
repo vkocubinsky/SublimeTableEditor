@@ -300,7 +300,7 @@ class TableEditorPreviousField(AbstractTableCommand):
             if table[row_num].is_separator():
                 if row_num > 0:
                     row_num = row_num - 1
-                    field_num = table.column_count - 1
+                    field_num = table.nav_column_count(row_num) - 1
                     moved = True
                     continue
                 else:
@@ -314,7 +314,7 @@ class TableEditorPreviousField(AbstractTableCommand):
                 break
             elif row_num > 0:
                 row_num = row_num - 1
-                field_num = table.column_count - 1
+                field_num = table.nav_column_count(row_num) - 1
                 moved = True
                 continue
             else:
