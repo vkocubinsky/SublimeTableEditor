@@ -286,17 +286,29 @@ class MultiMarkdownAlignColumn(Column):
 class TextileCellColumn(Column):
     PATTERN = (
         r"\s*("
-        r"(?:\\[0-9]+.)|(?:\/[0-9]+.)|"
-        r"(?:\_\.)|(?:\<\.)|(?:\>\.)|(?:\=\.)|(?:\<\>\.)|(?:\^\.)|(?:\~\.)"
-        r")\s(.*)$")
+        # Sequence of one or more table cell terms
+        r"(?:"
+            # Single character modifiers
+            r"[_<>=~^:-]|"
+            # Row and col spans
+            r"(?:[/\\]\d+)|"
+            # Styling and classes
+            r"(?:\{.*?\})|(?:\(.*?\))"
+        r")+"
+        # Terminated by a period
+        r"\.)?\s+(.*)$")
+    COLSPAN_PATTERN = r"\\(\d+)"
+    ROWSPAN_PATTERN = r"/(\d+)"
 
     def __init__(self, row, data):
         Column.__init__(self, row)
         mo = re.match(TextileCellColumn.PATTERN, data)
-        self.attr = mo.group(1)
+        self.attr = mo.group(1) or ''
         self.data = mo.group(2).strip()
-        if self.attr[0] == '\\':
-            self.colspan = int(self.attr[1:-1])
+        if '\\' in self.attr:
+            mo = re.search(TextileCellColumn.COLSPAN_PATTERN, self.attr)
+            if mo:
+                self.colspan = int(mo.group(1))
 
         self.pseudo_columns = []
 
@@ -312,9 +324,9 @@ class TextileCellColumn(Column):
         # colspan -1 is count of '|'
         total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
 
-        if self.attr == '>.':
+        if '>' in self.attr and not '<>' in self.attr:
             return self.attr + ' ' + self.data.rjust(total_col_len - len(self.attr) - 2, ' ') + ' '
-        elif self.attr in ['_.','=.']:
+        elif '=' in self.attr or '_' in self.attr:
             return self.attr + ' ' + self.data.center(total_col_len - len(self.attr) - 2, ' ') + ' '
         else:
             return self.attr + ' ' + self.data.ljust(total_col_len - len(self.attr) - 2, ' ') + ' '

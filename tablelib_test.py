@@ -279,21 +279,48 @@ class TextileSyntaxTest(BaseTableTest):
 |<. align left |
 | cell|
 |>. align right|
-|=. center |
+|=. center|
 |<>. justify |
 |^. valign top |
-|~. bottom |
+|~. bottom|
+|     >.  poor syntax
+|(className). class|
+|{key:value}. style|
 """.rstrip()
 
         expected = """\
-|_. attribute list |
-|<. align left     |
-|    cell          |
-|>.    align right |
-|=.     center     |
-|<>. justify       |
-|^. valign top     |
-|~. bottom         |
+|_.  attribute list |
+|<. align left      |
+| cell              |
+|>.     align right |
+|=.      center     |
+|<>. justify        |
+|^. valign top      |
+|~. bottom          |
+|>.     poor syntax |
+|(className). class |
+|{key:value}. style |
+""".rstrip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
+    def testCompoundSyntax(self):
+        unformatted = """\
+|_>. header |_. centered header |
+|>^. right and top align | long text to show alignment |
+|=\\2. centered colspan|
+|<>(red). justified |~=. centered |
+|{text-shadow:0 1px 1px black;}(highlight)<~. syntax overload | normal text |
+""".rstrip()
+
+        expected = """\
+|_>.                                                   header |_.      centered header      |
+|>^.                                      right and top align | long text to show alignment |
+|=\\2.                                    centered colspan                                   |
+|<>(red). justified                                           |~=.         centered         |
+|{text-shadow:0 1px 1px black;}(highlight)<~. syntax overload | normal text                 |
 """.rstrip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
