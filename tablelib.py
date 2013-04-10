@@ -296,14 +296,14 @@ class TextileCellColumn(Column):
             r"(?:\{.*?\})|(?:\(.*?\))"
         r")+"
         # Terminated by a period
-        r"\.)?\s+(.*)$")
+        r"\.)\s+(.*)$")
     COLSPAN_PATTERN = r"\\(\d+)"
     ROWSPAN_PATTERN = r"/(\d+)"
 
     def __init__(self, row, data):
         Column.__init__(self, row)
         mo = re.match(TextileCellColumn.PATTERN, data)
-        self.attr = mo.group(1) or ''
+        self.attr = mo.group(1)
         self.data = mo.group(2).strip()
         if '\\' in self.attr:
             mo = re.search(TextileCellColumn.COLSPAN_PATTERN, self.attr)
@@ -493,17 +493,6 @@ class TextTable:
             for i in range(diff_count):
                 row.columns.append(row.new_empty_column())
 
-        if self.syntax.textile_syntax():
-            textile_sizes = [0] * self.column_count
-            for row in self._rows:
-                for col_ind, column in enumerate(row.columns):
-                    if isinstance(column, TextileCellColumn):
-                        textile_sizes[col_ind] = max(textile_sizes[col_ind], len(column.attr))
-            for row in self._rows:
-                for left_size, column in zip(textile_sizes, row.columns):
-                    if isinstance(column, DataColumn):
-                        column.left_space = ' ' * (left_size + 1)
-
         #calculate column lens
         col_lens = [0] * self.column_count
         for row in self._rows:
@@ -615,14 +604,9 @@ class TextTable:
 
     def visual_to_internal_index(self, row, visual_index):
         curr_visual_ind = -1
-        print("visual index", visual_index)
         for col in range(self.column_count):
-            print("col", col, type(self[row][col]), self[row][col].pseudo())
             if not self[row][col].pseudo():
                 curr_visual_ind = curr_visual_ind + 1
-                print("increase ", curr_visual_ind)
-            else:
-                print("keep ", curr_visual_ind)
             if curr_visual_ind == visual_index:
                 return col
 
@@ -795,11 +779,24 @@ if __name__ == '__main__':
      | c | col 1 |  col 2         |  d |
 """
 
+    text = r"""
+|_.  attribute list |
+|<. align left      |
+| cell              |
+|>.     align right |
+|=.      center     |
+|<>. justify        |
+|^. valign top      |
+|~. bottom          |
+|>.     poor syntax |
+|(className). class |
+|{key:value}. style |
+"""
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     # print("internal to visual for 3", t.internal_to_visual_index(0,3))
     #print("visual to internal for 2", t.visual_to_internal_index(0,2))
-    print("visual to internal for 2", t.visual_to_internal_index(0,2))
+    #print("visual to internal for 2", t.visual_to_internal_index(0,2))
 
-    print("cursor", t.get_cursor(0,1))
+    #print("cursor", t.get_cursor(0,1))
