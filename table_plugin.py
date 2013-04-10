@@ -40,8 +40,11 @@ class TableContext:
         self.first_table_row = self._get_first_table_row(sel_row, sel_col)
         self.last_table_row = self._get_last_table_row(sel_row, sel_col)
         self.table_text = self._get_table_text(self.first_table_row, self.last_table_row)
-        self.field_num = self._get_unformatted_field_num(sel_row, sel_col)
+        self.visual_field_num = self._visual_field_num(sel_row, sel_col)
         self.row_num = sel_row - self.first_table_row
+
+        self.table = tablelib.parse_table(self.syntax, self.table_text)
+        self.field_num = self.table.visual_to_internal_index(self.row_num, self.visual_field_num)
 
 
     def _get_table_text(self, first_table_row, last_table_row):
@@ -75,17 +78,13 @@ class TableContext:
         return tablelib.TableParser(self.syntax).is_table_row(text)
 
 
-    def _get_unformatted_field_num(self, sel_row, sel_col):
+    def _visual_field_num(self, sel_row, sel_col):
         line_text = self._get_text(sel_row)
         sel_field_num = self._hline_count(line_text, 0, sel_col) - 1
         mo = re.compile(r"\s*$")
         if sel_field_num > 0 and mo.match(line_text, sel_col):
             sel_field_num = sel_field_num - 1
         return sel_field_num
-
-    #not used
-    def _get_field_num(self, row, col):
-        return self._hline_count(self._get_text(row), 0, col) - 1
 
     def _hline_count(self, text, start, end):
         if self.syntax.is_hline(text):
@@ -228,7 +227,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
         self.merge(edit, ctx, table)
         self.status_message("Table Editor: Table aligned")
         return self.cell_sel(ctx, table, ctx.row_num, ctx.field_num)
@@ -243,17 +242,17 @@ class TableEditorNextField(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
         self.merge(edit, ctx, table)
 
-        field_num = ctx.field_num
+        visual_field_num = ctx.visual_field_num
         row_num = ctx.row_num
 
         moved = False
         while True:
             if table[row_num].is_separator():
                 if row_num + 1 < table.row_count:
-                    field_num = 0
+                    visual_field_num = 0
                     row_num = row_num + 1
                     moved = True
                     continue
@@ -261,16 +260,16 @@ class TableEditorNextField(AbstractTableCommand):
                     #sel_row == last_table_row
                     table.insert_empty_row(table.row_count)
                     self.merge(edit, ctx, table)
-                    field_num = 0
+                    visual_field_num = 0
                     row_num = row_num + 1
                     break
             elif moved:
                 break
-            elif field_num + 1 < table.nav_column_count(row_num):
-                field_num = field_num + 1
+            elif visual_field_num + 1 < table.visual_column_count(row_num):
+                visual_field_num = visual_field_num + 1
                 break
             elif row_num + 1 < table.row_count:
-                field_num = 0
+                visual_field_num = 0
                 row_num = row_num + 1
                 moved = True
                 continue
@@ -278,10 +277,15 @@ class TableEditorNextField(AbstractTableCommand):
                 #sel_row == last_table_row
                 table.insert_empty_row(table.row_count)
                 self.merge(edit, ctx, table)
-                field_num = 0
+                visual_field_num = 0
                 row_num = row_num + 1
                 break
         self.status_message("Table Editor: Cursor position changed")
+
+        field_num = table.visual_to_internal_index(row_num, visual_field_num)
+        print ("visual_field_num", visual_field_num)
+        print ("field_num", field_num)
+
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -293,10 +297,10 @@ class TableEditorPreviousField(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
         self.merge(edit, ctx, table)
 
-        field_num = ctx.field_num
+        visual_field_num = ctx.visual_field_num
         row_num = ctx.row_num
 
         moved = False
@@ -304,27 +308,31 @@ class TableEditorPreviousField(AbstractTableCommand):
             if table[row_num].is_separator():
                 if row_num > 0:
                     row_num = row_num - 1
-                    field_num = table.nav_column_count(row_num) - 1
+                    visual_field_num = table.visual_column_count(row_num) - 1
                     moved = True
                     continue
                 else:
                     #row_num == 0
-                    field_num = 0
+                    visual_field_num = 0
                     break
             elif moved:
                 break
-            elif field_num > 0:
-                field_num = field_num - 1
+            elif visual_field_num > 0:
+                visual_field_num = visual_field_num - 1
                 break
             elif row_num > 0:
                 row_num = row_num - 1
-                field_num = table.nav_column_count(row_num) - 1
+                visual_field_num = table.visual_column_count(row_num) - 1
                 moved = True
                 continue
             else:
                 #row_num == 0
                 break
         self.status_message("Table Editor: Cursor position changed")
+        field_num = table.visual_to_internal_index(row_num, visual_field_num)
+        print ("visual_field_num", visual_field_num)
+        print ("field_num", field_num)
+
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -338,7 +346,7 @@ class TableEditorNextRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
         self.merge(edit, ctx, table)
 
         field_num = ctx.field_num
@@ -364,7 +372,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -390,7 +398,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -417,7 +425,7 @@ class TableEditorDeleteColumn(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -441,7 +449,7 @@ class TableEditorInsertColumn(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         row_num = ctx.row_num
         field_num = ctx.field_num
@@ -463,7 +471,7 @@ class TableEditorKillRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         row_num = ctx.row_num
         field_num = ctx.field_num
@@ -485,7 +493,7 @@ class TableEditorInsertRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -504,7 +512,7 @@ class TableEditorMoveRowUp(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -528,7 +536,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -551,7 +559,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -570,7 +578,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -590,7 +598,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -632,7 +640,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         rest_data = self.remove_rest_line(edit, sel)
 
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
@@ -655,7 +663,7 @@ class TableEditorJoinLines(AbstractTableCommand):
     """
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = self.create_table(ctx)
+        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num

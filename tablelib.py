@@ -452,14 +452,6 @@ class TextTable:
         self._rows.append(row)
 
 
-    def nav_column_count(self, row):
-        return sum([1 for col in self[row].columns if not col.pseudo()])
-
-    def colspan(self, col):
-        for row in self._rows:
-            if row[col].pseudo() or row[col].colspan > 1:
-                return True
-        return False
 
 
     @property
@@ -592,6 +584,37 @@ class TextTable:
         assert 0 <= i < len(self._rows)
         del self._rows[i]
         self.pack()
+
+    def visual_column_count(self, row):
+        return sum([1 for col in self[row].columns if not col.pseudo()])
+
+    def colspan(self, col):
+        for row in self._rows:
+            if row[col].pseudo() or row[col].colspan > 1:
+                return True
+        return False
+
+    def internal_to_visual_index(self, row, internal_index):
+        ind = internal_index
+        for col in range(internal_index):
+            if self[row][col].pseudo():
+                ind = ind - 1
+        return ind
+
+    def visual_to_internal_index(self, row, visual_index):
+        curr_visual_ind = -1
+        print("visual index", visual_index)
+        for col in range(self.column_count):
+            print("col", col, type(self[row][col]), self[row][col].pseudo())
+            if not self[row][col].pseudo():
+                curr_visual_ind = curr_visual_ind + 1
+                print("increase ", curr_visual_ind)
+            else:
+                print("keep ", curr_visual_ind)
+            if curr_visual_ind == visual_index:
+                return col
+
+
 
     def get_cursor(self, row_ind, col_ind):
         #
@@ -756,15 +779,15 @@ def parse_csv(syntax, text):
 if __name__ == '__main__':
     # each line begin from '|'
     text = r"""
-     | n | \3. spans two cols |
-     | g | col 1 |  col 2 | col 3 |
+     | a |\2. spans two cols     |  b |
+     | c | col 1 |  col 2         |  d |
 """
 
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
-    print("nav column count", t.nav_column_count(0))
-    print("nav_column_count", t.nav_column_count(1))
-    print("is colspan", t.colspan(0))
-    print("is colspan", t.colspan(1))
-    print(t.get_cursor(0,1))
+    # print("internal to visual for 3", t.internal_to_visual_index(0,3))
+    #print("visual to internal for 2", t.visual_to_internal_index(0,2))
+    print("visual to internal for 2", t.visual_to_internal_index(0,2))
+
+    print("cursor", t.get_cursor(0,1))
