@@ -251,14 +251,14 @@ class TableEditorNextField(AbstractTableCommand):
         moved = False
         while True:
             if table[row_num].is_separator():
-                if row_num + 1 < table.row_count:
+                if row_num + 1 < len(table):
                     visual_field_num = 0
                     row_num = row_num + 1
                     moved = True
                     continue
                 else:
                     #sel_row == last_table_row
-                    table.insert_empty_row(table.row_count)
+                    table.insert_empty_row(len(table))
                     self.merge(edit, ctx, table)
                     visual_field_num = 0
                     row_num = row_num + 1
@@ -268,14 +268,14 @@ class TableEditorNextField(AbstractTableCommand):
             elif visual_field_num + 1 < table.visual_column_count(row_num):
                 visual_field_num = visual_field_num + 1
                 break
-            elif row_num + 1 < table.row_count:
+            elif row_num + 1 < len(table):
                 visual_field_num = 0
                 row_num = row_num + 1
                 moved = True
                 continue
             else:
                 #sel_row == last_table_row
-                table.insert_empty_row(table.row_count)
+                table.insert_empty_row(len(table))
                 self.merge(edit, ctx, table)
                 visual_field_num = 0
                 row_num = row_num + 1
@@ -283,9 +283,6 @@ class TableEditorNextField(AbstractTableCommand):
         self.status_message("Table Editor: Cursor position changed")
 
         field_num = table.visual_to_internal_index(row_num, visual_field_num)
-        print ("visual_field_num", visual_field_num)
-        print ("field_num", field_num)
-
         return self.cell_sel(ctx, table, row_num, field_num)
 
 
@@ -330,8 +327,6 @@ class TableEditorPreviousField(AbstractTableCommand):
                 break
         self.status_message("Table Editor: Cursor position changed")
         field_num = table.visual_to_internal_index(row_num, visual_field_num)
-        print ("visual_field_num", visual_field_num)
-        print ("field_num", field_num)
 
         return self.cell_sel(ctx, table, row_num, field_num)
 
@@ -352,12 +347,12 @@ class TableEditorNextRow(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 < table.row_count:
+        if row_num + 1 < len(table):
             if table[row_num + 1].is_header_separator():
                 table.insert_empty_row(row_num + 1)
                 self.merge(edit, ctx, table)
         else:
-            table.insert_empty_row(table.row_count)
+            table.insert_empty_row(len(table))
             self.merge(edit, ctx, table)
         row_num = row_num + 1
         self.status_message("Table Editor: Moved to next row")
@@ -478,7 +473,7 @@ class TableEditorKillRow(AbstractTableCommand):
 
         table.delete_row(row_num)
         self.merge(edit, ctx, table)
-        if row_num == table.row_count: # just deleted one row
+        if row_num == len(table): # just deleted one row
             row_num = row_num - 1
         self.status_message("Table Editor: Row deleted")
         return self.cell_sel(ctx, table, row_num, field_num)
@@ -541,7 +536,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 < table.row_count:
+        if row_num + 1 < len(table):
             table.swap_rows(row_num, row_num + 1)
             self.status_message("Table Editor: Row moved down")
             row_num = row_num + 1
@@ -605,7 +600,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
 
         table.insert_single_separator_row(row_num + 1)
 
-        if row_num + 2 < table.row_count:
+        if row_num + 2 < len(table):
             if table[row_num + 2].is_separator():
                 table.insert_empty_row(row_num + 2)
         else:
@@ -645,7 +640,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 == table.row_count or table[row_num + 1].is_separator():
+        if row_num + 1 == len(table) or table[row_num + 1].is_separator():
             table.insert_empty_row(row_num + 1)
         row_num = row_num + 1
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
@@ -670,7 +665,7 @@ class TableEditorJoinLines(AbstractTableCommand):
 
         self.merge(edit, ctx, table)
 
-        if (row_num + 1 < table.row_count
+        if (row_num + 1 < len(table)
             and table[row_num].is_data()
             and table[row_num + 1].is_data()):
             for curr_col, next_col in zip(table[row_num].columns,

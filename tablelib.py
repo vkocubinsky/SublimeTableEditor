@@ -461,7 +461,6 @@ class TextTable:
         self.syntax = syntax
         self.prefix = ""
         self._rows = []
-        self.column_count = 0
         self.pack()
 
 
@@ -469,38 +468,36 @@ class TextTable:
         self._rows.append(row)
 
 
-    @property
-    def row_count(self):
-        return len(self._rows)
-
     def __len__(self):
         return len(self._rows)
 
     def empty(self):
-        return self.column_count == 0
+        return len(self._rows) == 0
 
     def __getitem__(self, index):
         return self._rows[index]
 
+    def _max_column_count(self):
+        return max([len(row) for row in self._rows])
+
     def pack(self):
         if len(self._rows) == 0:
-            self.column_count = 0
             return
 
-        self.column_count = max([len(row) for row in self._rows])
+        column_count = self._max_column_count()
 
-        if self.column_count == 0:
+        if column_count == 0:
             self._rows = []
             return
 
         #adjust/extend column count
         for row in self._rows:
-            diff_count = self.column_count - len(row.columns)
+            diff_count = column_count - len(row.columns)
             for i in range(diff_count):
                 row.columns.append(row.new_empty_column())
 
         #calculate column lens
-        col_lens = [0] * self.column_count
+        col_lens = [0] * column_count
         for row in self._rows:
             new_col_lens = [column.min_len() for column in row.columns]
             col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
@@ -548,21 +545,21 @@ class TextTable:
 
 
     def delete_column(self, i):
-        assert i < self.column_count
         assert self.colspan(i) == False
 
         for row in self._rows:
-            del row.columns[i]
+            if i < len(row):
+                del row.columns[i]
         self.pack()
 
 
     def swap_columns(self, i, j):
-        assert i < self.column_count and j < self.column_count
         assert self.colspan(i) == False
         assert self.colspan(j) == False
 
         for row in self._rows:
-            row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
+            if i < len(row) and j < len(row):
+                row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
 
     def insert_empty_column(self, i):
         assert i >= 0
@@ -629,7 +626,7 @@ class TextTable:
 
     def visual_to_internal_index(self, row, visual_index):
         count_visual = 0
-        for col in range(self.column_count):
+        for col in range(len(self[row])):
             if not self[row][col].pseudo():
                 count_visual += 1
             if count_visual == visual_index + 1:
@@ -640,7 +637,7 @@ class TextTable:
     def get_cursor(self, row_ind, col_ind):
         #
         # '   |  1 |  2  |  3_| 4 |'
-        assert col_ind < self.column_count
+        assert col_ind < len(self[row_ind])
         base_len = (len(self.prefix) +
                    sum([column.col_len for column, ind
                                 in zip(self[row_ind].columns, range(col_ind))]) +
