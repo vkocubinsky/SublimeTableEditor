@@ -149,6 +149,7 @@ class Column(object):
         self.align = None
         self.header = None
         self.colspan = 1
+        self.rowspan = 1
 
     def min_len(self):
         raise NotImplementedError
@@ -302,13 +303,17 @@ class TextileCellColumn(Column):
 
     def __init__(self, row, data):
         Column.__init__(self, row)
-        mo = re.match(TextileCellColumn.PATTERN, data)
-        self.attr = mo.group(1)
-        self.data = mo.group(2).strip()
-        if '\\' in self.attr:
-            mo = re.search(TextileCellColumn.COLSPAN_PATTERN, self.attr)
-            if mo:
-                self.colspan = int(mo.group(1))
+        cell_mo = re.match(TextileCellColumn.PATTERN, data)
+        self.attr = cell_mo.group(1)
+        self.data = cell_mo.group(2).strip()
+
+        colspan_mo = re.search(TextileCellColumn.COLSPAN_PATTERN, self.attr)
+        if colspan_mo:
+            self.colspan = int(colspan_mo.group(1))
+
+        rowspan_mo = re.search(TextileCellColumn.ROWSPAN_PATTERN, self.attr)
+        if rowspan_mo:
+            self.rowspan = int(rowspan_mo.group(1))
 
         self.pseudo_columns = []
 
@@ -464,8 +469,6 @@ class TextTable:
         self._rows.append(row)
 
 
-
-
     @property
     def row_count(self):
         return len(self._rows)
@@ -543,6 +546,8 @@ class TextTable:
 
     def delete_column(self, i):
         assert i < self.column_count
+        assert self.colspan(i) == False
+
         for row in self._rows:
             del row.columns[i]
         self.pack()
@@ -550,11 +555,16 @@ class TextTable:
 
     def swap_columns(self, i, j):
         assert i < self.column_count and j < self.column_count
+        assert self.colspan(i) == False
+        assert self.colspan(j) == False
+
         for row in self._rows:
             row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
 
     def insert_empty_column(self, i):
         assert i >= 0
+        assert self.colspan(i) == False
+
         for row in self._rows:
             row.columns.insert(i, row.new_empty_column())
         self.pack()
@@ -562,27 +572,32 @@ class TextTable:
 
     def insert_empty_row(self, i):
         assert i >= 0
+
         self._rows.insert(i, DataRow(self))
         self.pack()
 
     def insert_single_separator_row(self, i):
         assert i >= 0
+
         self._rows.insert(i, SeparatorRow(self, '-'))
         self.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
+
         self._rows.insert(i, SeparatorRow(self, '='))
         self.pack()
 
 
     def swap_rows(self, i, j):
         assert 0 <= i < len(self._rows) and 0 <= j < len(self._rows)
+
         self._rows[i], self._rows[j] = self._rows[j], self._rows[i]
         self.pack()
 
     def delete_row(self, i ):
         assert 0 <= i < len(self._rows)
+
         del self._rows[i]
         self.pack()
 
@@ -595,6 +610,13 @@ class TextTable:
                 return True
         return False
 
+    def rowspan(self,row):
+        for col in self[row].columns:
+            if col.rowspan > 1:
+                return True
+        return False
+
+
     def internal_to_visual_index(self, row, internal_index):
         ind = internal_index
         for col in range(internal_index):
@@ -603,13 +625,13 @@ class TextTable:
         return ind
 
     def visual_to_internal_index(self, row, visual_index):
-        curr_visual_ind = -1
+        count_visual = 0
         for col in range(self.column_count):
             if not self[row][col].pseudo():
-                curr_visual_ind = curr_visual_ind + 1
-            if curr_visual_ind == visual_index:
-                return col
-
+                count_visual += 1
+            if count_visual == visual_index + 1:
+                break
+        return col
 
 
     def get_cursor(self, row_ind, col_ind):
@@ -776,27 +798,14 @@ if __name__ == '__main__':
     # each line begin from '|'
     text = r"""
      | a |\2. spans two cols     |  b |
-     | c | col 1 |  col 2         |  d |
+     | c |/3. col 1 |  col 2         |  d |
 """
 
-    text = r"""
-|_.  attribute list |
-|<. align left      |
-| cell              |
-|>.     align right |
-|=.      center     |
-|<>. justify        |
-|^. valign top      |
-|~. bottom          |
-|>.     poor syntax |
-|(className). class |
-|{key:value}. style |
-"""
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     # print("internal to visual for 3", t.internal_to_visual_index(0,3))
     #print("visual to internal for 2", t.visual_to_internal_index(0,2))
-    #print("visual to internal for 2", t.visual_to_internal_index(0,2))
+    print("visual to internal for 2", t.visual_to_internal_index(0,2))
 
     #print("cursor", t.get_cursor(0,1))
