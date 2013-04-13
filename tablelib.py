@@ -473,6 +473,9 @@ class TextTable:
     def row_count(self):
         return len(self._rows)
 
+    def __len__(self):
+        return len(self._rows)
+
     def empty(self):
         return self.column_count == 0
 

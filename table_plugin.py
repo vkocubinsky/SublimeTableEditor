@@ -403,7 +403,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if field_num < table.column_count - 1:
+        if field_num < len(table[row_num]) - 1:
             if table.colspan(field_num) or table.colspan(field_num + 1):
                 self.status_message("Table Editor: Move column right is not permitted for colspan column")
             else:
@@ -411,7 +411,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
                 self.status_message("Table Editor: Column moved")
                 field_num = field_num + 1
         else:
-            self.status_message("Table Editor: Move column right doesn't make sense for first column")
+            self.status_message("Table Editor: Move column right doesn't make sense for last column")
         self.merge(edit,ctx, table)
 
         return self.cell_sel(ctx, table, row_num, field_num)
@@ -436,7 +436,7 @@ class TableEditorDeleteColumn(AbstractTableCommand):
             table.delete_column(field_num)
             self.status_message("Table Editor: Column deleted")
             self.merge(edit, ctx, table)
-            if field_num == table.column_count:
+            if field_num == len(table[row_num]):
                 field_num = field_num - 1
         return self.cell_sel(ctx, table, row_num, field_num)
 
