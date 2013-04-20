@@ -494,7 +494,6 @@ class TextTable:
 
         rowspans = [0] * column_count
         for row in self._rows:
-            print(rowspans)
             overcols = sum([rowspan for rowspan in rowspans if rowspan > 0])
             diff_count = column_count - len(row.columns) - overcols
             for i in range(diff_count):
@@ -670,6 +669,7 @@ class TextTable:
         assert self._rows[start_row_ind].is_data()
         for row in self._rows[start_row_ind:]:
             if (row.is_data()
+                and col_ind < len(row.columns)
                 and len(row.columns[col_ind].data.strip()) > 0
                 and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
                 return False
