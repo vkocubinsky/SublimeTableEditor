@@ -491,16 +491,28 @@ class TextTable:
             return
 
         #adjust/extend column count
+
+        rowspans = [0] * column_count
         for row in self._rows:
-            diff_count = column_count - len(row.columns)
+            print(rowspans)
+            overcols = sum([rowspan for rowspan in rowspans if rowspan > 0])
+            diff_count = column_count - len(row.columns) - overcols
             for i in range(diff_count):
                 row.columns.append(row.new_empty_column())
+
+            #prepare rowspans for next row
+            for col_ind, rowspan in enumerate(rowspans):
+                if rowspan > 0:
+                    rowspans[col_ind] = rowspans[col_ind] - 1
+
+            for col_ind, column in enumerate(row.columns):
+                rowspans[col_ind] = rowspans[col_ind] + column.rowspan - 1
 
         #calculate column lens
         col_lens = [0] * column_count
         for row in self._rows:
-            new_col_lens = [column.min_len() for column in row.columns]
-            col_lens = [max(x, y) for x, y in zip(col_lens, new_col_lens)]
+            for col_ind,column in enumerate(row.columns):
+                col_lens[col_ind] = max(col_lens[col_ind], column.min_len())
 
         #set column len
         for row in self._rows:
@@ -802,8 +814,11 @@ if __name__ == '__main__':
 """
 
     text = r"""
-    | a |/2. row span |
+    | a |/3. row span |
     | b |
+    | c |
+    | d |
+    | e |
 """
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
