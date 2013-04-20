@@ -801,6 +801,10 @@ if __name__ == '__main__':
      | c |/3. col 1 |  col 2         |  d |
 """
 
+    text = r"""
+    | a |/2. row span |
+    | b |
+"""
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
