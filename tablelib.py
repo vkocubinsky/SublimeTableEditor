@@ -495,8 +495,11 @@ class TextTable:
         rowspans = [0] * column_count
         for row in self._rows:
             overcols = sum([rowspan for rowspan in rowspans if rowspan > 0])
-            diff_count = column_count - len(row.columns) - overcols
+
+            diff_count = column_count - len(row) - overcols
             for i in range(diff_count):
+                row.columns.append(row.new_empty_column())
+            if len(row) == 0:
                 row.columns.append(row.new_empty_column())
 
             #prepare rowspans for next row
@@ -809,11 +812,8 @@ if __name__ == '__main__':
 """
 
     text = r"""
-    | a |/3. row span |
-    | b |
-    | c |
-    | d |
-    | e |
+    |/3. row span |
+    |
 """
     syntax = textile_syntax()
     t = parse_table(syntax, text.strip())

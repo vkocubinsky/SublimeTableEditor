@@ -353,6 +353,7 @@ class TableEditorNextRow(AbstractTableCommand):
                 self.merge(edit, ctx, table)
         else:
             table.insert_empty_row(len(table))
+            print(table.render())
             self.merge(edit, ctx, table)
         row_num = row_num + 1
         self.status_message("Table Editor: Moved to next row")
