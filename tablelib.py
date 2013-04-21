@@ -482,33 +482,23 @@ class TextTable:
         return max([len(row) for row in self._rows])
 
     def _rstrip(self):
-        lens = []
-        rstrip_lens = []
-        for row in self._rows:
-            lens.append(len(row))
+        max_column_count = self._max_column_count()
+        long_lines_count = 0
+        long_line_ind = 0
+        for row_ind, row in enumerate(self._rows):
+            if len(row) == max_column_count:
+                long_lines_count += 1
+                long_line_ind = row_ind
+
+        if long_lines_count == 1:
+            row = self._rows[long_line_ind]
             if row.is_data():
                 shift = 0
                 for shift, column in enumerate(row[::-1]):
                     if column.pseudo() or len(column.data.strip()) > 0:
                         break
-                rstrip_lens.append(len(row) - shift)
-            else:
-                rstrip_lens.append(len(row))
-
-        diff_count = 0
-        for row_ind in range(len(self._rows)):
-            full_len = lens[row_ind]
-            rstrip_len = rstrip_lens[row_ind]
-            if rstrip_len < full_len:
-                diff_count = diff_count + 1
-                last_ind = row_ind
-        if diff_count == 1:
-            row = self._rows[last_ind]
-            shift = 0
-            for shift, column in enumerate(row[::-1]):
-                if column.pseudo() or len(column.data.strip()) > 0:
-                    break
-            row.columns = row.columns[:-shift]
+                if shift > 0:
+                    row.columns = row.columns[:-shift]
 
 
     def pack(self):
@@ -854,6 +844,14 @@ if __name__ == '__main__':
 |_. Attribute Name |_. Required |_. Value Type |
 | \3. All Events                               |            |              |
 """
+
+
+    text = r"""
+|_. Attribute Name |_. Required |_. Value Type |
+| \3. All Events                               |
+|                  |            |               | k |
+"""
+
     syntax = textile_syntax()
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
