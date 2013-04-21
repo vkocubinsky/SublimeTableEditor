@@ -571,6 +571,7 @@ class TextTable:
         for row in self._rows:
             if i < len(row) and j < len(row):
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
+        self.pack()
 
     def insert_empty_column(self, i):
         assert i >= 0
@@ -617,16 +618,10 @@ class TextTable:
 
     def colspan(self, col):
         for row in self._rows:
-            if row[col].pseudo() or row[col].colspan > 1:
-                return True
+            if col < len(row):
+                if row[col].pseudo() or row[col].colspan > 1:
+                    return True
         return False
-
-    def rowspan(self,row):
-        for col in self[row].columns:
-            if col.rowspan > 1:
-                return True
-        return False
-
 
     def internal_to_visual_index(self, row, internal_index):
         ind = internal_index
