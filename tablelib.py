@@ -512,7 +512,6 @@ class TextTable:
             return
 
         #intelligent formatting
-        print ("intelligent_formatting", self.syntax.intelligent_formatting)
         if self.syntax.intelligent_formatting:
             self._rstrip()
             column_count = self._max_column_count()
@@ -845,12 +844,6 @@ if __name__ == '__main__':
 | \3. All Events                               |            |              |
 """
 
-
-    text = r"""
-|_. Attribute Name |_. Required |_. Value Type |
-| \3. All Events                               |
-|                  |            |               | k |
-"""
 
     syntax = textile_syntax()
     syntax.intelligent_formatting = True

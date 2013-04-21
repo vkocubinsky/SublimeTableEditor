@@ -386,6 +386,23 @@ class TextileSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected, formatted)
 
 
+    def testIntelligentFormatting(self):
+        self.syntax.intelligent_formatting = True
+        unformatted = r"""
+|_. Attribute Name |_. Required |_. Value Type |
+| \3. All Events                 |            |              |
+""".strip()
+
+        expected = r"""
+|_. Attribute Name |_. Required |_. Value Type |
+|\3. All Events                                |
+""".strip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
+
 
 class MultiMarkdownSyntaxTest(BaseTableTest):
 
