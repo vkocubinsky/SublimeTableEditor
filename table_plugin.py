@@ -144,6 +144,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().has("table_editor_detect_header"):
             syntax.detect_header = self.view.settings().get("table_editor_detect_header")
 
+        if self.view.settings().has("table_editor_intelligent_formatting"):
+            syntax.intelligent_formatting = self.view.settings().get("table_editor_intelligent_formatting")
+
+
         return syntax
 
 
@@ -353,7 +357,6 @@ class TableEditorNextRow(AbstractTableCommand):
                 self.merge(edit, ctx, table)
         else:
             table.insert_empty_row(len(table))
-            print(table.render())
             self.merge(edit, ctx, table)
         row_num = row_num + 1
         self.status_message("Table Editor: Moved to next row")

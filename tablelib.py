@@ -51,6 +51,7 @@ class TableSyntax:
         self.keep_space_left = False
         self.align_number_right = True
         self.detect_header = True
+        self.intelligent_formatting = False
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
@@ -480,6 +481,36 @@ class TextTable:
     def _max_column_count(self):
         return max([len(row) for row in self._rows])
 
+    def _rstrip(self):
+        lens = []
+        rstrip_lens = []
+        for row in self._rows:
+            lens.append(len(row))
+            if row.is_data():
+                shift = 0
+                for shift, column in enumerate(row[::-1]):
+                    if column.pseudo() or len(column.data.strip()) > 0:
+                        break
+                rstrip_lens.append(len(row) - shift)
+            else:
+                rstrip_lens.append(len(row))
+
+        diff_count = 0
+        for row_ind in range(len(self._rows)):
+            full_len = lens[row_ind]
+            rstrip_len = rstrip_lens[row_ind]
+            if rstrip_len < full_len:
+                diff_count = diff_count + 1
+                last_ind = row_ind
+        if diff_count == 1:
+            row = self._rows[last_ind]
+            shift = 0
+            for shift, column in enumerate(row[::-1]):
+                if column.pseudo() or len(column.data.strip()) > 0:
+                    break
+            row.columns = row.columns[:-shift]
+
+
     def pack(self):
         if len(self._rows) == 0:
             return
@@ -489,6 +520,14 @@ class TextTable:
         if column_count == 0:
             self._rows = []
             return
+
+        #intelligent formatting
+        print ("intelligent_formatting", self.syntax.intelligent_formatting)
+        if self.syntax.intelligent_formatting:
+            self._rstrip()
+            column_count = self._max_column_count()
+
+
 
         #adjust/extend column count
 
@@ -812,10 +851,11 @@ if __name__ == '__main__':
 """
 
     text = r"""
-    |/3. row span |
-    |
+|_. Attribute Name |_. Required |_. Value Type |
+| \3. All Events                               |            |              |
 """
     syntax = textile_syntax()
+    syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     # print("internal to visual for 3", t.internal_to_visual_index(0,3))
