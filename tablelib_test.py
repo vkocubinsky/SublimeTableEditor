@@ -50,63 +50,88 @@ class SimpleSyntaxTest(BaseTableTest):
         self.syntax = tablelib.simple_syntax()
 
     def testBasic(self):
-        unformatted = """\
+        unformatted = """
 | Name | Gender | Age |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa | F | 21 |
 | Alex | M | 22 |
-""".rstrip()
+""".strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
+""".strip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
+
+    def testSpace(self):
+        unformatted = """\
+    | Name | Gender | Age |
+    | Text Column | Char Column | Number Column |
+    |-------------|-------------|---------------|
+    | Alisa | F | 21 |
+    | Alex | M | 22 |
+""".rstrip()
+
+        expected = """\
+    |     Name    |    Gender   |      Age      |
+    | Text Column | Char Column | Number Column |
+    |-------------|-------------|---------------|
+    | Alisa       | F           |            21 |
+    | Alex        | M           |            22 |
 """.rstrip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
+
+
+
     def testCustomAlignment(self):
-        unformatted = """\
+        unformatted = """
 | Name | Gender | Age |
 | > | # | < |
 |---|---|---|
 | Alisa | F | 21 |
 | Alex | M | 22 |
-""".rstrip()
+""".strip()
 
-        expected = """\
+        expected = """
 |  Name | Gender | Age |
 | >>>>> | ###### | <<< |
 |-------|--------|-----|
 | Alisa |   F    | 21  |
 |  Alex |   M    | 22  |
-""".rstrip()
+""".strip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
     def testSwapColumn(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |      Age      |    Gender   |
 | Text Column | Number Column | Char Column |
 |-------------|---------------|-------------|
 | Alisa       |            21 | F           |
 | Alex        |            22 | M           |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -115,21 +140,21 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
     def testDeleteColumn(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |      Age      |
 | Text Column | Number Column |
 |-------------|---------------|
 | Alisa       |            21 |
 | Alex        |            22 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -138,21 +163,21 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
     def testSwapRows(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alex        | M           |            22 |
 | Alisa       | F           |            21 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -160,20 +185,20 @@ class SimpleSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected,t.render())
 
     def testDeleteRow(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -181,21 +206,21 @@ class SimpleSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected,t.render())
 
     def testInsertEmptyColumn(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |   |    Gender   |      Age      |
 | Text Column |   | Char Column | Number Column |
 |-------------|---|-------------|---------------|
 | Alisa       |   | F           |            21 |
 | Alex        |   | M           |            22 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -203,22 +228,22 @@ class SimpleSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected,t.render())
 
     def testInsertEmptyRow(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 |             |             |               |
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -226,20 +251,20 @@ class SimpleSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected,t.render())
 
     def testInsertSeparatorRow(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |-------------|-------------|---------------|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -248,20 +273,20 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
     def testInsertDoubleSeparatorRow(self):
-        text = """\
+        text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
-        expected = """\
+        expected = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
 |=============|=============|===============|
 | Alisa       | F           |            21 |
 | Alex        | M           |            22 |
-        """.rstrip()
+        """.strip()
 
 
         t = tablelib.parse_table(self.syntax, text)
@@ -274,7 +299,7 @@ class TextileSyntaxTest(BaseTableTest):
         self.syntax = tablelib.textile_syntax()
 
     def testBasic(self):
-        unformatted = """\
+        unformatted = """
 |_. attribute list |
 |<. align left |
 | cell|
@@ -286,9 +311,9 @@ class TextileSyntaxTest(BaseTableTest):
 |     >.  poor syntax
 |(className). class|
 |{key:value}. style|
-""".rstrip()
+""".strip()
 
-        expected = """\
+        expected = """
 |_.  attribute list |
 |<. align left      |
 | cell              |
@@ -300,32 +325,66 @@ class TextileSyntaxTest(BaseTableTest):
 |>.     poor syntax |
 |(className). class |
 |{key:value}. style |
-""".rstrip()
+""".strip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
     def testCompoundSyntax(self):
-        unformatted = """\
+        unformatted = r"""
 |_>. header |_. centered header |
 |>^. right and top align | long text to show alignment |
-|=\\2. centered colspan|
+|=\2. centered colspan|
 |<>(red). justified |~=. centered |
 |{text-shadow:0 1px 1px black;}(highlight)<~. syntax overload | normal text |
-""".rstrip()
+""".strip()
 
-        expected = """\
+        expected = r"""
 |_>.                                                   header |_.      centered header      |
 |>^.                                      right and top align | long text to show alignment |
-|=\\2.                                    centered colspan                                   |
+|=\2.                                    centered colspan                                   |
 |<>(red). justified                                           |~=.         centered         |
 |{text-shadow:0 1px 1px black;}(highlight)<~. syntax overload | normal text                 |
-""".rstrip()
+""".strip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
+
+    def testColspan(self):
+        unformatted = r"""
+|\2. spans two cols |
+| col 1 | col 2 |
+""".strip()
+
+        expected = r"""
+|\2. spans two cols   |
+| col 1    | col 2    |
+""".strip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
+
+    def testRowspan(self):
+        unformatted = r"""
+|/3. spans 3 rows | a |
+| b |
+| c |
+""".strip()
+
+        expected = r"""
+|/3. spans 3 rows | a |
+| b               |
+| c               |
+""".strip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):
