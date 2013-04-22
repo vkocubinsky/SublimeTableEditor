@@ -51,7 +51,7 @@ class TableSyntax:
         self.keep_space_left = False
         self.align_number_right = True
         self.detect_header = True
-        self.intelligent_formatting = False
+        self.intelligent_formatting = True
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
