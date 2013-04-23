@@ -51,7 +51,8 @@ class TableSyntax:
         self.keep_space_left = False
         self.align_number_right = True
         self.detect_header = True
-        self.intelligent_formatting = True
+        if syntax == TableSyntax.TEXTILE_SYNTAX:
+            self.intelligent_formatting = True
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
@@ -482,6 +483,8 @@ class TextTable:
         return max([len(row) for row in self._rows])
 
     def _rstrip(self):
+        if len(self._rows) <= 1:
+            return
         max_column_count = self._max_column_count()
         long_lines_count = 0
         long_line_ind = 0
@@ -492,12 +495,17 @@ class TextTable:
 
         if long_lines_count == 1:
             row = self._rows[long_line_ind]
-            if row.is_data():
+            overspans = max([column.colspan - 1 for column in row.columns if column.colspan > 1])
+            if row.is_data() and overspans > 0:
                 shift = 0
                 for shift, column in enumerate(row[::-1]):
                     if column.pseudo() or len(column.data.strip()) > 0:
                         break
                 if shift > 0:
+                    if len(self._rows) == 2:
+                        if shift != overspans:
+                            return
+
                     row.columns = row.columns[:-shift]
 
 
