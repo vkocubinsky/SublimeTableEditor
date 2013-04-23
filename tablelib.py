@@ -53,6 +53,9 @@ class TableSyntax:
         self.detect_header = True
         if syntax == TableSyntax.TEXTILE_SYNTAX:
             self.intelligent_formatting = True
+        else:
+            self.intelligent_formatting = True
+
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
