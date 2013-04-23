@@ -495,7 +495,7 @@ class TextTable:
 
         if long_lines_count == 1:
             row = self._rows[long_line_ind]
-            overspans = max([column.colspan - 1 for column in row.columns if column.colspan > 1])
+            overspans = sum([column.colspan - 1 for column in row.columns])
             if row.is_data() and overspans > 0:
                 shift = 0
                 for shift, column in enumerate(row[::-1]):
