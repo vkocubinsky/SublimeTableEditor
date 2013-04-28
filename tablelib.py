@@ -667,7 +667,7 @@ class TextTable:
 
     def internal_to_visual_index(self, row, internal_index):
         ind = internal_index
-        for col in range(internal_index):
+        for col in range(internal_index + 1):
             if self[row][col].pseudo():
                 ind = ind - 1
         return ind
@@ -864,6 +864,6 @@ if __name__ == '__main__':
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
-    print("visual to internal for 2", t.visual_to_internal_index(1,1))
+    print("visual to internal for 1", t.internal_to_visual_index(1,2))
 
     #print("cursor", t.get_cursor(0,1))

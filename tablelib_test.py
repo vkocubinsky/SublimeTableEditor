@@ -411,19 +411,32 @@ class TextileSyntaxTest(BaseTableTest):
 """.strip()
 
         t = tablelib.parse_table(self.syntax, unformatted)
-        formatted = t.render()
+        #formatted = t.render()
+
+        # test visual_to_internal_index
         self.assertEqual(0, t.visual_to_internal_index(1,0))
         self.assertEqual(2, t.visual_to_internal_index(1,1))
         self.assertEqual(3, t.visual_to_internal_index(1,2))
         self.assertEqual(5, t.visual_to_internal_index(1,3))
 
-        self.assertEqual(5, t.visual_to_internal_index(1,500))
+        self.assertEqual(5, t.visual_to_internal_index(1,1000))
 
+        # test trivial
         for col in range(len(t[0])):
             self.assertEqual(col, t.visual_to_internal_index(0,col))
             self.assertEqual(col, t.visual_to_internal_index(2,col))
 
+            self.assertEqual(col, t.internal_to_visual_index(0,col))
+            self.assertEqual(col, t.internal_to_visual_index(2,col))
 
+
+        # test internal_to_visual_index
+        self.assertEqual(0, t.internal_to_visual_index(1,0))
+        self.assertEqual(0, t.internal_to_visual_index(1,1))
+        self.assertEqual(1, t.internal_to_visual_index(1,2))
+        self.assertEqual(2, t.internal_to_visual_index(1,3))
+        self.assertEqual(2, t.internal_to_visual_index(1,4))
+        self.assertEqual(3, t.internal_to_visual_index(1,5))
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):
