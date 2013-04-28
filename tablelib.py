@@ -54,7 +54,7 @@ class TableSyntax:
         if syntax == TableSyntax.TEXTILE_SYNTAX:
             self.intelligent_formatting = True
         else:
-            self.intelligent_formatting = True
+            self.intelligent_formatting = False
 
 
     def multi_markdown_syntax(self):
@@ -845,16 +845,16 @@ def parse_csv(syntax, text):
 
 if __name__ == '__main__':
     # each line begin from '|'
-    text = r"""
-     | a |\2. spans two cols     |  b |
-     | c |/3. col 1 |  col 2         |  d |
-"""
 
     text = r"""
 |_. Attribute Name |_. Required |_. Value Type |
-| \3. All Events                               |            |              |
+| \3. All Events   |            |              |
 """
 
+    text = r"""
+     | _. a | _.b | _.c |
+    | \3.   |     |     |
+   """
 
     syntax = textile_syntax()
     syntax.intelligent_formatting = True

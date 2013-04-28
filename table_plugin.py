@@ -214,7 +214,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            col = table.get_cursor(row_num, field_num)
+            if field_num < len(ctx.table[row_num]):
+                col = table.get_cursor(row_num, field_num)
+            else:
+                col = table.get_cursor(row_num, len(ctx.table[row_num]) - 1)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 

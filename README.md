@@ -24,7 +24,7 @@
     - Pandoc
     - Multi Markdown
     - reStructuredText
-    - Textile
+    - Textile(support colspan and rowspan in alpha status)
 - auto detect table syntax by view syntax
 - switch between different table syntax on the fly
 - temporary disable/enable table editor for current view
@@ -301,6 +301,9 @@ Table editor support next table syntax:
     | Anna      |   12  |         20 |
     | Alexander |   13  |         27 |
 
+Note: colspan with '||' characters doesn't support, it will be supported 
+in next releases.
+
 **RestrucuredText**
 
     |    Name   | Age |
@@ -310,11 +313,35 @@ Table editor support next table syntax:
 
 **Textile**
 
+
+Alignment:
+
     |_.    Name   |_. Age |_. Custom Alignment Demo |
     |   Anna      |    20 |<. left                  |
     |   Alexander |    27 |>.                 right |
     |   Misha     |    42 |=.         center        |
     |             |       |                         |
+
+Colspan(alpha status):
+
+    |\2. spans two cols   |
+    | col 1    | col 2    |
+   
+Rowspan(alpha status):
+
+    |/3. spans 3 rows | a |
+    | b               |
+    | c               |
+
+
+Compound Textile table cell specifiers:
+
+    |_\2.  spans two cols |
+    |_<. col 1 |_>. col 2 |
+
+
+Note: Formatting and work with textile tables with colspan and rowspan has alpha status. 
+
 
 
 ### Switch table syntax on the fly
@@ -516,6 +543,44 @@ Also you can temporary switch this setting with command palette:
 * Table Editor: Disable 'keep_space_left' for current view
 
 
+### Intelligent Formating
+
+Intelligent Formatting is an configuration option for table editor. 
+Currently this option have effect only for textiles tables. 
+It is true by default for textile syntax. You can disable it if you want
+```json
+{
+    "table_editor_intelligent_formatting":false
+}
+``` 
+
+Let you have a table
+
+    |_. Attribute Name |_. Required |_. Value Type |
+    |                  |            |              |
+
+and want a row spanning all 3 columns
+
+    |_. Attribute Name |_. Required |_. Value Type |
+    | \3. All Events                 |            |              |
+
+after click tab table editor will format table as
+
+    |_. Attribute Name |_. Required |_. Value Type |
+    |\3. All Events                                |
+
+Probably it is expected result and this result of Table Editor with 
+"table_editor_intelligent_formatting":true.
+
+But probably you expected
+
+    |_. Attribute Name |_. Required |_. Value Type |   |   |
+    |\3. All Events                                |   |   |
+
+and this result of Table Editor with 
+"table_editor_intelligent_formatting":false.
+
+## Keybinding
 
 **ctrl+shift+a**
 
