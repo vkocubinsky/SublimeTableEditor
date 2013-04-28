@@ -674,12 +674,16 @@ class TextTable:
 
     def visual_to_internal_index(self, row, visual_index):
         count_visual = 0
+        internal_ind = 0
         for col in range(len(self[row])):
             if not self[row][col].pseudo():
                 count_visual += 1
+                internal_ind = col
             if count_visual == visual_index + 1:
                 break
-        return col
+        else:
+            print("WARNING: Visual Index Not found")
+        return internal_ind
 
 
     def get_cursor(self, row_ind, col_ind):
@@ -852,16 +856,14 @@ if __name__ == '__main__':
 """
 
     text = r"""
-     | _. a | _.b | _.c |
-    | \3.   |     |     |
+     | _. a | _.b | _.c | d | e |
+    | \3.               | 1 | 2 |
    """
 
     syntax = textile_syntax()
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
-    # print("internal to visual for 3", t.internal_to_visual_index(0,3))
-    #print("visual to internal for 2", t.visual_to_internal_index(0,2))
-    print("visual to internal for 2", t.visual_to_internal_index(0,2))
+    print("visual to internal for 2", t.visual_to_internal_index(1,1))
 
     #print("cursor", t.get_cursor(0,1))

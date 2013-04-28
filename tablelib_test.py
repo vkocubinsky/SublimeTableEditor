@@ -402,6 +402,28 @@ class TextileSyntaxTest(BaseTableTest):
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
+    def testVisualTointernalIndex(self):
+
+        unformatted = r"""
+| a     | b     | c        | d     | e     | f        |
+|\2. visual 0   | visual 1 |\2. visual 2   | visual 3 |
+| 0     | 1     | 2        | 3     | 4     | 5        |
+""".strip()
+
+        t = tablelib.parse_table(self.syntax, unformatted)
+        formatted = t.render()
+        self.assertEqual(0, t.visual_to_internal_index(1,0))
+        self.assertEqual(2, t.visual_to_internal_index(1,1))
+        self.assertEqual(3, t.visual_to_internal_index(1,2))
+        self.assertEqual(5, t.visual_to_internal_index(1,3))
+
+        self.assertEqual(5, t.visual_to_internal_index(1,500))
+
+        for col in range(len(t[0])):
+            self.assertEqual(col, t.visual_to_internal_index(0,col))
+            self.assertEqual(col, t.visual_to_internal_index(2,col))
+
+
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):
