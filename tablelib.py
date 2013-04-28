@@ -666,11 +666,11 @@ class TextTable:
         return False
 
     def internal_to_visual_index(self, row, internal_index):
-        ind = internal_index
+        visual_ind = internal_index
         for col in range(internal_index + 1):
             if self[row][col].pseudo():
-                ind = ind - 1
-        return ind
+                visual_ind -= 1
+        return visual_ind
 
     def visual_to_internal_index(self, row, visual_index):
         count_visual = 0
