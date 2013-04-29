@@ -598,7 +598,7 @@ class TextTable:
 
 
     def delete_column(self, i):
-        assert self.colspan(i) == False
+        assert self.is_col_colspan(i) == False
 
         for row in self._rows:
             if i < len(row):
@@ -607,8 +607,8 @@ class TextTable:
 
 
     def swap_columns(self, i, j):
-        assert self.colspan(i) == False
-        assert self.colspan(j) == False
+        assert self.is_col_colspan(i) == False
+        assert self.is_col_colspan(j) == False
 
         for row in self._rows:
             if i < len(row) and j < len(row):
@@ -617,7 +617,7 @@ class TextTable:
 
     def insert_empty_column(self, i):
         assert i >= 0
-        assert self.colspan(i) == False
+        assert self.is_col_colspan(i) == False
 
         for row in self._rows:
             row.columns.insert(i, row.new_empty_column())
@@ -658,10 +658,16 @@ class TextTable:
     def visual_column_count(self, row):
         return sum([1 for col in self[row].columns if not col.pseudo()])
 
-    def colspan(self, col):
+    def is_col_colspan(self, col):
         for row in self._rows:
             if col < len(row):
                 if row[col].pseudo() or row[col].colspan > 1:
+                    return True
+        return False
+
+    def is_row_colspan(self, row):
+        for column in self[row].columns:
+            if column.pseudo() or column.colspan > 1:
                     return True
         return False
 

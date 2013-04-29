@@ -381,7 +381,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
         row_num = ctx.row_num
 
         if field_num > 0:
-            if table.colspan(field_num) or table.colspan(field_num - 1):
+            if table.is_col_colspan(field_num) or table.is_col_colspan(field_num - 1):
                 self.status_message("Table Editor: Move column Left is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num - 1)
@@ -407,7 +407,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
         row_num = ctx.row_num
 
         if field_num < len(table[row_num]) - 1:
-            if table.colspan(field_num) or table.colspan(field_num + 1):
+            if table.is_col_colspan(field_num) or table.is_col_colspan(field_num + 1):
                 self.status_message("Table Editor: Move column right is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num + 1)
@@ -433,7 +433,7 @@ class TableEditorDeleteColumn(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if table.colspan(field_num):
+        if table.is_col_colspan(field_num):
             self.status_message("Table Editor: Delete column is not permitted for colspan column")
         else:
             table.delete_column(field_num)
@@ -457,7 +457,7 @@ class TableEditorInsertColumn(AbstractTableCommand):
         row_num = ctx.row_num
         field_num = ctx.field_num
 
-        if table.colspan(field_num):
+        if table.is_col_colspan(field_num):
             self.status_message("Table Editor: Insert column is not permitted for colspan column")
         else:
             table.insert_empty_column(field_num)
@@ -685,18 +685,21 @@ class TableEditorJoinLines(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        self.merge(edit, ctx, table)
-
         if (row_num + 1 < len(table)
             and table[row_num].is_data()
-            and table[row_num + 1].is_data()):
+            and table[row_num + 1].is_data()
+            and not table.is_row_colspan(row_num)
+            and not table.is_row_colspan(row_num + 1)):
+
             for curr_col, next_col in zip(table[row_num].columns,
                                           table[row_num +1].columns):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
-        self.status_message("Table Editor: Row joined")
+            self.status_message("Table Editor: Row joined")
+        else:
+            self.status_message("Table Editor: Join columns is not permitted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
