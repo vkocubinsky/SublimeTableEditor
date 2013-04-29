@@ -241,7 +241,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
         ctx = self.create_context(sel)
         self.merge(edit, ctx, ctx.table)
         self.status_message("Table Editor: Table aligned")
-        return self.visual_field_cell(ctx, ctx.table, ctx.row_num, ctx.visual_field_num)
+        return self.visual_field_sel(ctx, ctx.table, ctx.row_num, ctx.visual_field_num)
 
 
 class TableEditorNextField(AbstractTableCommand):
@@ -639,6 +639,19 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         return rest_data.strip()
 
     def run_one_sel(self, edit, sel):
+        ctx = self.create_context(sel)
+        table = ctx.table
+        field_num = ctx.field_num
+        row_num = ctx.row_num
+        if row_num + 1 < len(table):
+            if len(table[row_num + 1]) - 1 < field_num:
+                self.status_message("Table Editor: Split column is not permitted for short line")
+                return self.field_sel(ctx, table, row_num, field_num)
+            elif table[row_num + 1][field_num].pseudo():
+                self.status_message("Table Editor: Split column is not permitted to colspan column")
+                return self.field_sel(ctx, table, row_num, field_num)
+
+
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
 
@@ -650,6 +663,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
 
         if row_num + 1 == len(table) or table[row_num + 1].is_separator():
             table.insert_empty_row(row_num + 1)
+
         row_num = row_num + 1
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
