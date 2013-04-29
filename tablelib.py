@@ -686,10 +686,10 @@ class TextTable:
         return internal_ind
 
 
-    def get_cursor(self, row_ind, col_ind):
+    def get_cursor(self, row_ind, visual_col_ind):
         #
         # '   |  1 |  2  |  3_| 4 |'
-        assert col_ind < len(self[row_ind])
+        col_ind = self.visual_to_internal_index(row_ind, visual_col_ind)
         base_len = (len(self.prefix) +
                    sum([column.col_len for column, ind
                                 in zip(self[row_ind].columns, range(col_ind))]) +

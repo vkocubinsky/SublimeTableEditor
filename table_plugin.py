@@ -210,16 +210,21 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def run_one_sel(self, edit, sel):
         return sel
 
-    def cell_sel(self, ctx, table, row_num, field_num):
+    def visual_field_sel(self, ctx, table, row_num, visual_field_num):
         if table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            if field_num < len(ctx.table[row_num]):
-                col = table.get_cursor(row_num, field_num)
-            else:
-                col = table.get_cursor(row_num, len(ctx.table[row_num]) - 1)
+            col = table.get_cursor(row_num, visual_field_num)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
+
+    def field_sel(self, ctx, table, row_num, field_num):
+        if table.empty():
+            visual_field_num = 0
+        else:
+            visual_field_num = table.internal_to_visual_index(row_num, field_num)
+        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
+
 
     def status_message(self, message):
         sublime.status_message(message)
@@ -234,10 +239,9 @@ class TableEditorAlignCommand(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
-        self.merge(edit, ctx, table)
+        self.merge(edit, ctx, ctx.table)
         self.status_message("Table Editor: Table aligned")
-        return self.cell_sel(ctx, table, ctx.row_num, ctx.field_num)
+        return self.visual_field_cell(ctx, ctx.table, ctx.row_num, ctx.visual_field_num)
 
 
 class TableEditorNextField(AbstractTableCommand):
@@ -289,8 +293,7 @@ class TableEditorNextField(AbstractTableCommand):
                 break
         self.status_message("Table Editor: Cursor position changed")
 
-        field_num = table.visual_to_internal_index(row_num, visual_field_num)
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
 
 
 class TableEditorPreviousField(AbstractTableCommand):
@@ -333,9 +336,7 @@ class TableEditorPreviousField(AbstractTableCommand):
                 #row_num == 0
                 break
         self.status_message("Table Editor: Cursor position changed")
-        field_num = table.visual_to_internal_index(row_num, visual_field_num)
-
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
 
 
 class TableEditorNextRow(AbstractTableCommand):
@@ -363,7 +364,7 @@ class TableEditorNextRow(AbstractTableCommand):
             self.merge(edit, ctx, table)
         row_num = row_num + 1
         self.status_message("Table Editor: Moved to next row")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorMoveColumnLeft(AbstractTableCommand):
@@ -389,7 +390,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
         else:
             self.status_message("Table Editor: Move column left doesn't make sense for first column")
         self.merge(edit, ctx, table)
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
@@ -416,7 +417,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
             self.status_message("Table Editor: Move column right doesn't make sense for last column")
         self.merge(edit,ctx, table)
 
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorDeleteColumn(AbstractTableCommand):
@@ -438,9 +439,9 @@ class TableEditorDeleteColumn(AbstractTableCommand):
             table.delete_column(field_num)
             self.status_message("Table Editor: Column deleted")
             self.merge(edit, ctx, table)
-            if field_num == len(table[row_num]):
+            if not table.empty() and field_num == len(table[row_num]):
                 field_num = field_num - 1
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorInsertColumn(AbstractTableCommand):
@@ -462,7 +463,7 @@ class TableEditorInsertColumn(AbstractTableCommand):
             table.insert_empty_column(field_num)
             self.status_message("Column inserted")
             self.merge(edit, ctx, table)
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorKillRow(AbstractTableCommand):
@@ -483,7 +484,7 @@ class TableEditorKillRow(AbstractTableCommand):
         if row_num == len(table): # just deleted one row
             row_num = row_num - 1
         self.status_message("Table Editor: Row deleted")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 
@@ -503,7 +504,7 @@ class TableEditorInsertRow(AbstractTableCommand):
         table.insert_empty_row(row_num)
         self.merge(edit, ctx, table)
         self.status_message("Table Editor: Row inserted")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorMoveRowUp(AbstractTableCommand):
@@ -526,7 +527,7 @@ class TableEditorMoveRowUp(AbstractTableCommand):
         else:
             self.status_message("Table Editor: Move row up doesn't make sense for first row")
         self.merge(edit, ctx, table)
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 
@@ -550,7 +551,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
         else:
             self.status_message("Table Editor: Move row down doesn't make sense for last row")
         self.merge(edit, ctx, table)
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorInsertSingleHline(AbstractTableCommand):
@@ -569,7 +570,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
         table.insert_single_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
         self.status_message("Table Editor: Single separator row inserted")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorInsertDoubleHline(AbstractTableCommand):
@@ -588,7 +589,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
         table.insert_double_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
         self.status_message("Table Editor: Double separator row inserted")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorHlineAndMove(AbstractTableCommand):
@@ -619,7 +620,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
         row_num = row_num + 2
         field_num = 0
         self.status_message("Table Editor: Single separator row inserted")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorSplitColumnDown(AbstractTableCommand):
@@ -654,7 +655,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         table.pack()
         self.merge(edit, ctx, table)
         self.status_message("Table Editor: Column splitted down")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 
@@ -682,7 +683,7 @@ class TableEditorJoinLines(AbstractTableCommand):
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
         self.status_message("Table Editor: Row joined")
-        return self.cell_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, table, row_num, field_num)
 
 
 class TableEditorCsvToTable(AbstractTableCommand):
