@@ -37,6 +37,8 @@ class TableContext:
         self.view = view
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.syntax = syntax
+        self.lineParser = tablelib.LineParser(self.syntax)
+
         self.first_table_row = self._get_first_table_row(sel_row, sel_col)
         self.last_table_row = self._get_last_table_row(sel_row, sel_col)
         self.table_text = self._get_table_text(self.first_table_row, self.last_table_row)
@@ -80,8 +82,8 @@ class TableContext:
 
     def _visual_field_num(self, sel_row, sel_col):
         line_text = self._get_text(sel_row)
-        lineParser = tablelib.LineParser(self.syntax, line_text)
-        return lineParser.field_num(sel_col)
+        line = self.lineParser.parse(line_text)
+        return line.field_num(sel_col)
 
     def _hline_count(self, text, start, end):
         if self.syntax.is_hline(text):

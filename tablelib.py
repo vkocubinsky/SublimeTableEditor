@@ -808,12 +808,13 @@ class TableParser:
     def parse_text(self, text):
         table = TextTable(self.syntax)
         lines = text.strip().splitlines()
+        lineParser = LineParser(self.syntax)
+
         for ind, line in enumerate(lines):
-            lineParser = LineParser(self.syntax, line)
+            line = lineParser.parse(line)
             if ind == 0 :
-                table.prefix = lineParser.prefix
-            cols = lineParser.text_cells
-            row = self._parse_row(table, cols)
+                table.prefix = line.prefix
+            row = self._parse_row(table, line.str_cols())
             table.add_row(row)
         table.pack()
         return table
@@ -849,21 +850,50 @@ def parse_csv(syntax, text):
     table = parser.parse_csv(text)
     return table
 
-class LineParser:
-    def __init__(self, syntax, line):
-        self.syntax = syntax
-        self.line = line
-        self.borders = []
-        self.cells = []
-        self.text_cells = []
-        self._parse()
 
-    def _parse(self):
-        mo = re.search(r"[^\s]", self.line)
-        if mo:
-            self.prefix = self.line[:mo.start()]
+class LineRegion:
+    def __init__(self, begin, end):
+        self.begin = begin
+        self.end = end
+
+class LineCell:
+    def __init__(self, line_text, left_border, right_border):
+        self.cell_region = LineRegion(left_border.end, right_border.begin)
+        self.left_border = left_border
+        self.right_border = right_border
+        self.text = line_text[self.cell_region.begin:self.cell_region.end]
+
+
+class Line:
+    def __init__(self):
+        self.cells = []
+        self.prefix = ""
+
+    def str_cols(self):
+        return [cell.text for cell in self.cells]
+
+    def field_num(self, pos):
+        for ind, cell in enumerate(self.cells):
+            if cell.right_border.end > pos:
+                return ind
         else:
-            self.prefix = ""
+            return len(self.cells) - 1
+
+
+
+class LineParser:
+    def __init__(self, syntax):
+        self.syntax = syntax
+
+    def parse(self, line_text):
+
+        line = Line()
+
+        mo = re.search(r"[^\s]", line_text)
+        if mo:
+            line.prefix = line_text[:mo.start()]
+        else:
+            line.prefix = ""
 
         if self.syntax.multi_markdown_syntax():
             pattern = "(?:{0}{0})|{1}".format(re.escape(syntax.vline ),
@@ -872,36 +902,25 @@ class LineParser:
         else:
             pattern = self.syntax.hline_border_pattern()
 
+
+        borders = []
+
         last_border_end = 0
-        for m in re.finditer(pattern, self.line):
-            self.borders.append([m.start(),m.end()])
+        for m in re.finditer(pattern, line_text):
+            borders.append(LineRegion(m.start(),m.end()))
             last_border_end = m.end()
 
-        if last_border_end < len(self.line.rstrip()):
-            self.borders.append([len(self.line), len(self.line)])
+        if last_border_end < len(line_text.rstrip()):
+            borders.append(LineRegion(len(line_text), len(line_text)))
 
-        prev_border = None
-        for border in self.borders:
-            if prev_border is None:
-                prev_border = border
+        left_border = None
+        for right_border in borders:
+            if left_border is None:
+                left_border = right_border
             else:
-                self.cells.append([prev_border[1], border[0]])
-                prev_border = border
-
-        for cell in self.cells:
-            begin, end = cell
-            self.text_cells.append(self.line[begin:end])
-        #print(self.borders)
-        #print(self.cells)
-        #print(self.text_cells)
-
-    def field_num(self, pos):
-        assert len(self.borders) > 0
-        for ind, border in enumerate(self.borders):
-            if border[1] > pos:
-                return ind - 1
-        else:
-            return len(self.cells) - 1
+                line.cells.append(LineCell(line_text, left_border, right_border))
+                left_border = right_border
+        return line
 
 
 
@@ -921,6 +940,7 @@ if __name__ == '__main__':
     print("Table:'\n{0}\n'".format(t.render()))
     #print("visual to internal for 1", t.internal_to_visual_index(1,2))
 
-    p = LineParser(syntax, "  | a | b ||  c     ")
-                           #01234567890123456789
-    print(p.field_num(12))
+    p = LineParser(syntax)
+    line = p.parse("  | a | b ||  c     ")
+                   #01234567890123456789
+    print(line.field_num(12))
