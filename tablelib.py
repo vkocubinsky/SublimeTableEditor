@@ -176,6 +176,9 @@ class DataColumn(Column):
         self.left_space = ' '
         self.right_space = ' '
 
+        self.pseudo_columns = []
+
+
     def _norm(self):
         if self.syntax.keep_space_left:
             if self.header:
@@ -188,8 +191,11 @@ class DataColumn(Column):
             norm = self.data.strip()
         return norm
 
-
     def min_len(self):
+        return int(math.ceil(self.total_min_len()/self.colspan))
+
+
+    def total_min_len(self):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
         return max(space_len + 1, len(self._norm()) + space_len)
@@ -783,8 +789,10 @@ class TableParser:
                     len(line_cell.right_border_text) > 1
                     ):
                     print("catch multimarkdown colspan")
+                    column = DataColumn(row,col)
+                    column.colspan = len(line_cell.right_border_text)
 
-                if (self.syntax.textile_syntax() and
+                elif (self.syntax.textile_syntax() and
                    TextileCellColumn.match_cell(col)):
                     column = TextileCellColumn(row, col)
                 else:
