@@ -759,7 +759,8 @@ class TableParser:
         return True
 
 
-    def _parse_row(self, table, str_cols):
+    def _parse_row(self, table, line):
+        str_cols = line.str_cols()
         if self._is_single_row_separator(str_cols):
             row = SeparatorRow(table, '-', len(str_cols))
         elif self._is_double_row_separator(str_cols):
@@ -776,7 +777,13 @@ class TableParser:
                 row.columns.append(MultiMarkdownAlignColumn(row,col))
         else:
             row = DataRow(table)
-            for col in str_cols:
+            for line_cell in line.cells:
+                col = line_cell.text
+                if (self.syntax.multi_markdown_syntax() and
+                    len(line_cell.right_border_text) > 1
+                    ):
+                    print("catch multimarkdown colspan")
+
                 if (self.syntax.textile_syntax() and
                    TextileCellColumn.match_cell(col)):
                     column = TextileCellColumn(row, col)
@@ -784,21 +791,6 @@ class TableParser:
                     column = DataColumn(row,col)
                 row.append(column)
         return row
-
-
-    def _split_row(self, table, line):
-        line = line.strip()
-        #remove first '|' character
-        if line[:1] in self.syntax.hline_borders:
-            line = line[1:]
-        #remove last '|' character
-        if line[-1:] in self.syntax.hline_borders:
-            line = line[:-1]
-        if self.syntax.is_hline(line):
-            cols = re.split(self.syntax.hline_border_pattern(), line)
-        else:
-            cols = line.split(self.syntax.vline)
-        return cols
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
@@ -814,7 +806,7 @@ class TableParser:
             line = lineParser.parse(line)
             if ind == 0 :
                 table.prefix = line.prefix
-            row = self._parse_row(table, line.str_cols())
+            row = self._parse_row(table, line)
             table.add_row(row)
         table.pack()
         return table
@@ -862,6 +854,8 @@ class LineCell:
         self.left_border = left_border
         self.right_border = right_border
         self.text = line_text[self.cell_region.begin:self.cell_region.end]
+        self.left_border_text = line_text[self.left_border.begin:self.left_border.end]
+        self.right_border_text = line_text[self.right_border.begin:self.right_border.end]
 
 
 class Line:
@@ -930,8 +924,13 @@ if __name__ == '__main__':
     # each line begin from '|'
 
     text = r"""
-|_. Attribute Name |_. Required |_. Value Type |
-| \3. All Events   |            |              |
+ |                 |          Grouping           ||
+ |   First Header  | Second Header | Third Header |
+ |    ------------ | :-----------: | -----------: |
+ |   Content       |          *Long Cell*        ||
+ |   Content       |   **Cell**    |         Cell |
+ |   New section   |     More      |         Data |
+ |   And more      |            And more          |
 """
 
     syntax = multi_markdown_syntax()
