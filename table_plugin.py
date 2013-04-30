@@ -80,11 +80,8 @@ class TableContext:
 
     def _visual_field_num(self, sel_row, sel_col):
         line_text = self._get_text(sel_row)
-        sel_field_num = self._hline_count(line_text, 0, sel_col) - 1
-        mo = re.compile(r"\s*$")
-        if sel_field_num > 0 and mo.match(line_text, sel_col):
-            sel_field_num = sel_field_num - 1
-        return sel_field_num
+        lineParser = tablelib.LineParser(self.syntax, line_text)
+        return lineParser.field_num(sel_col)
 
     def _hline_count(self, text, start, end):
         if self.syntax.is_hline(text):

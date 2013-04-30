@@ -807,14 +807,12 @@ class TableParser:
 
     def parse_text(self, text):
         table = TextTable(self.syntax)
-        mo = re.search(r"[^\s]", text)
-        if mo:
-            table.prefix = text[:mo.start()]
-        else:
-            table.prefix = ""
         lines = text.strip().splitlines()
-        for line in lines:
-            cols = self._split_row(table, line)
+        for ind, line in enumerate(lines):
+            lineParser = LineParser(self.syntax, line)
+            if ind == 0 :
+                table.prefix = lineParser.prefix
+            cols = lineParser.text_cells
             row = self._parse_row(table, cols)
             table.add_row(row)
         table.pack()
@@ -851,6 +849,62 @@ def parse_csv(syntax, text):
     table = parser.parse_csv(text)
     return table
 
+class LineParser:
+    def __init__(self, syntax, line):
+        self.syntax = syntax
+        self.line = line
+        self.borders = []
+        self.cells = []
+        self.text_cells = []
+        self._parse()
+
+    def _parse(self):
+        mo = re.search(r"[^\s]", self.line)
+        if mo:
+            self.prefix = self.line[:mo.start()]
+        else:
+            self.prefix = ""
+
+        if self.syntax.multi_markdown_syntax():
+            pattern = "(?:{0}{0})|{1}".format(re.escape(syntax.vline ),
+                                              syntax.hline_border_pattern()
+                                             )
+        else:
+            pattern = self.syntax.hline_border_pattern()
+
+        last_border_end = 0
+        for m in re.finditer(pattern, self.line):
+            self.borders.append([m.start(),m.end()])
+            last_border_end = m.end()
+
+        if last_border_end < len(self.line.rstrip()):
+            self.borders.append([len(self.line), len(self.line)])
+
+        prev_border = None
+        for border in self.borders:
+            if prev_border is None:
+                prev_border = border
+            else:
+                self.cells.append([prev_border[1], border[0]])
+                prev_border = border
+
+        for cell in self.cells:
+            begin, end = cell
+            self.text_cells.append(self.line[begin:end])
+        #print(self.borders)
+        #print(self.cells)
+        #print(self.text_cells)
+
+    def field_num(self, pos):
+        assert len(self.borders) > 0
+        for ind, border in enumerate(self.borders):
+            if border[1] > pos:
+                return ind - 1
+        else:
+            return len(self.cells) - 1
+
+
+
 
 
 if __name__ == '__main__':
@@ -861,15 +915,12 @@ if __name__ == '__main__':
 | \3. All Events   |            |              |
 """
 
-    text = r"""
-     | _. a | _.b | _.c | d | e |
-    | \3.               | 1 | 2 |
-   """
-
-    syntax = textile_syntax()
+    syntax = multi_markdown_syntax()
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
-    print("visual to internal for 1", t.internal_to_visual_index(1,2))
+    #print("visual to internal for 1", t.internal_to_visual_index(1,2))
 
-    #print("cursor", t.get_cursor(0,1))
+    p = LineParser(syntax, "  | a | b ||  c     ")
+                           #01234567890123456789
+    print(p.field_num(12))
