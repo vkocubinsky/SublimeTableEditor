@@ -296,7 +296,7 @@ class MultiMarkdownAlignColumn(Column):
 
     def render(self):
         total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
-        total_col_len = self.col_len - (self.colspan - 1)
+        total_col_len = total_col_len - (self.colspan - 1)
 
         if self._align_follow == Column.ALIGN_CENTER:
             return ' :' + '-' * (total_col_len - 4) + ': '
@@ -815,16 +815,17 @@ class TableParser:
 
     def _parse_row(self, table, line):
         str_cols = line.str_cols()
-        if self._is_single_row_separator(str_cols):
+
+        if (self.syntax.multi_markdown_syntax()
+              and self._is_multi_markdown_align_row(str_cols)):
+            row = MultiMarkdownAlignRow(table)
+        elif self._is_single_row_separator(str_cols):
             row = SeparatorRow(table, '-', len(str_cols))
         elif self._is_double_row_separator(str_cols):
             row = SeparatorRow(table, '=', len(str_cols))
         elif (self.syntax.custom_column_alignment and
               self._is_custom_align_row(str_cols)):
             row = CustomAlignRow(table)
-        elif (self.syntax.multi_markdown_syntax()
-              and self._is_multi_markdown_align_row(str_cols)):
-            row = MultiMarkdownAlignRow(table)
         else:
             row = DataRow(table)
 
@@ -937,7 +938,7 @@ class LineParser:
             line.prefix = ""
 
         if self.syntax.multi_markdown_syntax():
-            pattern = "(?:{0}{0})|{1}".format(re.escape(self.syntax.vline ),
+            pattern = "(?:{0}{0}+)|{1}".format(re.escape(self.syntax.vline ),
                                               self.syntax.hline_border_pattern()
                                              )
         else:
@@ -973,12 +974,12 @@ if __name__ == '__main__':
     text = r"""
  |                 |          Grouping           ||
  |   First Header  | Second Header | Third Header |
- |    ------------ | :-----------: | -----------: |
+ |    ------------ | :-------: | --------: |
  |   Content       |          *Long Cell*        ||
  |   Content       |   **Cell**    |         Cell |
  |   New section   |     More      |         Data |
  |   And more      |            And more          |
- | :-: ||||
+ | :---: |||
 """
 
     syntax = multi_markdown_syntax()
