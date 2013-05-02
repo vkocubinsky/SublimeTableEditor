@@ -557,7 +557,7 @@ Also you can temporary switch this setting with command palette:
 ### Intelligent Formating
 
 Intelligent Formatting is an configuration option for table editor. 
-Currently this option have effect only for textiles tables. 
+Currently this option have effect only for textiles and multimarkdown tables. 
 It is true by default for textile syntax. You can disable it if you want
 ```json
 {
