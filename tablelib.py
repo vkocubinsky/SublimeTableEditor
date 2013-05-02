@@ -211,7 +211,6 @@ class DataColumn(Column):
         # colspan -1 is count of '|'
         total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
 
-
         if self.syntax.multi_markdown_syntax():
             total_col_len = total_col_len - (self.colspan - 1)
 
@@ -288,18 +287,25 @@ class MultiMarkdownAlignColumn(Column):
             self._align_follow = None
 
     def min_len(self):
+        return int(math.ceil(self.total_min_len()/self.colspan))
+
+    def total_min_len(self):
         # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
-        return 5
+        return 5 + self.colspan - 1
+
 
     def render(self):
+        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+        total_col_len = self.col_len - (self.colspan - 1)
+
         if self._align_follow == Column.ALIGN_CENTER:
-            return ' :' + '-' * (self.col_len - 4) + ': '
+            return ' :' + '-' * (total_col_len - 4) + ': '
         elif self._align_follow == Column.ALIGN_LEFT:
-            return ' :' + '-' * (self.col_len - 4) + '- '
+            return ' :' + '-' * (total_col_len - 4) + '- '
         elif self._align_follow == Column.ALIGN_RIGHT:
-            return ' -' + '-' * (self.col_len - 4) + ': '
+            return ' -' + '-' * (total_col_len - 4) + ': '
         else:
-            return ' -' + '-' * (self.col_len - 4) + '- '
+            return ' -' + '-' * (total_col_len - 4) + '- '
 
     def align_follow(self):
         return self._align_follow
@@ -385,6 +391,7 @@ class Row:
 
     def __init__(self, table):
         self.table = table
+        self.syntax = table.syntax
         self.columns = []
 
     def __getitem__(self, index):
@@ -415,6 +422,10 @@ class Row:
 
     def new_empty_column(self):
         raise NotImplementedError
+
+    def create_column(self, text):
+        raise NotImplementedError
+
 
     def render(self):
 
@@ -449,6 +460,9 @@ class SeparatorRow(Row):
     def new_empty_column(self):
         return SeparatorColumn(self,self.separator)
 
+    def create_column(self, text):
+        return SeparatorColumn(self,self.separator)
+
     def is_header_separator(self):
         return True
 
@@ -461,6 +475,13 @@ class DataRow(Row):
     def new_empty_column(self):
         return DataColumn(self,'')
 
+    def create_column(self, text):
+        if (self.syntax.textile_syntax() and
+           TextileCellColumn.match_cell(col)):
+            return TextileCellColumn(self, text)
+        else:
+            return DataColumn(self, text)
+
     def is_data(self):
         return True
 
@@ -469,6 +490,9 @@ class CustomAlignRow(Row):
     def new_empty_column(self):
         return CustomAlignColumn(self,'#')
 
+    def create_column(self, text):
+        return CustomAlignColumn(self,text)
+
     def is_align(self):
         return True
 
@@ -476,7 +500,11 @@ class CustomAlignRow(Row):
 class MultiMarkdownAlignRow(Row):
 
     def new_empty_column(self):
-        return MultiMarkdownAlignColumn(self.row,'-')
+        return MultiMarkdownAlignColumn(self,'-')
+
+    def create_column(self, text):
+        return MultiMarkdownAlignColumn(self, text)
+
 
     def is_header_separator(self):
         return True
@@ -794,30 +822,21 @@ class TableParser:
         elif (self.syntax.custom_column_alignment and
               self._is_custom_align_row(str_cols)):
             row = CustomAlignRow(table)
-            for col in str_cols:
-                row.columns.append(CustomAlignColumn(row,col))
         elif (self.syntax.multi_markdown_syntax()
               and self._is_multi_markdown_align_row(str_cols)):
             row = MultiMarkdownAlignRow(table)
-            for col in str_cols:
-                row.columns.append(MultiMarkdownAlignColumn(row,col))
         else:
             row = DataRow(table)
-            for line_cell in line.cells:
-                col = line_cell.text
-                if (self.syntax.multi_markdown_syntax() and
-                    len(line_cell.right_border_text) > 1
-                    ):
-                    column = DataColumn(row,col)
-                    column.colspan = len(line_cell.right_border_text)
-                elif (self.syntax.textile_syntax() and
-                   TextileCellColumn.match_cell(col)):
-                    column = TextileCellColumn(row, col)
-                else:
-                    column = DataColumn(row,col)
-                column.left_border_text = line_cell.left_border_text
-                column.right_border_text = line_cell.right_border_text
-                row.append(column)
+
+        for line_cell in line.cells:
+            column = row.create_column(line_cell.text)
+            if (self.syntax.multi_markdown_syntax() and
+                len(line_cell.right_border_text) > 1
+                ):
+                column.colspan = len(line_cell.right_border_text)
+            row.append(column)
+            column.left_border_text = line_cell.left_border_text
+            column.right_border_text = line_cell.right_border_text
         return row
 
     def is_table_row(self, row):
@@ -959,6 +978,7 @@ if __name__ == '__main__':
  |   Content       |   **Cell**    |         Cell |
  |   New section   |     More      |         Data |
  |   And more      |            And more          |
+ | :-: ||||
 """
 
     syntax = multi_markdown_syntax()
