@@ -983,20 +983,7 @@ if __name__ == '__main__':
  | :---: |||
 """
 
-    text = """
-    |_.  attribute list |
-|<. align left      |
-| cell              |
-|>.     align right |
-|=.      center     |
-|<>. justify        |
-|^. valign top      |
-|~. bottom          |
-|>.     poor syntax
-|(className). class |
-|{key:value}. style |
-"""
-    syntax = textile_syntax()
+    syntax = multi_markdown_syntax()
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))

@@ -22,7 +22,7 @@
     - Simple
     - EmacsOrgMode
     - Pandoc
-    - Multi Markdown
+    - Multi Markdown(support colspan in alpha status)
     - reStructuredText
     - Textile(support colspan and rowspan in alpha status)
 - auto detect table syntax by view syntax
@@ -296,13 +296,24 @@ Table editor support next table syntax:
 
 **Markdown**
 
+Alignment:
+
     |    Name   | Phone | Age Column |
     | :-------- | :---: | ---------: |
     | Anna      |   12  |         20 |
     | Alexander |   13  |         27 |
 
-Note: colspan with '||' characters doesn't support, it will be supported 
-in next releases.
+Colspan(alpha status):
+
+    |              |           Grouping          ||
+    | First Header | Second Header | Third Header |
+    | ------------ | :-----------: | -----------: |
+    | Content      |         *Long Cell*         ||
+    | Content      |    **Cell**   |         Cell |
+    | New section  |      More     |         Data |
+    | And more     |    And more   |              |
+    | :---------------------------------------: |||
+
 
 **RestrucuredText**
 
