@@ -156,6 +156,8 @@ class Column(object):
         self.colspan = 1
         self.rowspan = 1
         self.pseudo_columns = []
+        self.left_border_text = self.syntax.vline
+        self.right_border_text = self.syntax.vline
 
 
     def min_len(self):
@@ -199,12 +201,20 @@ class DataColumn(Column):
     def total_min_len(self):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
-        return max(space_len + 1, len(self._norm()) + space_len)
+        total_min_len = max(space_len + 1, len(self._norm()) + space_len)
+        if self.syntax.multi_markdown_syntax():
+            total_min_len += self.colspan - 1
+        return total_min_len
 
 
     def render(self):
         # colspan -1 is count of '|'
         total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+
+
+        if self.syntax.multi_markdown_syntax():
+            total_col_len = total_col_len - (self.colspan - 1)
+
 
         norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
@@ -417,8 +427,15 @@ class Row:
                 + syntax.hline_in_border.join(str_cols())
                 + syntax.hline_out_border)
         else:
-            vline = syntax.vline
-            return vline + vline.join(str_cols()) + vline
+            r = ""
+            for ind, column in enumerate(self.columns):
+                if column.pseudo():
+                    continue
+                if ind == 0:
+                    r += column.left_border_text
+                r += column.render()
+                r += column.right_border_text
+            return r
 
 
 class SeparatorRow(Row):
@@ -798,6 +815,8 @@ class TableParser:
                     column = TextileCellColumn(row, col)
                 else:
                     column = DataColumn(row,col)
+                column.left_border_text = line_cell.left_border_text
+                column.right_border_text = line_cell.right_border_text
                 row.append(column)
         return row
 
@@ -899,8 +918,8 @@ class LineParser:
             line.prefix = ""
 
         if self.syntax.multi_markdown_syntax():
-            pattern = "(?:{0}{0})|{1}".format(re.escape(syntax.vline ),
-                                              syntax.hline_border_pattern()
+            pattern = "(?:{0}{0})|{1}".format(re.escape(self.syntax.vline ),
+                                              self.syntax.hline_border_pattern()
                                              )
         else:
             pattern = self.syntax.hline_border_pattern()
