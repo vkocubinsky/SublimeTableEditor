@@ -477,7 +477,7 @@ class DataRow(Row):
 
     def create_column(self, text):
         if (self.syntax.textile_syntax() and
-           TextileCellColumn.match_cell(col)):
+           TextileCellColumn.match_cell(text)):
             return TextileCellColumn(self, text)
         else:
             return DataColumn(self, text)
@@ -820,9 +820,9 @@ class TableParser:
               and self._is_multi_markdown_align_row(str_cols)):
             row = MultiMarkdownAlignRow(table)
         elif self._is_single_row_separator(str_cols):
-            row = SeparatorRow(table, '-', len(str_cols))
+            row = SeparatorRow(table, '-')
         elif self._is_double_row_separator(str_cols):
-            row = SeparatorRow(table, '=', len(str_cols))
+            row = SeparatorRow(table, '=')
         elif (self.syntax.custom_column_alignment and
               self._is_custom_align_row(str_cols)):
             row = CustomAlignRow(table)
@@ -847,9 +847,8 @@ class TableParser:
 
     def parse_text(self, text):
         table = TextTable(self.syntax)
-        lines = text.strip().splitlines()
+        lines = text.splitlines()
         lineParser = LineParser(self.syntax)
-
         for ind, line in enumerate(lines):
             line = lineParser.parse(line)
             if ind == 0 :
@@ -902,8 +901,11 @@ class LineCell:
         self.left_border = left_border
         self.right_border = right_border
         self.text = line_text[self.cell_region.begin:self.cell_region.end]
+        if self.right_border.begin == self.right_border.end:
+            self.right_border_text = '|'
+        else:
+            self.right_border_text = line_text[self.right_border.begin:self.right_border.end]
         self.left_border_text = line_text[self.left_border.begin:self.left_border.end]
-        self.right_border_text = line_text[self.right_border.begin:self.right_border.end]
 
 
 class Line:
@@ -971,8 +973,7 @@ class LineParser:
 if __name__ == '__main__':
     # each line begin from '|'
 
-    text = r"""
- |                 |          Grouping           ||
+    text = """   |                 |          Grouping           ||
  |   First Header  | Second Header | Third Header |
  |    ------------ | :-------: | --------: |
  |   Content       |          *Long Cell*        ||
@@ -982,13 +983,22 @@ if __name__ == '__main__':
  | :---: |||
 """
 
-    syntax = multi_markdown_syntax()
+    text = """
+    |_.  attribute list |
+|<. align left      |
+| cell              |
+|>.     align right |
+|=.      center     |
+|<>. justify        |
+|^. valign top      |
+|~. bottom          |
+|>.     poor syntax
+|(className). class |
+|{key:value}. style |
+"""
+    syntax = textile_syntax()
     syntax.intelligent_formatting = True
     t = parse_table(syntax, text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     #print("visual to internal for 1", t.internal_to_visual_index(1,2))
 
-    p = LineParser(syntax)
-    line = p.parse("  | a | b ||  c     ")
-                   #01234567890123456789
-    print(line.field_num(12))

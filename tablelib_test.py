@@ -466,6 +466,38 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected, formatted)
 
 
+    def testColspan(self):
+                unformatted = """\
+    |                 |          Grouping           ||
+    |   First Header  | Second Header | Third Header |
+    |    ------------ | :-------:     | --------:    |
+    |   Content       |          *Long Cell*        ||
+    |   Content       |   **Cell**    |         Cell |
+    |   New section   |     More      |         Data |
+    |   And more      |            And more          |
+    | :---: |||
+        """.rstrip()
+
+                expected = """\
+    |              |           Grouping          ||
+    | First Header | Second Header | Third Header |
+    | ------------ | :-----------: | -----------: |
+    | Content      |         *Long Cell*         ||
+    | Content      |    **Cell**   |         Cell |
+    | New section  |      More     |         Data |
+    | And more     |    And more   |              |
+    | :---------------------------------------: |||
+        """.rstrip()
+
+                t = tablelib.parse_table(self.syntax, unformatted)
+                formatted = t.render()
+                self.assert_table_equals(expected, formatted)
+
+    text = """
+
+"""
+
+
 class ReStructuredTextSyntaxTest(BaseTableTest):
 
     def setUp(self):
