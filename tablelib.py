@@ -155,6 +155,8 @@ class Column(object):
         self.header = None
         self.colspan = 1
         self.rowspan = 1
+        self.pseudo_columns = []
+
 
     def min_len(self):
         raise NotImplementedError
@@ -176,7 +178,6 @@ class DataColumn(Column):
         self.left_space = ' '
         self.right_space = ' '
 
-        self.pseudo_columns = []
 
 
     def _norm(self):
@@ -202,17 +203,20 @@ class DataColumn(Column):
 
 
     def render(self):
+        # colspan -1 is count of '|'
+        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+
         norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
 
         if self.header and self.syntax.detect_header:
-            align_value =  norm.center(self.col_len - space_len, ' ')
+            align_value =  norm.center(total_col_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
-            align_value = norm.rjust(self.col_len - space_len, ' ')
+            align_value = norm.rjust(total_col_len - space_len, ' ')
         elif self.align == Column.ALIGN_CENTER:
-            align_value = norm.center(self.col_len - space_len, ' ')
+            align_value = norm.center(total_col_len - space_len, ' ')
         else:
-            align_value = norm.ljust(self.col_len - space_len, ' ')
+            align_value = norm.ljust(total_col_len - space_len, ' ')
         return self.left_space + align_value + self.right_space
 
 
@@ -326,7 +330,6 @@ class TextileCellColumn(Column):
         if rowspan_mo:
             self.rowspan = int(rowspan_mo.group(1))
 
-        self.pseudo_columns = []
 
 
     def min_len(self):
@@ -788,10 +791,8 @@ class TableParser:
                 if (self.syntax.multi_markdown_syntax() and
                     len(line_cell.right_border_text) > 1
                     ):
-                    print("catch multimarkdown colspan")
                     column = DataColumn(row,col)
                     column.colspan = len(line_cell.right_border_text)
-
                 elif (self.syntax.textile_syntax() and
                    TextileCellColumn.match_cell(col)):
                     column = TextileCellColumn(row, col)
