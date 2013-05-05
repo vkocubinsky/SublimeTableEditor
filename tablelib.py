@@ -858,36 +858,34 @@ class TableParser:
         table.pack()
         return table
 
-    def parse_csv(self, text):
-        lines = []
-        try:
-            table = TextTable(self.syntax)
-            vline = self.syntax.vline
-            dialect = csv.Sniffer().sniff(text)
-            table_reader = csv.reader(text.splitlines(), dialect)
-            for cols in table_reader:
-                row = DataRow(table)
-                for col in cols:
-                    row.columns.append(DataColumn(row,col))
-                table.add_row(row)
-        except csv.Error:
-            table = TextTable(syntax)
-            for line in text.splitlines():
-                row = Row(table, Row.ROW_DATA)
-                row.columns.append(DataColumn(row,line))
-                table.add_row(self, row)
-        table.pack()
-        return table
+
+
+def parse_csv(syntax, text):
+    lines = []
+    try:
+        table = TextTable(syntax)
+        vline = syntax.vline
+        dialect = csv.Sniffer().sniff(text)
+        table_reader = csv.reader(text.splitlines(), dialect)
+        for cols in table_reader:
+            row = DataRow(table)
+            for col in cols:
+                row.columns.append(DataColumn(row,col))
+            table.add_row(row)
+    except csv.Error:
+        table = TextTable(syntax)
+        for line in text.splitlines():
+            row = Row(table, Row.ROW_DATA)
+            row.columns.append(DataColumn(row,line))
+            table.add_row(self, row)
+    table.pack()
+    return table
 
 def parse_table(syntax, text):
     parser = TableParser(syntax)
     table = parser.parse_text(text)
     return table
 
-def parse_csv(syntax, text):
-    parser = TableParser(syntax)
-    table = parser.parse_csv(text)
-    return table
 
 
 class LineRegion:

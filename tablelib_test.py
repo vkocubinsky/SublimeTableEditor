@@ -293,6 +293,21 @@ class SimpleSyntaxTest(BaseTableTest):
         t.insert_double_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
+    def testParseCsv(self):
+        csv_text = """
+a,b,c
+1,2,3
+        """.strip()
+
+        expected = """
+| a | b | c |
+| 1 | 2 | 3 |
+        """.strip()
+
+        t = tablelib.parse_csv(self.syntax, csv_text)
+        self.assert_table_equals(expected,t.render())
+
+
 class TextileSyntaxTest(BaseTableTest):
 
     def setUp(self):
