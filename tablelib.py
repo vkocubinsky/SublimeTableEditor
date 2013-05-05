@@ -123,9 +123,14 @@ class TextileTableSyntax(TableSyntax):
     def create_parser(self):
         return TextileTableParser(self)
 
+class SimpleTableSyntax(TableSyntax):
+
+    def create_parser(self):
+        return SimpleTableParser(self)
+
 
 def simple_syntax():
-    return TableSyntax(syntax = TableSyntax.SIMPLE_SYNTAX,
+    return SimpleTableSyntax(syntax = TableSyntax.SIMPLE_SYNTAX,
                        hline_out_border='|',
                        hline_in_border='|',
                        custom_column_alignment=True)
@@ -492,11 +497,7 @@ class DataRow(Row):
         return DataColumn(self,'')
 
     def create_column(self, text):
-        if (self.syntax.textile_syntax() and
-           TextileCellColumn.match_cell(text)):
-            return TextileCellColumn(self, text)
-        else:
-            return DataColumn(self, text)
+        return DataColumn(self, text)
 
     def is_data(self):
         return True
@@ -816,45 +817,14 @@ class TextTable:
         return "\n".join(self.render_lines())
 
 
-
-
-class TableParser:
+class BaseTableParser:
 
     def __init__(self, syntax):
         self.syntax = syntax
 
-    def _is_single_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\-]+\s*$", col):
-                return False
-        return True
-
-    def _is_double_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\=]+\s*$", col):
-                return False
-        return True
-
-    def _is_custom_align_row(self, str_cols):
-        for col in str_cols:
-            if not CustomAlignColumn.match_cell(col):
-                return False
-        return True
 
     def parse_row(self, table, line):
-        str_cols = line.str_cols()
-
-        if self._is_single_row_separator(str_cols):
-            row = SeparatorRow(table, '-')
-        elif self._is_double_row_separator(str_cols):
-            row = SeparatorRow(table, '=')
-        elif (self.syntax.custom_column_alignment and
-              self._is_custom_align_row(str_cols)):
-            row = CustomAlignRow(table)
-        elif self.syntax.textile_syntax():
-            row = TextileRow(table)
-        else:
-            row = DataRow(table)
+        row = self.create_row(table, line)
 
         for line_cell in line.cells:
             column = row.create_column(line_cell.text)
@@ -862,6 +832,9 @@ class TableParser:
             column.left_border_text = line_cell.left_border_text
             column.right_border_text = line_cell.right_border_text
         return row
+
+    def create_row(self, table, line):
+        raise NotImplementedError
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
@@ -881,7 +854,50 @@ class TableParser:
         table.pack()
         return table
 
-class MultiMarkdownTableParser(TableParser):
+
+class TableParser(BaseTableParser):
+
+
+    def _is_single_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\-]+\s*$", col):
+                return False
+        return True
+
+    def _is_double_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\=]+\s*$", col):
+                return False
+        return True
+
+
+    def create_row(self, table, line):
+        if self._is_single_row_separator(line.str_cols()):
+            row = SeparatorRow(table, '-')
+        elif self._is_double_row_separator(line.str_cols()):
+            row = SeparatorRow(table, '=')
+        else:
+            row = DataRow(table)
+        return row
+
+
+class SimpleTableParser(BaseTableParser):
+
+    def _is_custom_align_row(self, str_cols):
+        for col in str_cols:
+            if not CustomAlignColumn.match_cell(col):
+                return False
+        return True
+
+    def create_row(self, table, line):
+        if (self.syntax.custom_column_alignment and
+              self._is_custom_align_row(line.str_cols())):
+            row = CustomAlignRow(table)
+        else:
+            row = TableParser.create_row()
+
+
+class MultiMarkdownTableParser(BaseTableParser):
 
 
     def _is_multi_markdown_align_row(self, str_cols):
@@ -891,12 +907,7 @@ class MultiMarkdownTableParser(TableParser):
         return True
 
     def parse_row(self, table, line):
-        str_cols = line.str_cols()
-
-        if self._is_multi_markdown_align_row(str_cols):
-            row = MultiMarkdownAlignRow(table)
-        else:
-            row = DataRow(table)
+        row = self.create_row(table, line)
 
         for line_cell in line.cells:
             column = row.create_column(line_cell.text)
@@ -907,19 +918,18 @@ class MultiMarkdownTableParser(TableParser):
             column.right_border_text = line_cell.right_border_text
         return row
 
-class TextileTableParser(TableParser):
+
+    def create_row(self, table, line):
+        if self._is_multi_markdown_align_row(line.str_cols()):
+            row = MultiMarkdownAlignRow(table)
+        else:
+            row = DataRow(table)
+        return row
+
+class TextileTableParser(BaseTableParser):
 
     def parse_row(self, table, line):
-        str_cols = line.str_cols()
-
-        row = TextileRow(table)
-
-        for line_cell in line.cells:
-            column = row.create_column(line_cell.text)
-            row.append(column)
-            column.left_border_text = line_cell.left_border_text
-            column.right_border_text = line_cell.right_border_text
-        return row
+        return TextileRow(table)
 
 
 
