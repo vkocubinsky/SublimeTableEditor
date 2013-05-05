@@ -30,14 +30,11 @@ import csv
 
 try:
     from .tablebase import *
+    from .multi_markdown_syntax import *
 except ValueError:
     from tablebase import *
+    from multi_markdown_syntax import *
 
-
-class MultiMarkdownTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return MultiMarkdownTableParser(self)
 
 
 class TextileTableSyntax(TableSyntax):
@@ -133,48 +130,6 @@ class CustomAlignColumn(Column):
 
 
 
-class MultiMarkdownAlignColumn(Column):
-    PATTERN = r"^\s*([\:]?[\-]+[\:]?)\s*$"
-
-    def __init__(self, row, data):
-        Column.__init__(self, row)
-        col = data.strip()
-        if col.count(':') == 2:
-            self._align_follow = Column.ALIGN_CENTER
-        elif col[0] == ':':
-            self._align_follow = Column.ALIGN_LEFT
-        elif col[-1] == ':':
-            self._align_follow = Column.ALIGN_RIGHT
-        else:
-            self._align_follow = None
-
-    def min_len(self):
-        return int(math.ceil(self.total_min_len()/self.colspan))
-
-    def total_min_len(self):
-        # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
-        return 5 + self.colspan - 1
-
-
-    def render(self):
-        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
-        total_col_len = total_col_len - (self.colspan - 1)
-
-        if self._align_follow == Column.ALIGN_CENTER:
-            return ' :' + '-' * (total_col_len - 4) + ': '
-        elif self._align_follow == Column.ALIGN_LEFT:
-            return ' :' + '-' * (total_col_len - 4) + '- '
-        elif self._align_follow == Column.ALIGN_RIGHT:
-            return ' -' + '-' * (total_col_len - 4) + ': '
-        else:
-            return ' -' + '-' * (total_col_len - 4) + '- '
-
-    def align_follow(self):
-        return self._align_follow
-
-    @staticmethod
-    def match_cell(str_col):
-        return re.match(MultiMarkdownAlignColumn.PATTERN, str_col)
 
 
 class TextileCellColumn(Column):
@@ -265,21 +220,6 @@ class CustomAlignRow(Row):
         return True
 
 
-class MultiMarkdownAlignRow(Row):
-
-    def new_empty_column(self):
-        return MultiMarkdownAlignColumn(self,'-')
-
-    def create_column(self, text):
-        return MultiMarkdownAlignColumn(self, text)
-
-
-    def is_header_separator(self):
-        return True
-
-    def is_align(self):
-        return True
-
 
 
 
@@ -327,27 +267,6 @@ class SimpleTableParser(TableParser):
         return row
 
 
-class MultiMarkdownTableParser(BaseTableParser):
-
-
-    def _is_multi_markdown_align_row(self, str_cols):
-        for col in str_cols:
-            if not MultiMarkdownAlignColumn.match_cell(col):
-                return False
-        return True
-
-    def create_row(self, table, line):
-        if self._is_multi_markdown_align_row(line.str_cols()):
-            row = MultiMarkdownAlignRow(table)
-        else:
-            row = DataRow(table)
-        return row
-
-    def create_column(self, table, row, line_cell):
-        column = BaseTableParser.create_column(self, table, row, line_cell)
-        if len(line_cell.right_border_text) > 1:
-            column.colspan = len(line_cell.right_border_text)
-        return column
 
 class TextileTableParser(BaseTableParser):
 
@@ -396,20 +315,8 @@ if __name__ == '__main__':
  | :---: |||
 """
 
-    text = """
-|_.  attribute list |
-|<. align left      |
-| cell              |
-|>.     align right |
-|=.      center     |
-|<>. justify        |
-|^. valign top      |
-|~. bottom          |
-|>.     poor syntax |
-|(className). class |
-|{key:value}. style |""".strip()
 
-    syntax = textile_syntax()
+    syntax = multi_markdown_syntax()
     syntax.intelligent_formatting = True
     t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
