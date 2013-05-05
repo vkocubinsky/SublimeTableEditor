@@ -62,25 +62,6 @@ class TableSyntax:
     def create_parser(self):
         raise NotImplementedError
 
-    def multi_markdown_syntax(self):
-        return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
-
-    def textile_syntax(self):
-        return self.syntax == TableSyntax.TEXTILE_SYNTAX
-
-    def emacs_org_mode_syntax(self):
-        return self.syntax == TableSyntax.EMACS_ORG_MODE_SYNTAX
-
-    def re_structured_text_syntax(self):
-        return self.syntax == TableSyntax.RE_STRUCTURED_TEXT_SYNTAX
-
-    def pandoc_syntax(self):
-        return self.syntax == TableSyntax.PANDOC_SYNTAX
-
-    def simple_syntax(self):
-        return self.syntax == TableSyntax.SIMPLE_SYNTAX
-
-
     def __str__(self):
         return """
 {0} a {0} b {0}
@@ -286,8 +267,9 @@ class DataColumn(Column):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
         total_min_len = max(space_len + 1, len(self._norm()) + space_len)
-        if self.syntax.multi_markdown_syntax():
-            total_min_len += self.colspan - 1
+        # if self.syntax.multi_markdown_syntax():
+        #     total_min_len += self.colspan - 1
+        total_min_len = total_min_len + (len(self.left_border_text) - 1) + (len(self.right_border_text) - 1)
         return total_min_len
 
 
@@ -295,8 +277,9 @@ class DataColumn(Column):
         # colspan -1 is count of '|'
         total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
 
-        if self.syntax.multi_markdown_syntax():
-            total_col_len = total_col_len - (self.colspan - 1)
+        #if self.syntax.multi_markdown_syntax():
+        #    total_col_len = total_col_len - (self.colspan - 1)
+        total_col_len = total_col_len - (len(self.left_border_text) - 1) - (len(self.right_border_text) - 1)
 
 
 
