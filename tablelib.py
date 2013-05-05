@@ -31,9 +31,11 @@ import csv
 try:
     from .tablebase import *
     from .multi_markdown_syntax import *
+    from .textile_syntax import *
 except ValueError:
     from tablebase import *
     from multi_markdown_syntax import *
+    from textile_syntax import *
 
 
 
