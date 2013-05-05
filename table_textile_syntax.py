@@ -30,9 +30,9 @@ import re
 
 
 try:
-    from .tablebase import *
+    from .table_base import *
 except ValueError:
-    from tablebase import *
+    from table_base import *
 
 
 class TextileTableSyntax(TableSyntax):

@@ -27,9 +27,9 @@ import csv
 import re
 
 try:
-    from . import tablelib
+    from . import table_lib
 except ValueError:
-    import tablelib
+    import table_lib
 
 class TableContext:
 
@@ -37,7 +37,7 @@ class TableContext:
         self.view = view
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         self.syntax = syntax
-        self.lineParser = tablelib.LineParser(self.syntax)
+        self.lineParser = table_lib.LineParser(self.syntax)
 
         self.first_table_row = self._get_first_table_row(sel_row, sel_col)
         self.last_table_row = self._get_last_table_row(sel_row, sel_col)
@@ -104,17 +104,17 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def detect_syntax(self):
         syntax_name = self.view.settings().get("table_editor_syntax")
         if syntax_name == "Simple":
-            syntax = tablelib.simple_syntax()
+            syntax = table_lib.simple_syntax()
         elif syntax_name == "EmacsOrgMode":
-            syntax = tablelib.emacs_org_mode_syntax()
+            syntax = table_lib.emacs_org_mode_syntax()
         elif syntax_name == "Pandoc":
-            syntax = tablelib.pandoc_syntax()
+            syntax = table_lib.pandoc_syntax()
         elif syntax_name == "MultiMarkdown":
-            syntax = tablelib.multi_markdown_syntax()
+            syntax = table_lib.multi_markdown_syntax()
         elif syntax_name == "reStructuredText":
-            syntax = tablelib.re_structured_text_syntax()
+            syntax = table_lib.re_structured_text_syntax()
         elif syntax_name == "Textile":
-            syntax = tablelib.textile_syntax()
+            syntax = table_lib.textile_syntax()
         else:
             syntax = self.auto_detect_syntax()
         border_style = (self.view.settings().get("table_editor_border_style",
@@ -154,14 +154,14 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         view_syntax = self.view.settings().get('syntax')
         if (view_syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
             view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
-            return tablelib.multi_markdown_syntax()
+            return table_lib.multi_markdown_syntax()
         elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
-            return tablelib.textile_syntax()
+            return table_lib.textile_syntax()
         elif (view_syntax ==
                      'Packages/RestructuredText/reStructuredText.tmLanguage'):
-            return tablelib.re_structured_text_syntax()
+            return table_lib.re_structured_text_syntax()
         else:
-            return tablelib.simple_syntax()
+            return table_lib.simple_syntax()
         #'Packages/Text/Plain text.tmLanguage':
         #
 
@@ -191,7 +191,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 self.view.erase(edit, region)
 
     def create_table(self, ctx):
-        return tablelib.parse_table(ctx.syntax, ctx.table_text)
+        return table_lib.parse_table(ctx.syntax, ctx.table_text)
 
     def create_context(self, sel):
         return TableContext(self.view, sel, self.detect_syntax())
@@ -714,7 +714,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
             return sel
         else:
             text = self.view.substr(sel)
-            table = tablelib.parse_csv(self.detect_syntax(), text)
+            table = table_lib.parse_csv(self.detect_syntax(), text)
             self.view.replace(edit, sel, table.render())
 
             first_row = self.view.rowcol(sel.begin())[0]

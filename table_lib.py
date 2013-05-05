@@ -29,13 +29,13 @@ import re
 import csv
 
 try:
-    from .tablebase import *
-    from .multi_markdown_syntax import *
-    from .textile_syntax import *
+    from .table_base import *
+    from .table_multi_markdown_syntax import *
+    from .table_textile_syntax import *
 except ValueError:
-    from tablebase import *
-    from multi_markdown_syntax import *
-    from textile_syntax import *
+    from table_base import *
+    from table_multi_markdown_syntax import *
+    from table_textile_syntax import *
 
 
 

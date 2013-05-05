@@ -25,9 +25,9 @@ import unittest
 import difflib
 
 try:
-    from . import tablelib
+    from . import table_lib
 except ValueError:
-    import tablelib
+    import table_lib
 
 
 class BaseTableTest(unittest.TestCase):
