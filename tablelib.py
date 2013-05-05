@@ -28,6 +28,12 @@ import math
 import re
 import csv
 
+try:
+    from .tablebase import *
+except ValueError:
+    from tablebase import *
+
+
 class TableSyntax:
     MUTLI_MARKDOWN_SYTAX = 'Multi Markdown'
     TEXTILE_SYNTAX = "Textile"
