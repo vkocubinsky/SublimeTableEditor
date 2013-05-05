@@ -47,7 +47,7 @@ class BaseTableTest(unittest.TestCase):
 class SimpleSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.simple_syntax()
+        self.syntax = table_lib.simple_syntax()
 
     def testBasic(self):
         unformatted = """
@@ -304,14 +304,14 @@ a,b,c
 | 1 | 2 | 3 |
         """.strip()
 
-        t = tablelib.parse_csv(self.syntax, csv_text)
+        t = table_lib.parse_csv(self.syntax, csv_text)
         self.assert_table_equals(expected,t.render())
 
 
 class TextileSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.textile_syntax()
+        self.syntax = table_lib.textile_syntax()
 
     def testBasic(self):
         unformatted = """
@@ -457,7 +457,7 @@ class TextileSyntaxTest(BaseTableTest):
 class MultiMarkdownSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.multi_markdown_syntax()
+        self.syntax = table_lib.multi_markdown_syntax()
 
     def testBasic(self):
         unformatted = """\
@@ -516,7 +516,7 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
 class ReStructuredTextSyntaxTest(BaseTableTest):
 
     def setUp(self):
-        self.syntax = tablelib.re_structured_text_syntax()
+        self.syntax = table_lib.re_structured_text_syntax()
 
     def testBasic(self):
         unformatted = """\
