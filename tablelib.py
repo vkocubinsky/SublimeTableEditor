@@ -827,14 +827,18 @@ class BaseTableParser:
         row = self.create_row(table, line)
 
         for line_cell in line.cells:
-            column = row.create_column(line_cell.text)
+            column = self.create_column(table, row, line_cell)
             row.append(column)
-            column.left_border_text = line_cell.left_border_text
-            column.right_border_text = line_cell.right_border_text
         return row
 
     def create_row(self, table, line):
         raise NotImplementedError
+
+    def create_column(self, table, row, line_cell):
+        column = row.create_column(line_cell.text)
+        column.left_border_text = line_cell.left_border_text
+        column.right_border_text = line_cell.right_border_text
+        return column
 
     def is_table_row(self, row):
         return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
@@ -906,25 +910,18 @@ class MultiMarkdownTableParser(BaseTableParser):
                 return False
         return True
 
-    def parse_row(self, table, line):
-        row = self.create_row(table, line)
-
-        for line_cell in line.cells:
-            column = row.create_column(line_cell.text)
-            if len(line_cell.right_border_text) > 1:
-                column.colspan = len(line_cell.right_border_text)
-            row.append(column)
-            column.left_border_text = line_cell.left_border_text
-            column.right_border_text = line_cell.right_border_text
-        return row
-
-
     def create_row(self, table, line):
         if self._is_multi_markdown_align_row(line.str_cols()):
             row = MultiMarkdownAlignRow(table)
         else:
             row = DataRow(table)
         return row
+
+    def create_column(self, table, row, line_cell):
+        column = BaseTableParser.create_column(self, table, row, line_cell)
+        if len(line_cell.right_border_text) > 1:
+            column.colspan = len(line_cell.right_border_text)
+        return column
 
 class TextileTableParser(BaseTableParser):
 
