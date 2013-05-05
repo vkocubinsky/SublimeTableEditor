@@ -32,18 +32,16 @@ try:
     from .table_base import *
     from .table_multi_markdown_syntax import *
     from .table_textile_syntax import *
+    from .table_simple_syntax import *
 except ValueError:
     from table_base import *
     from table_multi_markdown_syntax import *
     from table_textile_syntax import *
+    from table_simple_syntax import *
 
 
 
 
-class SimpleTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return SimpleTableParser(self)
 
 
 class EmacsOrgModeTableSyntax(TableSyntax):
@@ -100,95 +98,11 @@ def textile_syntax():
 
 
 
-class CustomAlignColumn(Column):
-    ALIGN_MAP = {'<': Column.ALIGN_LEFT,
-                 '>': Column.ALIGN_RIGHT,
-                 '#': Column.ALIGN_CENTER}
-
-    PATTERN = r"^\s*((?:[\<]+)|(?:[\>]+)|(?:[\#]+))\s*$"
-
-    def __init__(self, row, data):
-        Column.__init__(self, row)
-        self.align_char = re.search(r"[\<]|[\>]|[\#]", data).group(0)
-
-    def align_follow(self):
-        return CustomAlignColumn.ALIGN_MAP[self.align_char]
-
-    def min_len(self):
-        # ' < ' or ' > ' or ' # '
-        return 3
-
-
-    def render(self):
-        return ' ' + self.align_char * (self.col_len - 2) + ' '
-
-    @staticmethod
-    def match_cell(str_col):
-        return re.match(CustomAlignColumn.PATTERN, str_col)
 
 
 
 
 
-
-
-class CustomAlignRow(Row):
-
-    def new_empty_column(self):
-        return CustomAlignColumn(self,'#')
-
-    def create_column(self, text):
-        return CustomAlignColumn(self,text)
-
-    def is_align(self):
-        return True
-
-
-
-
-
-
-class TableParser(BaseTableParser):
-
-
-    def _is_single_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\-]+\s*$", col):
-                return False
-        return True
-
-    def _is_double_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\=]+\s*$", col):
-                return False
-        return True
-
-
-    def create_row(self, table, line):
-        if self._is_single_row_separator(line.str_cols()):
-            row = SeparatorRow(table, '-')
-        elif self._is_double_row_separator(line.str_cols()):
-            row = SeparatorRow(table, '=')
-        else:
-            row = DataRow(table)
-        return row
-
-
-class SimpleTableParser(TableParser):
-
-    def _is_custom_align_row(self, str_cols):
-        for col in str_cols:
-            if not CustomAlignColumn.match_cell(col):
-                return False
-        return True
-
-    def create_row(self, table, line):
-        if (self.syntax.custom_column_alignment and
-              self._is_custom_align_row(line.str_cols())):
-            row = CustomAlignRow(table)
-        else:
-            row = TableParser.create_row(self, table, line)
-        return row
 
 
 

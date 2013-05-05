@@ -644,6 +644,33 @@ class BaseTableParser:
 
 
 
+class TableParser(BaseTableParser):
+
+
+    def _is_single_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\-]+\s*$", col):
+                return False
+        return True
+
+    def _is_double_row_separator(self, str_cols):
+        for col in str_cols:
+            if not re.match(r"^\s*[\=]+\s*$", col):
+                return False
+        return True
+
+
+    def create_row(self, table, line):
+        if self._is_single_row_separator(line.str_cols()):
+            row = SeparatorRow(table, '-')
+        elif self._is_double_row_separator(line.str_cols()):
+            row = SeparatorRow(table, '=')
+        else:
+            row = DataRow(table)
+        return row
+
+
+
 class LineRegion:
     def __init__(self, begin, end):
         self.begin = begin
