@@ -850,6 +850,7 @@ class BaseTableParser:
         lines = text.splitlines()
         lineParser = LineParser(self.syntax)
         for ind, line in enumerate(lines):
+
             line = lineParser.parse(line)
             if ind == 0 :
                 table.prefix = line.prefix
@@ -885,7 +886,7 @@ class TableParser(BaseTableParser):
         return row
 
 
-class SimpleTableParser(BaseTableParser):
+class SimpleTableParser(TableParser):
 
     def _is_custom_align_row(self, str_cols):
         for col in str_cols:
@@ -898,7 +899,8 @@ class SimpleTableParser(BaseTableParser):
               self._is_custom_align_row(line.str_cols())):
             row = CustomAlignRow(table)
         else:
-            row = TableParser.create_row()
+            row = TableParser.create_row(self, table, line)
+        return row
 
 
 class MultiMarkdownTableParser(BaseTableParser):
@@ -925,7 +927,7 @@ class MultiMarkdownTableParser(BaseTableParser):
 
 class TextileTableParser(BaseTableParser):
 
-    def parse_row(self, table, line):
+    def create_row(self, table, line):
         return TextileRow(table)
 
 
@@ -1045,7 +1047,20 @@ if __name__ == '__main__':
  | :---: |||
 """
 
-    syntax = multi_markdown_syntax()
+    text = """
+|_.  attribute list |
+|<. align left      |
+| cell              |
+|>.     align right |
+|=.      center     |
+|<>. justify        |
+|^. valign top      |
+|~. bottom          |
+|>.     poor syntax |
+|(className). class |
+|{key:value}. style |""".strip()
+
+    syntax = textile_syntax()
     syntax.intelligent_formatting = True
     t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
