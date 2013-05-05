@@ -40,6 +40,11 @@ class MultiMarkdownTableSyntax(TableSyntax):
     def create_parser(self):
         return MultiMarkdownTableParser(self)
 
+    def hline_border_pattern(self):
+        return "(?:{0}{0}+)|{1}".format(re.escape(self.vline),
+                                        TableSyntax.hline_border_pattern(self)
+                                        )
+
 
 class MultiMarkdownAlignColumn(Column):
     PATTERN = r"^\s*([\:]?[\-]+[\:]?)\s*$"

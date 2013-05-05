@@ -299,6 +299,7 @@ class DataColumn(Column):
             total_col_len = total_col_len - (self.colspan - 1)
 
 
+
         norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
 
@@ -720,12 +721,7 @@ class LineParser:
         else:
             line.prefix = ""
 
-        if self.syntax.multi_markdown_syntax():
-            pattern = "(?:{0}{0}+)|{1}".format(re.escape(self.syntax.vline ),
-                                              self.syntax.hline_border_pattern()
-                                             )
-        else:
-            pattern = self.syntax.hline_border_pattern()
+        pattern = self.syntax.hline_border_pattern()
 
 
         borders = []
