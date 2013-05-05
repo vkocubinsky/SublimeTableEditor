@@ -1,4 +1,4 @@
-# tablelib.py - pretty print text table.
+# table_lib.py - pretty print text table.
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 

@@ -1,4 +1,4 @@
-# tablelib_test.py - unittest for tablelib
+# table_lib_test.py - unittest for tablelib
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 

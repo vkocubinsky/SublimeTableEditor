@@ -1,4 +1,4 @@
-# tablebase.py - Key classes and methods for pretty print text table.
+# table_base.py - Key classes and methods for pretty print text table.
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 

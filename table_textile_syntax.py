@@ -1,4 +1,4 @@
-# textile_syntax.py - Support Textile table syntax
+# table_textile_syntax.py - Support Textile table syntax
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 

@@ -1,4 +1,4 @@
-# multi_markdown_syntax.py - Support MultiMarkdown table syntax
+# table_multi_markdown_syntax.py - Support MultiMarkdown table syntax
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 
