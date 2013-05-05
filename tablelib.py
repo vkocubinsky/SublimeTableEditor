@@ -56,6 +56,8 @@ class TableSyntax:
         else:
             self.intelligent_formatting = False
 
+        self.table_parser = TableParser(self)
+
 
     def multi_markdown_syntax(self):
         return self.syntax == TableSyntax.MUTLI_MARKDOWN_SYTAX
@@ -881,12 +883,6 @@ def parse_csv(syntax, text):
     table.pack()
     return table
 
-def parse_table(syntax, text):
-    parser = TableParser(syntax)
-    table = parser.parse_text(text)
-    return table
-
-
 
 class LineRegion:
     def __init__(self, begin, end):
@@ -983,7 +979,7 @@ if __name__ == '__main__':
 
     syntax = multi_markdown_syntax()
     syntax.intelligent_formatting = True
-    t = parse_table(syntax, text.strip())
+    t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
     #print("visual to internal for 1", t.internal_to_visual_index(1,2))
 

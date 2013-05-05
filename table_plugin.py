@@ -45,7 +45,7 @@ class TableContext:
         self.visual_field_num = self._visual_field_num(sel_row, sel_col)
         self.row_num = sel_row - self.first_table_row
 
-        self.table = tablelib.parse_table(self.syntax, self.table_text)
+        self.table = self.syntax.table_parser.parse_text(self.table_text)
         self.field_num = self.table.visual_to_internal_index(self.row_num, self.visual_field_num)
 
 
@@ -77,7 +77,7 @@ class TableContext:
 
     def _is_table_row(self, row):
         text = self._get_text(row)
-        return tablelib.TableParser(self.syntax).is_table_row(text)
+        return self.syntax.table_parser.is_table_row(text)
 
 
     def _visual_field_num(self, sel_row, sel_col):

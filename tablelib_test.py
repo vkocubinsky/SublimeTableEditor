@@ -66,7 +66,7 @@ class SimpleSyntaxTest(BaseTableTest):
 | Alex        | M           |            22 |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -88,7 +88,7 @@ class SimpleSyntaxTest(BaseTableTest):
     | Alex        | M           |            22 |
 """.rstrip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -112,7 +112,7 @@ class SimpleSyntaxTest(BaseTableTest):
 |  Alex |   M    | 22  |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -134,7 +134,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.swap_columns(1,2)
         self.assert_table_equals(expected,t.render())
 
@@ -157,7 +157,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.delete_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -180,7 +180,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.swap_rows(3,4)
         self.assert_table_equals(expected,t.render())
 
@@ -201,7 +201,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.delete_row(4)
         self.assert_table_equals(expected,t.render())
 
@@ -223,7 +223,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.insert_empty_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -246,7 +246,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.insert_empty_row(3)
         self.assert_table_equals(expected,t.render())
 
@@ -267,7 +267,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.insert_single_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
@@ -289,7 +289,7 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
 
-        t = tablelib.parse_table(self.syntax, text)
+        t = self.syntax.table_parser.parse_text(text)
         t.insert_double_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
@@ -342,7 +342,7 @@ class TextileSyntaxTest(BaseTableTest):
 |{key:value}. style |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -363,7 +363,7 @@ class TextileSyntaxTest(BaseTableTest):
 |{text-shadow:0 1px 1px black;}(highlight)<~. syntax overload | normal text                 |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -378,7 +378,7 @@ class TextileSyntaxTest(BaseTableTest):
 | col 1    | col 2    |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -396,7 +396,7 @@ class TextileSyntaxTest(BaseTableTest):
 | c               |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -413,7 +413,7 @@ class TextileSyntaxTest(BaseTableTest):
 |\3. All Events                                |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -425,7 +425,7 @@ class TextileSyntaxTest(BaseTableTest):
 | 0     | 1     | 2        | 3     | 4     | 5        |
 """.strip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         #formatted = t.render()
 
         # test visual_to_internal_index
@@ -476,7 +476,7 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
 |        Alex |      M      | 22            |
 """.rstrip()
 
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
@@ -504,7 +504,7 @@ class MultiMarkdownSyntaxTest(BaseTableTest):
     | :---------------------------------------: |||
         """.rstrip()
 
-                t = tablelib.parse_table(self.syntax, unformatted)
+                t = self.syntax.table_parser.parse_text(unformatted)
                 formatted = t.render()
                 self.assert_table_equals(expected, formatted)
 
@@ -540,7 +540,7 @@ class ReStructuredTextSyntaxTest(BaseTableTest):
 """.rstrip()
 
         self.syntax.keep_space_left = True
-        t = tablelib.parse_table(self.syntax, unformatted)
+        t = self.syntax.table_parser.parse_text(unformatted)
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
