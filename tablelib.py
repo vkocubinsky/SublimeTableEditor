@@ -37,10 +37,6 @@ except ValueError:
 
 
 
-class TextileTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return TextileTableParser(self)
 
 class SimpleTableSyntax(TableSyntax):
 
@@ -132,80 +128,6 @@ class CustomAlignColumn(Column):
 
 
 
-class TextileCellColumn(Column):
-    PATTERN = (
-        r"\s*("
-        # Sequence of one or more table cell terms
-        r"(?:"
-            # Single character modifiers
-            r"[_<>=~^:-]|"
-            # Row and col spans
-            r"(?:[/\\]\d+)|"
-            # Styling and classes
-            r"(?:\{.*?\})|(?:\(.*?\))"
-        r")+"
-        # Terminated by a period
-        r"\.)\s+(.*)$")
-    COLSPAN_PATTERN = r"\\(\d+)"
-    ROWSPAN_PATTERN = r"/(\d+)"
-
-    def __init__(self, row, data):
-        Column.__init__(self, row)
-        cell_mo = re.match(TextileCellColumn.PATTERN, data)
-        self.attr = cell_mo.group(1)
-        self.data = cell_mo.group(2).strip()
-
-        colspan_mo = re.search(TextileCellColumn.COLSPAN_PATTERN, self.attr)
-        if colspan_mo:
-            self.colspan = int(colspan_mo.group(1))
-
-        rowspan_mo = re.search(TextileCellColumn.ROWSPAN_PATTERN, self.attr)
-        if rowspan_mo:
-            self.rowspan = int(rowspan_mo.group(1))
-
-
-
-    def min_len(self):
-        return int(math.ceil(self.total_min_len()/self.colspan))
-
-    def total_min_len(self):
-        # '<. data '
-        return len(self.attr) + len(self.data) + 2
-
-    def render(self):
-        # colspan -1 is count of '|'
-        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
-
-        if '>' in self.attr and not '<>' in self.attr:
-            return self.attr + ' ' + self.data.rjust(total_col_len - len(self.attr) - 2, ' ') + ' '
-        elif '=' in self.attr or '_' in self.attr:
-            return self.attr + ' ' + self.data.center(total_col_len - len(self.attr) - 2, ' ') + ' '
-        else:
-            return self.attr + ' ' + self.data.ljust(total_col_len - len(self.attr) - 2, ' ') + ' '
-
-    @staticmethod
-    def match_cell(str_col):
-        return re.match(TextileCellColumn.PATTERN, str_col)
-
-
-
-
-
-
-class TextileRow(Row):
-
-    def new_empty_column(self):
-        return DataColumn(self,'')
-
-    def create_column(self, text):
-        if TextileCellColumn.match_cell(text):
-            return TextileCellColumn(self, text)
-        else:
-            return DataColumn(self, text)
-
-    def is_data(self):
-        return True
-
 
 
 class CustomAlignRow(Row):
@@ -267,11 +189,6 @@ class SimpleTableParser(TableParser):
         return row
 
 
-
-class TextileTableParser(BaseTableParser):
-
-    def create_row(self, table, line):
-        return TextileRow(table)
 
 
 
