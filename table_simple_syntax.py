@@ -34,6 +34,9 @@ try:
 except ValueError:
     from table_base import *
 
+def create_syntax(table_configuration=None):
+    return SimpleTableSyntax(table_configuration)
+
 
 class SimpleTableSyntax(TableSyntax):
 

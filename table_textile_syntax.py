@@ -34,6 +34,9 @@ try:
 except ValueError:
     from table_base import *
 
+def create_syntax(table_configuration=None):
+    return TextileTableSyntax(table_configuration)
+
 
 class TextileTableSyntax(TableSyntax):
 

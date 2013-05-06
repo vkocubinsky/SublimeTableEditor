@@ -30,60 +30,48 @@ import csv
 
 try:
     from .table_base import *
-    from .table_multi_markdown_syntax import *
-    from .table_textile_syntax import *
-    from .table_simple_syntax import *
-    from .table_emacs_org_mode_syntax import *
-    from .table_pandoc_syntax import *
-    from .table_re_structured_text_syntax import *
 except ValueError:
     from table_base import *
-    from table_multi_markdown_syntax import *
-    from table_textile_syntax import *
-    from table_simple_syntax import *
-    from table_emacs_org_mode_syntax import *
-    from table_pandoc_syntax import *
-    from table_re_structured_text_syntax import *
-
 
 
 def simple_syntax(table_configuration=None):
-    return SimpleTableSyntax(table_configuration)
-
+    return create_syntax("Simple", table_configuration)
 
 def emacs_org_mode_syntax(table_configuration=None):
-    return EmacsOrgModeTableSyntax(table_configuration)
-
+    return create_syntax("EmacsOrgMode",table_configuration)
 
 def pandoc_syntax(table_configuration=None):
-    return PandocTableSyntax(table_configuration)
+    return create_syntax("Pandoc",table_configuration)
 
 def re_structured_text_syntax(table_configuration=None):
-    return ReStructuredTextTableSyntax(table_configuration)
+    return create_syntax("reStructuredText",table_configuration)
 
 def multi_markdown_syntax(table_configuration=None):
-    return MultiMarkdownTableSyntax(table_configuration=table_configuration)
-
+    return create_syntax("MultiMarkdown",table_configuration=table_configuration)
 
 def textile_syntax(table_configuration=None):
-    return TextileTableSyntax(table_configuration=table_configuration)
+    return create_syntax("Textile",table_configuration=table_configuration)
 
 
-def create_syntax(syntax_name, table_configuration):
-    if syntax_name == "Simple":
-        syntax = simple_syntax(table_configuration)
-    elif syntax_name == "EmacsOrgMode":
-        syntax = emacs_org_mode_syntax(table_configuration)
-    elif syntax_name == "Pandoc":
-        syntax = pandoc_syntax(table_configuration)
-    elif syntax_name == "MultiMarkdown":
-        syntax = multi_markdown_syntax(table_configuration)
-    elif syntax_name == "reStructuredText":
-        syntax = re_structured_text_syntax(table_configuration)
-    elif syntax_name == "Textile":
-        syntax = textile_syntax(table_configuration)
-    else:
+def create_syntax(syntax_name, table_configuration=None):
+    modules = {
+        "Simple" : "table_simple_syntax",
+        "EmacsOrgMode" : "table_emacs_org_mode_syntax",
+        "Pandoc" : "table_pandoc_syntax",
+        "MultiMarkdown" : "table_multi_markdown_syntax",
+        "reStructuredText" : "table_re_structured_text_syntax",
+        "Textile" : "table_textile_syntax"
+    }
+    module_name = modules[syntax_name]
+    if module_name is None:
         raise ValueError('Unsupported syntax',syntax_name)
+
+    try:
+        module = __import__("." + module_name)
+    except ValueError:
+        module = __import__(module_name)
+
+    syntax = module.create_syntax(table_configuration)
     return syntax
 
 
@@ -110,11 +98,6 @@ def parse_csv(syntax, text):
     return table
 
 
-
-
-
-
-
 if __name__ == '__main__':
     # each line begin from '|'
 
@@ -129,7 +112,7 @@ if __name__ == '__main__':
 """
 
 
-    syntax = multi_markdown_syntax()
+    syntax = create_syntax("MultiMarkdown")
     syntax.intelligent_formatting = True
     t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))

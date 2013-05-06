@@ -35,6 +35,10 @@ except ValueError:
     from table_base import *
 
 
+def create_syntax(table_configuration=None):
+    return ReStructuredTextTableSyntax(table_configuration)
+
+
 class ReStructuredTextTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):

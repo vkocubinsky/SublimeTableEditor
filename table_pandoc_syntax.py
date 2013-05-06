@@ -35,6 +35,10 @@ except ValueError:
     from table_base import *
 
 
+def create_syntax(table_configuration=None):
+    return PandocTableSyntax(table_configuration)
+
+
 class PandocTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):

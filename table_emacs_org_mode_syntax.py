@@ -35,6 +35,10 @@ except ValueError:
     from table_base import *
 
 
+def create_syntax(table_configuration=None):
+    return EmacsOrgModeTableSyntax(table_configuration)
+
+
 class EmacsOrgModeTableSyntax(TableSyntax):
 
 
