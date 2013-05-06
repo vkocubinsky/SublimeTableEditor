@@ -37,8 +37,12 @@ except ValueError:
 
 class MultiMarkdownTableSyntax(TableSyntax):
 
-    def create_parser(self):
-        return MultiMarkdownTableParser(self)
+    def __init__(self, syntax, table_configuration):
+        TableSyntax.__init__(self, syntax, table_configuration)
+        self.table_parser = MultiMarkdownTableParser(self)
+        self.hline_out_border='|'
+        self.hline_in_border='|'
+
 
     def hline_border_pattern(self):
         return "(?:{0}{0}+)|{1}".format(re.escape(self.vline),

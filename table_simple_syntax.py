@@ -1,4 +1,4 @@
-# table_symple_syntax.py - Support Simple table syntax
+# table_simple_syntax.py - Support Simple table syntax
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 
@@ -37,8 +37,13 @@ except ValueError:
 
 class SimpleTableSyntax(TableSyntax):
 
-    def create_parser(self):
-        return SimpleTableParser(self)
+    def __init__(self, syntax, table_configuration):
+        TableSyntax.__init__(self, syntax, table_configuration)
+        self.table_parser = SimpleTableParser(self)
+        self.hline_out_border='|'
+        self.hline_in_border='|'
+        self.custom_column_alignment = self.table_configuration.custom_column_alignment or True
+
 
 
 class CustomAlignColumn(Column):

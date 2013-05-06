@@ -37,9 +37,11 @@ except ValueError:
 
 class TextileTableSyntax(TableSyntax):
 
-    def create_parser(self):
-        return TextileTableParser(self)
-
+    def __init__(self, syntax, table_configuration):
+        TableSyntax.__init__(self, syntax, table_configuration)
+        self.table_parser = TextileTableParser(self)
+        self.hline_out_border='|'
+        self.hline_in_border='|'
 
 
 class TextileCellColumn(Column):

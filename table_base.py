@@ -31,14 +31,14 @@ import re
 
 class TableConfiguration:
     def __init__(self):
-        self.custom_column_alignment = False
-        self.keep_space_left = False
-        self.align_number_right = True
-        self.detect_header = False
-        self.intelligent_formatting = False
+        self.custom_column_alignment = None
+        self.keep_space_left = None
+        self.align_number_right = None
+        self.detect_header = None
+        self.intelligent_formatting = None
 
-        self.hline_out_border='|'
-        self.hline_in_border='|'
+        self.hline_out_border = '|'
+        self.hline_in_border = '|'
 
 
 
@@ -50,42 +50,21 @@ class TableSyntax:
     PANDOC_SYNTAX = "Pandoc Syntax"
     SIMPLE_SYNTAX = "Simple Syntax"
 
-    def __init__(self, syntax,
-                       hline_out_border='|',
-                       hline_in_border='|',
-                       custom_column_alignment=False):
+    def __init__(self, syntax, table_configuration):
+        self.table_configuration = table_configuration or TableConfiguration()
         self.syntax = syntax
         self.vline = '|'
-        self.hline_out_border = hline_out_border
-        self.hline_in_border = hline_in_border
+        #should be set in subclass
+        self.hline_out_border = '|'
+        self.hline_in_border = '|'
         #characters from all styles correct switch from one style to other
         self.hline_borders = ['+', '|']
 
-        self.custom_column_alignment = custom_column_alignment
-        self.keep_space_left = False
-        self.align_number_right = True
-        self.detect_header = True
-        if syntax == TableSyntax.TEXTILE_SYNTAX:
-            self.intelligent_formatting = True
-        else:
-            self.intelligent_formatting = False
+        self.keep_space_left = self.table_configuration.keep_space_left or False
+        self.align_number_right = self.table_configuration.align_number_right or True
+        self.detect_header = self.table_configuration.detect_header or True
+        self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
 
-        self.table_parser = self.create_parser()
-
-
-    def create_parser(self):
-        raise NotImplementedError
-
-    def __str__(self):
-        return """
-{0} a {0} b {0}
-{1}---{2}---{1}
-{0} c {0} d {0}
-""".format(
-                    self.vline,
-                    self.hline_out_border,
-                    self.hline_in_border
-                    )
 
     def hline_border_pattern(self):
         return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"

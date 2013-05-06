@@ -102,68 +102,74 @@ class TableContext:
 class AbstractTableCommand(sublime_plugin.TextCommand):
 
     def detect_syntax(self):
-        syntax_name = self.view.settings().get("table_editor_syntax")
-        if syntax_name == "Simple":
-            syntax = table_lib.simple_syntax()
-        elif syntax_name == "EmacsOrgMode":
-            syntax = table_lib.emacs_org_mode_syntax()
-        elif syntax_name == "Pandoc":
-            syntax = table_lib.pandoc_syntax()
-        elif syntax_name == "MultiMarkdown":
-            syntax = table_lib.multi_markdown_syntax()
-        elif syntax_name == "reStructuredText":
-            syntax = table_lib.re_structured_text_syntax()
-        elif syntax_name == "Textile":
-            syntax = table_lib.textile_syntax()
+        if self.view.settings().has("table_editor_syntax"):
+            syntax_name = self.view.settings().get("table_editor_syntax")
         else:
-            syntax = self.auto_detect_syntax()
+            syntax_name = self.auto_detect_syntax_name()
+
+        table_configuration = table_lib.TableConfiguration()
+
         border_style = (self.view.settings().get("table_editor_border_style",
                                                    None) or
                          self.view.settings().get("table_editor_style",
                          None))
         if border_style == "emacs":
-            syntax.hline_out_border = '|'
-            syntax.hline_in_border = '+'
+            table_configuration.hline_out_border = '|'
+            table_configuration.hline_in_border = '+'
         elif border_style == "grid":
-            syntax.hline_out_border = '+'
-            syntax.hline_in_border = '+'
+            table_configuration.hline_out_border = '+'
+            table_configuration.hline_in_border = '+'
         elif border_style == "simple":
-            syntax.hline_out_border = '|'
-            syntax.hline_in_border = '|'
+            table_configuration.hline_out_border = '|'
+            table_configuration.hline_in_border = '|'
 
         if self.view.settings().has("table_editor_custom_column_alignment"):
-            syntax.custom_column_alignment = self.view.settings().get("table_editor_custom_column_alignment")
+            table_configuration.custom_column_alignment = self.view.settings().get("table_editor_custom_column_alignment")
 
         if self.view.settings().has("table_editor_keep_space_left"):
-            syntax.keep_space_left = self.view.settings().get("table_editor_keep_space_left")
+            table_configuration.keep_space_left = self.view.settings().get("table_editor_keep_space_left")
 
         if self.view.settings().has("table_editor_align_number_right"):
-            syntax.align_number_right = self.view.settings().get("table_editor_align_number_right")
+            table_configuration.align_number_right = self.view.settings().get("table_editor_align_number_right")
 
         if self.view.settings().has("table_editor_detect_header"):
-            syntax.detect_header = self.view.settings().get("table_editor_detect_header")
+            table_configuration.detect_header = self.view.settings().get("table_editor_detect_header")
 
         if self.view.settings().has("table_editor_intelligent_formatting"):
-            syntax.intelligent_formatting = self.view.settings().get("table_editor_intelligent_formatting")
+            table_configuration.intelligent_formatting = self.view.settings().get("table_editor_intelligent_formatting")
 
 
+
+
+        if syntax_name == "Simple":
+            syntax = table_lib.simple_syntax(table_configuration)
+        elif syntax_name == "EmacsOrgMode":
+            syntax = table_lib.emacs_org_mode_syntax(table_configuration)
+        elif syntax_name == "Pandoc":
+            syntax = table_lib.pandoc_syntax(table_configuration)
+        elif syntax_name == "MultiMarkdown":
+            syntax = table_lib.multi_markdown_syntax(table_configuration)
+        elif syntax_name == "reStructuredText":
+            syntax = table_lib.re_structured_text_syntax(table_configuration)
+        elif syntax_name == "Textile":
+            syntax = table_lib.textile_syntax(table_configuration)
+        else:
+            raise ValueError('Unsupported syntax',syntax_name)
         return syntax
 
 
-    def auto_detect_syntax(self):
+    def auto_detect_syntax_name(self):
         view_syntax = self.view.settings().get('syntax')
         if (view_syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
             view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
-            return table_lib.multi_markdown_syntax()
+            return "MultiMarkdown"
         elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
-            return table_lib.textile_syntax()
+            return "Textile"
         elif (view_syntax ==
                      'Packages/RestructuredText/reStructuredText.tmLanguage'):
-            return table_lib.re_structured_text_syntax()
+            return "reStructuredText"
         else:
-            return table_lib.simple_syntax()
-        #'Packages/Text/Plain text.tmLanguage':
-        #
+            return "Simple"
 
 
     def merge(self, edit, ctx, table):
