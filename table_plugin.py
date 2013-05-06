@@ -140,21 +140,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
 
 
-
-        if syntax_name == "Simple":
-            syntax = table_lib.simple_syntax(table_configuration)
-        elif syntax_name == "EmacsOrgMode":
-            syntax = table_lib.emacs_org_mode_syntax(table_configuration)
-        elif syntax_name == "Pandoc":
-            syntax = table_lib.pandoc_syntax(table_configuration)
-        elif syntax_name == "MultiMarkdown":
-            syntax = table_lib.multi_markdown_syntax(table_configuration)
-        elif syntax_name == "reStructuredText":
-            syntax = table_lib.re_structured_text_syntax(table_configuration)
-        elif syntax_name == "Textile":
-            syntax = table_lib.textile_syntax(table_configuration)
-        else:
-            raise ValueError('Unsupported syntax',syntax_name)
+        syntax = table_lib.create_syntax(syntax_name, table_configuration)
         return syntax
 
 

@@ -75,15 +75,22 @@ def textile_syntax(table_configuration=None):
                               table_configuration=table_configuration)
 
 
-
-
-
-
-
-
-
-
-
+def create_syntax(syntax_name, table_configuration):
+    if syntax_name == "Simple":
+        syntax = simple_syntax(table_configuration)
+    elif syntax_name == "EmacsOrgMode":
+        syntax = emacs_org_mode_syntax(table_configuration)
+    elif syntax_name == "Pandoc":
+        syntax = pandoc_syntax(table_configuration)
+    elif syntax_name == "MultiMarkdown":
+        syntax = multi_markdown_syntax(table_configuration)
+    elif syntax_name == "reStructuredText":
+        syntax = re_structured_text_syntax(table_configuration)
+    elif syntax_name == "Textile":
+        syntax = textile_syntax(table_configuration)
+    else:
+        raise ValueError('Unsupported syntax',syntax_name)
+    return syntax
 
 
 
