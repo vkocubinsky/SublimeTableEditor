@@ -231,7 +231,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
         self.merge(edit, ctx, ctx.table)
-        self.status_message("Table Editor: Table aligned")
+        sublime.status_message("Table Editor: Table aligned")
         return self.visual_field_sel(ctx, ctx.table, ctx.row_num, ctx.visual_field_num)
 
 
@@ -282,7 +282,7 @@ class TableEditorNextField(AbstractTableCommand):
                 visual_field_num = 0
                 row_num = row_num + 1
                 break
-        self.status_message("Table Editor: Cursor position changed")
+        sublime.status_message("Table Editor: Cursor position changed")
 
         return self.visual_field_sel(ctx, table, row_num, visual_field_num)
 
@@ -326,7 +326,7 @@ class TableEditorPreviousField(AbstractTableCommand):
             else:
                 #row_num == 0
                 break
-        self.status_message("Table Editor: Cursor position changed")
+        sublime.status_message("Table Editor: Cursor position changed")
         return self.visual_field_sel(ctx, table, row_num, visual_field_num)
 
 
@@ -354,7 +354,7 @@ class TableEditorNextRow(AbstractTableCommand):
             table.insert_empty_row(len(table))
             self.merge(edit, ctx, table)
         row_num = row_num + 1
-        self.status_message("Table Editor: Moved to next row")
+        sublime.status_message("Table Editor: Moved to next row")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -373,13 +373,13 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
 
         if field_num > 0:
             if table.is_col_colspan(field_num) or table.is_col_colspan(field_num - 1):
-                self.status_message("Table Editor: Move column Left is not permitted for colspan column")
+                sublime.status_message("Table Editor: Move column Left is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num - 1)
                 field_num = field_num - 1
-                self.status_message("Table Editor: Column moved")
+                sublime.status_message("Table Editor: Column moved")
         else:
-            self.status_message("Table Editor: Move column left doesn't make sense for first column")
+            sublime.status_message("Table Editor: Move column left doesn't make sense for first column")
         self.merge(edit, ctx, table)
         return self.field_sel(ctx, table, row_num, field_num)
 
@@ -399,13 +399,13 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
 
         if field_num < len(table[row_num]) - 1:
             if table.is_col_colspan(field_num) or table.is_col_colspan(field_num + 1):
-                self.status_message("Table Editor: Move column right is not permitted for colspan column")
+                sublime.status_message("Table Editor: Move column right is not permitted for colspan column")
             else:
                 table.swap_columns(field_num, field_num + 1)
-                self.status_message("Table Editor: Column moved")
+                sublime.status_message("Table Editor: Column moved")
                 field_num = field_num + 1
         else:
-            self.status_message("Table Editor: Move column right doesn't make sense for last column")
+            sublime.status_message("Table Editor: Move column right doesn't make sense for last column")
         self.merge(edit,ctx, table)
 
         return self.field_sel(ctx, table, row_num, field_num)
@@ -425,10 +425,10 @@ class TableEditorDeleteColumn(AbstractTableCommand):
         row_num = ctx.row_num
 
         if table.is_col_colspan(field_num):
-            self.status_message("Table Editor: Delete column is not permitted for colspan column")
+            sublime.status_message("Table Editor: Delete column is not permitted for colspan column")
         else:
             table.delete_column(field_num)
-            self.status_message("Table Editor: Column deleted")
+            sublime.status_message("Table Editor: Column deleted")
             self.merge(edit, ctx, table)
             if not table.empty() and field_num == len(table[row_num]):
                 field_num = field_num - 1
@@ -449,10 +449,10 @@ class TableEditorInsertColumn(AbstractTableCommand):
         field_num = ctx.field_num
 
         if table.is_col_colspan(field_num):
-            self.status_message("Table Editor: Insert column is not permitted for colspan column")
+            sublime.status_message("Table Editor: Insert column is not permitted for colspan column")
         else:
             table.insert_empty_column(field_num)
-            self.status_message("Column inserted")
+            sublime.status_message("Column inserted")
             self.merge(edit, ctx, table)
         return self.field_sel(ctx, table, row_num, field_num)
 
@@ -474,7 +474,7 @@ class TableEditorKillRow(AbstractTableCommand):
         self.merge(edit, ctx, table)
         if row_num == len(table): # just deleted one row
             row_num = row_num - 1
-        self.status_message("Table Editor: Row deleted")
+        sublime.status_message("Table Editor: Row deleted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -494,7 +494,7 @@ class TableEditorInsertRow(AbstractTableCommand):
 
         table.insert_empty_row(row_num)
         self.merge(edit, ctx, table)
-        self.status_message("Table Editor: Row inserted")
+        sublime.status_message("Table Editor: Row inserted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -513,10 +513,10 @@ class TableEditorMoveRowUp(AbstractTableCommand):
 
         if row_num > 0:
             table.swap_rows(row_num, row_num - 1)
-            self.status_message("Table Editor: Row moved up")
+            sublime.status_message("Table Editor: Row moved up")
             row_num = row_num - 1
         else:
-            self.status_message("Table Editor: Move row up doesn't make sense for first row")
+            sublime.status_message("Table Editor: Move row up doesn't make sense for first row")
         self.merge(edit, ctx, table)
         return self.field_sel(ctx, table, row_num, field_num)
 
@@ -537,10 +537,10 @@ class TableEditorMoveRowDown(AbstractTableCommand):
 
         if row_num + 1 < len(table):
             table.swap_rows(row_num, row_num + 1)
-            self.status_message("Table Editor: Row moved down")
+            sublime.status_message("Table Editor: Row moved down")
             row_num = row_num + 1
         else:
-            self.status_message("Table Editor: Move row down doesn't make sense for last row")
+            sublime.status_message("Table Editor: Move row down doesn't make sense for last row")
         self.merge(edit, ctx, table)
         return self.field_sel(ctx, table, row_num, field_num)
 
@@ -560,7 +560,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
 
         table.insert_single_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        self.status_message("Table Editor: Single separator row inserted")
+        sublime.status_message("Table Editor: Single separator row inserted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -579,7 +579,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
 
         table.insert_double_separator_row(row_num + 1)
         self.merge(edit, ctx, table)
-        self.status_message("Table Editor: Double separator row inserted")
+        sublime.status_message("Table Editor: Double separator row inserted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -610,7 +610,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
 
         row_num = row_num + 2
         field_num = 0
-        self.status_message("Table Editor: Single separator row inserted")
+        sublime.status_message("Table Editor: Single separator row inserted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -636,10 +636,10 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         row_num = ctx.row_num
         if row_num + 1 < len(table):
             if len(table[row_num + 1]) - 1 < field_num:
-                self.status_message("Table Editor: Split column is not permitted for short line")
+                sublime.status_message("Table Editor: Split column is not permitted for short line")
                 return self.field_sel(ctx, table, row_num, field_num)
             elif table[row_num + 1][field_num].pseudo():
-                self.status_message("Table Editor: Split column is not permitted to colspan column")
+                sublime.status_message("Table Editor: Split column is not permitted to colspan column")
                 return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -659,7 +659,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
         table.pack()
         self.merge(edit, ctx, table)
-        self.status_message("Table Editor: Column splitted down")
+        sublime.status_message("Table Editor: Column splitted down")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -688,9 +688,9 @@ class TableEditorJoinLines(AbstractTableCommand):
 
             table.delete_row(row_num + 1)
             self.merge(edit, ctx, table)
-            self.status_message("Table Editor: Row joined")
+            sublime.status_message("Table Editor: Row joined")
         else:
-            self.status_message("Table Editor: Join columns is not permitted")
+            sublime.status_message("Table Editor: Join columns is not permitted")
         return self.field_sel(ctx, table, row_num, field_num)
 
 
@@ -711,7 +711,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
 
             first_row = self.view.rowcol(sel.begin())[0]
             pt = self.view.text_point(first_row, table.get_cursor(0, 0))
-            self.status_message("Table Editor: Table created from CSV")
+            sublime.status_message("Table Editor: Table created from CSV")
             return sublime.Region(pt, pt)
 
 
