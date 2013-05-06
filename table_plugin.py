@@ -758,5 +758,5 @@ class TableEditorSetSyntax(sublime_plugin.TextCommand):
     def run(self, edit, syntax):
         self.view.settings().set("enable_table_editor", True)
         self.view.settings().set("table_editor_syntax", syntax)
-        self.status_message("Table Editor: set syntax to '{0}'"
+        sublime.status_message("Table Editor: set syntax to '{0}'"
                                .format(syntax))

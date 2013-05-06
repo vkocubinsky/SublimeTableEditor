@@ -69,10 +69,9 @@ def create_syntax(syntax_name, table_configuration=None):
         module_name = syntax_name
 
     try:
-        module = __import__("." + module_name)
+        module = __import__("Table Editor." + module_name, globals(), locals(), [module_name],0)
     except ValueError:
         module = __import__(module_name)
-
     syntax = module.create_syntax(table_configuration)
     return syntax
 

@@ -105,5 +105,3 @@ class SimpleTableParser(TableParser):
         return row
 
 
-
-
