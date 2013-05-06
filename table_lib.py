@@ -63,7 +63,7 @@ def create_syntax(syntax_name, table_configuration=None):
         "Textile" : "table_textile_syntax"
     }
 
-    if modules.has_key(syntax_name):
+    if syntax_name in modules:
         module_name = modules[syntax_name]
     else:
         module_name = syntax_name
