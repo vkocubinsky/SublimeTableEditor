@@ -62,9 +62,11 @@ def create_syntax(syntax_name, table_configuration=None):
         "reStructuredText" : "table_re_structured_text_syntax",
         "Textile" : "table_textile_syntax"
     }
-    module_name = modules[syntax_name]
-    if module_name is None:
-        raise ValueError('Unsupported syntax',syntax_name)
+
+    if modules.has_key(syntax_name):
+        module_name = modules[syntax_name]
+    else:
+        module_name = syntax_name
 
     try:
         module = __import__("." + module_name)
@@ -113,6 +115,7 @@ if __name__ == '__main__':
 
 
     syntax = create_syntax("MultiMarkdown")
+    syntax = create_syntax("table_multi_markdown_syntax")
     syntax.intelligent_formatting = True
     t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
