@@ -176,25 +176,15 @@ class Row:
 
 
     def render(self):
-
-        def str_cols():
-            return [column.render() for column in self.columns if not column.pseudo()]
-
-        syntax = self.table.syntax
-        if self.is_separator():
-            return (syntax.hline_out_border
-                + syntax.hline_in_border.join(str_cols())
-                + syntax.hline_out_border)
-        else:
-            r = ""
-            for ind, column in enumerate(self.columns):
-                if column.pseudo():
-                    continue
-                if ind == 0:
-                    r += column.left_border_text
-                r += column.render()
-                r += column.right_border_text
-            return r
+        r = ""
+        for ind, column in enumerate(self.columns):
+            if column.pseudo():
+                continue
+            if ind == 0:
+                r += column.left_border_text
+            r += column.render()
+            r += column.right_border_text
+        return r
 
 
 class SeparatorRow(Row):
@@ -217,6 +207,14 @@ class SeparatorRow(Row):
     def is_separator(self):
         return True
 
+    def render(self):
+        r = self.syntax.hline_out_border
+        for ind, column in enumerate(self.columns):
+            if ind != 0:
+                r += self.syntax.hline_in_border
+            r += column.render()
+        r += self.syntax.hline_out_border
+        return r
 
 class DataRow(Row):
 
