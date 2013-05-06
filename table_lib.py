@@ -48,31 +48,25 @@ except ValueError:
 
 
 def simple_syntax(table_configuration=None):
-    return SimpleTableSyntax(syntax=TableSyntax.SIMPLE_SYNTAX,
-                             table_configuration=table_configuration)
+    return SimpleTableSyntax(table_configuration)
 
 
 def emacs_org_mode_syntax(table_configuration=None):
-    return EmacsOrgModeTableSyntax(syntax=TableSyntax.EMACS_ORG_MODE_SYNTAX,
-                                   table_configuration=table_configuration)
+    return EmacsOrgModeTableSyntax(table_configuration)
 
 
 def pandoc_syntax(table_configuration=None):
-    return PandocTableSyntax(syntax=TableSyntax.PANDOC_SYNTAX,
-                             table_configuration=table_configuration)
+    return PandocTableSyntax(table_configuration)
 
 def re_structured_text_syntax(table_configuration=None):
-    return ReStructuredTextTableSyntax(syntax=TableSyntax.RE_STRUCTURED_TEXT_SYNTAX,
-                                       table_configuration=table_configuration)
+    return ReStructuredTextTableSyntax(table_configuration)
 
 def multi_markdown_syntax(table_configuration=None):
-    return MultiMarkdownTableSyntax(syntax=TableSyntax.MUTLI_MARKDOWN_SYTAX,
-                                    table_configuration=table_configuration)
+    return MultiMarkdownTableSyntax(table_configuration=table_configuration)
 
 
 def textile_syntax(table_configuration=None):
-    return TextileTableSyntax(syntax=TableSyntax.TEXTILE_SYNTAX,
-                              table_configuration=table_configuration)
+    return TextileTableSyntax(table_configuration=table_configuration)
 
 
 def create_syntax(syntax_name, table_configuration):

@@ -37,8 +37,8 @@ except ValueError:
 
 class SimpleTableSyntax(TableSyntax):
 
-    def __init__(self, syntax, table_configuration):
-        TableSyntax.__init__(self, syntax, table_configuration)
+    def __init__(self, table_configuration):
+        TableSyntax.__init__(self, table_configuration)
         self.table_parser = SimpleTableParser(self)
         self.hline_out_border='|'
         self.hline_in_border='|'

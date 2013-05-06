@@ -43,16 +43,9 @@ class TableConfiguration:
 
 
 class TableSyntax:
-    MUTLI_MARKDOWN_SYTAX = 'Multi Markdown'
-    TEXTILE_SYNTAX = "Textile"
-    EMACS_ORG_MODE_SYNTAX = "Emacs Org Mode"
-    RE_STRUCTURED_TEXT_SYNTAX = "Re Structured Text Syntax"
-    PANDOC_SYNTAX = "Pandoc Syntax"
-    SIMPLE_SYNTAX = "Simple Syntax"
 
-    def __init__(self, syntax, table_configuration):
+    def __init__(self, table_configuration):
         self.table_configuration = table_configuration or TableConfiguration()
-        self.syntax = syntax
         self.vline = '|'
         #should be set in subclass
         self.hline_out_border = '|'

@@ -37,8 +37,8 @@ except ValueError:
 
 class PandocTableSyntax(TableSyntax):
 
-    def __init__(self, syntax, table_configuration):
-        TableSyntax.__init__(self, syntax, table_configuration)
+    def __init__(self, table_configuration):
+        TableSyntax.__init__(self, table_configuration)
         self.table_parser = TableParser(self)
         self.hline_out_border = '+'
         self.hline_in_border = '+'
