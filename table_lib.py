@@ -33,33 +33,18 @@ try:
     from .table_multi_markdown_syntax import *
     from .table_textile_syntax import *
     from .table_simple_syntax import *
+    from .table_emacs_org_mode_syntax import *
+    from .table_pandoc_syntax import *
+    from .table_re_structured_text_syntax import *
 except ValueError:
     from table_base import *
     from table_multi_markdown_syntax import *
     from table_textile_syntax import *
     from table_simple_syntax import *
+    from table_emacs_org_mode_syntax import *
+    from table_pandoc_syntax import *
+    from table_re_structured_text_syntax import *
 
-
-
-
-
-
-class EmacsOrgModeTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return TableParser(self)
-
-
-class PandocTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return TableParser(self)
-
-
-class ReStructuredTextTableSyntax(TableSyntax):
-
-    def create_parser(self):
-        return TableParser(self)
 
 
 def simple_syntax():

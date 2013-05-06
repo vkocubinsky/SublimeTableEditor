@@ -28,6 +28,20 @@ from __future__ import division
 import math
 import re
 
+
+class TableConfiguration:
+    def __init__(self):
+        self.custom_column_alignment = False
+        self.keep_space_left = False
+        self.align_number_right = True
+        self.detect_header = False
+        self.intelligent_formatting = False
+
+        self.hline_out_border='|'
+        self.hline_in_border='|'
+
+
+
 class TableSyntax:
     MUTLI_MARKDOWN_SYTAX = 'Multi Markdown'
     TEXTILE_SYNTAX = "Textile"
