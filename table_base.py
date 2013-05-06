@@ -60,7 +60,6 @@ class TableSyntax:
         #characters from all styles correct switch from one style to other
         self.hline_borders = ['+', '|']
 
-        self.keep_space_left = self.table_configuration.keep_space_left or False
         self.align_number_right = self.table_configuration.align_number_right or True
         self.detect_header = self.table_configuration.detect_header or True
         self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
@@ -238,17 +237,8 @@ class DataColumn(Column):
 
 
 
-    def _norm(self):
-        if self.syntax.keep_space_left:
-            if self.header:
-                norm = self.data.strip()
-            else:
-                norm = self.data.rstrip()
-                if norm[:1] == ' ':
-                     norm = norm[1:]
-        else:
-            norm = self.data.strip()
-        return norm
+    def norm(self):
+        return self.data.strip()
 
     def min_len(self):
         return int(math.ceil(self.total_min_len()/self.colspan))
@@ -257,7 +247,7 @@ class DataColumn(Column):
     def total_min_len(self):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
-        total_min_len = max(space_len + 1, len(self._norm()) + space_len)
+        total_min_len = max(space_len + 1, len(self.norm()) + space_len)
         # if self.syntax.multi_markdown_syntax():
         #     total_min_len += self.colspan - 1
         total_min_len = total_min_len + (len(self.left_border_text) - 1) + (len(self.right_border_text) - 1)
@@ -274,7 +264,7 @@ class DataColumn(Column):
 
 
 
-        norm = self._norm()
+        norm = self.norm()
         space_len = len(self.left_space) + len(self.right_space)
 
         if self.header and self.syntax.detect_header:
@@ -641,9 +631,11 @@ class TableParser(BaseTableParser):
         elif self._is_double_row_separator(line.str_cols()):
             row = SeparatorRow(table, '=')
         else:
-            row = DataRow(table)
+            row = self.create_data_row(table, line)
         return row
 
+    def create_data_row(self, table, line):
+        return DataRow(table)
 
 
 class LineRegion:

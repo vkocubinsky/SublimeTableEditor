@@ -35,15 +35,46 @@ except ValueError:
     from table_base import *
 
 
-
-
-
 class ReStructuredTextTableSyntax(TableSyntax):
 
     def __init__(self, syntax, table_configuration):
         TableSyntax.__init__(self, syntax, table_configuration)
-        self.table_parser = TableParser(self)
+        self.table_parser = ReStructuredTextParser(self)
         self.hline_out_border='+'
         self.hline_in_border='+'
+        self.keep_space_left = self.table_configuration.keep_space_left or False
+
+
+class ReStructuredTextRow(Row):
+
+    def new_empty_column(self):
+        return ReStructuredTextColumn(self,'')
+
+    def create_column(self, text):
+        return ReStructuredTextColumn(self, text)
+
+    def is_data(self):
+        return True
+
+
+class ReStructuredTextColumn(DataColumn):
+
+    def norm(self):
+        if self.syntax.keep_space_left:
+            if self.header:
+                norm = self.data.strip()
+            else:
+                norm = self.data.rstrip()
+                if norm[:1] == ' ':
+                     norm = norm[1:]
+        else:
+            norm = self.data.strip()
+        return norm
+
+
+class ReStructuredTextParser(TableParser):
+
+    def create_data_row(self, table, line):
+        return ReStructuredTextRow(table)
 
 
