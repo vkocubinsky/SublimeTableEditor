@@ -46,7 +46,8 @@ class TableContext:
         self.row_num = sel_row - self.first_table_row
 
         self.table = self.syntax.table_parser.parse_text(self.table_text)
-        self.field_num = self.table.visual_to_internal_index(self.row_num, self.visual_field_num)
+        self.table_driver = self.syntax.table_driver(self.table)
+        self.field_num = self.table_driver.visual_to_internal_index(self.row_num, self.visual_field_num)
 
 
     def _get_table_text(self, first_table_row, last_table_row):
@@ -158,7 +159,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             return "Simple"
 
 
-    def merge(self, edit, ctx, table):
+    def merge(self, edit, ctx):
+        table = ctx.table
         new_lines = table.render_lines()
         first_table_row = ctx.first_table_row
         last_table_row = ctx.last_table_row
@@ -201,24 +203,20 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def run_one_sel(self, edit, sel):
         return sel
 
-    def visual_field_sel(self, ctx, table, row_num, visual_field_num):
-        if table.empty():
+    def visual_field_sel(self, ctx, row_num, visual_field_num):
+        if ctx.table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            col = table.get_cursor(row_num, visual_field_num)
+            col = ctx.table_driver.get_cursor(row_num, visual_field_num)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
-    def field_sel(self, ctx, table, row_num, field_num):
-        if table.empty():
+    def field_sel(self, ctx, row_num, field_num):
+        if ctx.table.empty():
             visual_field_num = 0
         else:
-            visual_field_num = table.internal_to_visual_index(row_num, field_num)
-        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
-
-
-    def status_message(self, message):
-        sublime.status_message(message)
+            visual_field_num = ctx.table_driver.internal_to_visual_index(row_num, field_num)
+        return self.visual_field_sel(ctx, row_num, visual_field_num)
 
 
 class TableEditorAlignCommand(AbstractTableCommand):
@@ -230,9 +228,9 @@ class TableEditorAlignCommand(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        self.merge(edit, ctx, ctx.table)
+        self.merge(edit, ctx)
         sublime.status_message("Table Editor: Table aligned")
-        return self.visual_field_sel(ctx, ctx.table, ctx.row_num, ctx.visual_field_num)
+        return self.visual_field_sel(ctx, ctx.row_num, ctx.visual_field_num)
 
 
 class TableEditorNextField(AbstractTableCommand):
@@ -244,47 +242,46 @@ class TableEditorNextField(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
-        self.merge(edit, ctx, table)
+        self.merge(edit, ctx)
 
         visual_field_num = ctx.visual_field_num
         row_num = ctx.row_num
 
         moved = False
         while True:
-            if table[row_num].is_separator():
-                if row_num + 1 < len(table):
+            if ctx.table[row_num].is_separator():
+                if row_num + 1 < len(ctx.table):
                     visual_field_num = 0
                     row_num = row_num + 1
                     moved = True
                     continue
                 else:
                     #sel_row == last_table_row
-                    table.insert_empty_row(len(table))
-                    self.merge(edit, ctx, table)
+                    ctx.table_driver.insert_empty_row(len(ctx.table))
+                    self.merge(edit, ctx)
                     visual_field_num = 0
                     row_num = row_num + 1
                     break
             elif moved:
                 break
-            elif visual_field_num + 1 < table.visual_column_count(row_num):
+            elif visual_field_num + 1 < ctx.table_driver.visual_column_count(row_num):
                 visual_field_num = visual_field_num + 1
                 break
-            elif row_num + 1 < len(table):
+            elif row_num + 1 < len(ctx.table):
                 visual_field_num = 0
                 row_num = row_num + 1
                 moved = True
                 continue
             else:
                 #sel_row == last_table_row
-                table.insert_empty_row(len(table))
-                self.merge(edit, ctx, table)
+                ctx.table_driver.insert_empty_row(len(ctx.table))
+                self.merge(edit, ctx)
                 visual_field_num = 0
                 row_num = row_num + 1
                 break
         sublime.status_message("Table Editor: Cursor position changed")
 
-        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
+        return self.visual_field_sel(ctx, row_num, visual_field_num)
 
 
 class TableEditorPreviousField(AbstractTableCommand):
@@ -295,18 +292,17 @@ class TableEditorPreviousField(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
-        self.merge(edit, ctx, table)
+        self.merge(edit, ctx)
 
         visual_field_num = ctx.visual_field_num
         row_num = ctx.row_num
 
         moved = False
         while True:
-            if table[row_num].is_separator():
+            if ctx.table[row_num].is_separator():
                 if row_num > 0:
                     row_num = row_num - 1
-                    visual_field_num = table.visual_column_count(row_num) - 1
+                    visual_field_num = ctx.table_driver.visual_column_count(row_num) - 1
                     moved = True
                     continue
                 else:
@@ -320,14 +316,14 @@ class TableEditorPreviousField(AbstractTableCommand):
                 break
             elif row_num > 0:
                 row_num = row_num - 1
-                visual_field_num = table.visual_column_count(row_num) - 1
+                visual_field_num = ctx.table_driver.visual_column_count(row_num) - 1
                 moved = True
                 continue
             else:
                 #row_num == 0
                 break
         sublime.status_message("Table Editor: Cursor position changed")
-        return self.visual_field_sel(ctx, table, row_num, visual_field_num)
+        return self.visual_field_sel(ctx, row_num, visual_field_num)
 
 
 class TableEditorNextRow(AbstractTableCommand):
@@ -340,22 +336,21 @@ class TableEditorNextRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
-        self.merge(edit, ctx, table)
+        self.merge(edit, ctx)
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 < len(table):
-            if table[row_num + 1].is_header_separator():
-                table.insert_empty_row(row_num + 1)
-                self.merge(edit, ctx, table)
+        if row_num + 1 < len(ctx.table):
+            if ctx.table[row_num + 1].is_header_separator():
+                ctx.table_driver.insert_empty_row(row_num + 1)
+                self.merge(edit, ctx)
         else:
-            table.insert_empty_row(len(table))
-            self.merge(edit, ctx, table)
+            ctx.table_driver.insert_empty_row(len(ctx.table))
+            self.merge(edit, ctx)
         row_num = row_num + 1
         sublime.status_message("Table Editor: Moved to next row")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorMoveColumnLeft(AbstractTableCommand):
@@ -366,22 +361,21 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
         if field_num > 0:
-            if table.is_col_colspan(field_num) or table.is_col_colspan(field_num - 1):
+            if ctx.table_driver.is_col_colspan(field_num) or ctx.table_driver.is_col_colspan(field_num - 1):
                 sublime.status_message("Table Editor: Move column Left is not permitted for colspan column")
             else:
-                table.swap_columns(field_num, field_num - 1)
+                ctx.table_driver.swap_columns(field_num, field_num - 1)
                 field_num = field_num - 1
                 sublime.status_message("Table Editor: Column moved")
         else:
             sublime.status_message("Table Editor: Move column left doesn't make sense for first column")
-        self.merge(edit, ctx, table)
-        return self.field_sel(ctx, table, row_num, field_num)
+        self.merge(edit, ctx)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
@@ -392,23 +386,22 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if field_num < len(table[row_num]) - 1:
-            if table.is_col_colspan(field_num) or table.is_col_colspan(field_num + 1):
+        if field_num < len(ctx.table[row_num]) - 1:
+            if ctx.table_driver.is_col_colspan(field_num) or ctx.table_driver.is_col_colspan(field_num + 1):
                 sublime.status_message("Table Editor: Move column right is not permitted for colspan column")
             else:
-                table.swap_columns(field_num, field_num + 1)
+                ctx.table_driver.swap_columns(field_num, field_num + 1)
                 sublime.status_message("Table Editor: Column moved")
                 field_num = field_num + 1
         else:
             sublime.status_message("Table Editor: Move column right doesn't make sense for last column")
-        self.merge(edit,ctx, table)
+        self.merge(edit, ctx)
 
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorDeleteColumn(AbstractTableCommand):
@@ -419,20 +412,19 @@ class TableEditorDeleteColumn(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if table.is_col_colspan(field_num):
+        if ctx.table_driver.is_col_colspan(field_num):
             sublime.status_message("Table Editor: Delete column is not permitted for colspan column")
         else:
-            table.delete_column(field_num)
+            ctx.table_driver.delete_column(field_num)
             sublime.status_message("Table Editor: Column deleted")
-            self.merge(edit, ctx, table)
-            if not table.empty() and field_num == len(table[row_num]):
+            self.merge(edit, ctx)
+            if not ctx.table.empty() and field_num == len(ctx.table[row_num]):
                 field_num = field_num - 1
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorInsertColumn(AbstractTableCommand):
@@ -443,18 +435,17 @@ class TableEditorInsertColumn(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         row_num = ctx.row_num
         field_num = ctx.field_num
 
-        if table.is_col_colspan(field_num):
+        if ctx.table_driver.is_col_colspan(field_num):
             sublime.status_message("Table Editor: Insert column is not permitted for colspan column")
         else:
-            table.insert_empty_column(field_num)
+            ctx.table_driver.insert_empty_column(field_num)
             sublime.status_message("Column inserted")
-            self.merge(edit, ctx, table)
-        return self.field_sel(ctx, table, row_num, field_num)
+            self.merge(edit, ctx)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorKillRow(AbstractTableCommand):
@@ -465,17 +456,16 @@ class TableEditorKillRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         row_num = ctx.row_num
         field_num = ctx.field_num
 
-        table.delete_row(row_num)
-        self.merge(edit, ctx, table)
-        if row_num == len(table): # just deleted one row
+        ctx.table_driver.delete_row(row_num)
+        self.merge(edit, ctx)
+        if row_num == len(ctx.table): # just deleted one row
             row_num = row_num - 1
         sublime.status_message("Table Editor: Row deleted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 
@@ -487,15 +477,14 @@ class TableEditorInsertRow(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        table.insert_empty_row(row_num)
-        self.merge(edit, ctx, table)
+        ctx.table_driver.insert_empty_row(row_num)
+        self.merge(edit, ctx)
         sublime.status_message("Table Editor: Row inserted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorMoveRowUp(AbstractTableCommand):
@@ -506,19 +495,18 @@ class TableEditorMoveRowUp(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
         if row_num > 0:
-            table.swap_rows(row_num, row_num - 1)
+            ctx.table_driver.swap_rows(row_num, row_num - 1)
             sublime.status_message("Table Editor: Row moved up")
             row_num = row_num - 1
         else:
             sublime.status_message("Table Editor: Move row up doesn't make sense for first row")
-        self.merge(edit, ctx, table)
-        return self.field_sel(ctx, table, row_num, field_num)
+        self.merge(edit, ctx)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 
@@ -530,19 +518,18 @@ class TableEditorMoveRowDown(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 < len(table):
-            table.swap_rows(row_num, row_num + 1)
+        if row_num + 1 < len(ctx.table):
+            ctx.table_driver.swap_rows(row_num, row_num + 1)
             sublime.status_message("Table Editor: Row moved down")
             row_num = row_num + 1
         else:
             sublime.status_message("Table Editor: Move row down doesn't make sense for last row")
-        self.merge(edit, ctx, table)
-        return self.field_sel(ctx, table, row_num, field_num)
+        self.merge(edit, ctx)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorInsertSingleHline(AbstractTableCommand):
@@ -553,15 +540,14 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        table.insert_single_separator_row(row_num + 1)
-        self.merge(edit, ctx, table)
+        ctx.table_driver.insert_single_separator_row(row_num + 1)
+        self.merge(edit, ctx)
         sublime.status_message("Table Editor: Single separator row inserted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorInsertDoubleHline(AbstractTableCommand):
@@ -572,15 +558,14 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        table.insert_double_separator_row(row_num + 1)
-        self.merge(edit, ctx, table)
+        ctx.table_driver.insert_double_separator_row(row_num + 1)
+        self.merge(edit, ctx)
         sublime.status_message("Table Editor: Double separator row inserted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorHlineAndMove(AbstractTableCommand):
@@ -592,26 +577,25 @@ class TableEditorHlineAndMove(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        table.insert_single_separator_row(row_num + 1)
+        ctx.table_driver.insert_single_separator_row(row_num + 1)
 
-        if row_num + 2 < len(table):
-            if table[row_num + 2].is_separator():
-                table.insert_empty_row(row_num + 2)
+        if row_num + 2 < len(ctx.table):
+            if ctx.table[row_num + 2].is_separator():
+                ctx.table_driver.insert_empty_row(row_num + 2)
         else:
-            table.insert_empty_row(row_num + 2)
+            ctx.table_driver.insert_empty_row(row_num + 2)
 
 
-        self.merge(edit, ctx, table)
+        self.merge(edit, ctx)
 
         row_num = row_num + 2
         field_num = 0
         sublime.status_message("Table Editor: Single separator row inserted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorSplitColumnDown(AbstractTableCommand):
@@ -631,36 +615,34 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
         field_num = ctx.field_num
         row_num = ctx.row_num
-        if row_num + 1 < len(table):
-            if len(table[row_num + 1]) - 1 < field_num:
+        if row_num + 1 < len(ctx.table):
+            if len(ctx.table[row_num + 1]) - 1 < field_num:
                 sublime.status_message("Table Editor: Split column is not permitted for short line")
-                return self.field_sel(ctx, table, row_num, field_num)
-            elif table[row_num + 1][field_num].pseudo():
+                return self.field_sel(ctx, row_num, field_num)
+            elif ctx.table[row_num + 1][field_num].pseudo():
                 sublime.status_message("Table Editor: Split column is not permitted to colspan column")
-                return self.field_sel(ctx, table, row_num, field_num)
+                return self.field_sel(ctx, row_num, field_num)
 
 
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
 
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if row_num + 1 == len(table) or table[row_num + 1].is_separator():
-            table.insert_empty_row(row_num + 1)
+        if row_num + 1 == len(ctx.table) or ctx.table[row_num + 1].is_separator():
+            ctx.table_driver.insert_empty_row(row_num + 1)
 
         row_num = row_num + 1
-        table[row_num][field_num].data = rest_data + " " + table[row_num][field_num].data.strip()
-        table.pack()
-        self.merge(edit, ctx, table)
+        ctx.table[row_num][field_num].data = rest_data + " " + ctx.table[row_num][field_num].data.strip()
+        ctx.table.pack()
+        self.merge(edit, ctx)
         sublime.status_message("Table Editor: Column splitted down")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 
@@ -671,27 +653,26 @@ class TableEditorJoinLines(AbstractTableCommand):
     """
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-        table = ctx.table
 
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        if (row_num + 1 < len(table)
-            and table[row_num].is_data()
-            and table[row_num + 1].is_data()
-            and not table.is_row_colspan(row_num)
-            and not table.is_row_colspan(row_num + 1)):
+        if (row_num + 1 < len(ctx.table)
+            and ctx.table[row_num].is_data()
+            and ctx.table[row_num + 1].is_data()
+            and not ctx.table_driver.is_row_colspan(row_num)
+            and not ctx.table_driver.is_row_colspan(row_num + 1)):
 
-            for curr_col, next_col in zip(table[row_num].columns,
-                                          table[row_num +1].columns):
+            for curr_col, next_col in zip(ctx.table[row_num].columns,
+                                          ctx.table[row_num +1].columns):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
-            table.delete_row(row_num + 1)
-            self.merge(edit, ctx, table)
+            ctx.table_driver.delete_row(row_num + 1)
+            self.merge(edit, ctx)
             sublime.status_message("Table Editor: Row joined")
         else:
             sublime.status_message("Table Editor: Join columns is not permitted")
-        return self.field_sel(ctx, table, row_num, field_num)
+        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorCsvToTable(AbstractTableCommand):
@@ -705,12 +686,14 @@ class TableEditorCsvToTable(AbstractTableCommand):
         if sel.empty():
             return sel
         else:
+            syntax = self.detect_syntax()
             text = self.view.substr(sel)
-            table = table_lib.parse_csv(self.detect_syntax(), text)
+            table = table_lib.parse_csv(syntax, text)
             self.view.replace(edit, sel, table.render())
 
             first_row = self.view.rowcol(sel.begin())[0]
-            pt = self.view.text_point(first_row, table.get_cursor(0, 0))
+
+            pt = self.view.text_point(first_row, syntax.table_driver(table).get_cursor(0, 0))
             sublime.status_message("Table Editor: Table created from CSV")
             return sublime.Region(pt, pt)
 
