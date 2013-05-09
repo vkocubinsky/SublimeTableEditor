@@ -41,7 +41,7 @@ def create_syntax(table_configuration=None):
 class SimpleTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, table_configuration)
+        TableSyntax.__init__(self, "Simple", table_configuration)
         self.table_parser = SimpleTableParser(self)
         self.hline_out_border='|'
         self.hline_in_border='|'

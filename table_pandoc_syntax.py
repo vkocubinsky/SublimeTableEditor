@@ -42,7 +42,7 @@ def create_syntax(table_configuration=None):
 class PandocTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, table_configuration)
+        TableSyntax.__init__(self, "Pandoc", table_configuration)
         self.table_parser = TableParser(self)
         self.hline_out_border = '+'
         self.hline_in_border = '+'

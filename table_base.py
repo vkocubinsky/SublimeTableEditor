@@ -44,7 +44,8 @@ class TableConfiguration:
 
 class TableSyntax:
 
-    def __init__(self, table_configuration):
+    def __init__(self, name, table_configuration):
+        self.name = name
         self.table_configuration = table_configuration or TableConfiguration()
         self.vline = '|'
         #should be set in subclass
@@ -555,6 +556,22 @@ class TextTable:
     def render(self):
         return "\n".join(self.render_lines())
 
+
+class TableException(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+         return repr(self.value)
+
+
+
+class Driver:
+
+    def __init__(self, table):
+        self.table = table
+        self.syntax = table.sytax
 
 
 

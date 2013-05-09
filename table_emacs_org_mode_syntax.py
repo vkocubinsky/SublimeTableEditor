@@ -43,7 +43,7 @@ class EmacsOrgModeTableSyntax(TableSyntax):
 
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, table_configuration)
+        TableSyntax.__init__(self, "Emacs Org mode", table_configuration)
         self.table_parser = TableParser(self)
         self.hline_out_border='|'
         self.hline_in_border='+'
