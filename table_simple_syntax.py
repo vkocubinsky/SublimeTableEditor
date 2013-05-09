@@ -31,8 +31,11 @@ import re
 
 try:
     from .table_base import *
+    from .table_border_syntax import *
 except ValueError:
     from table_base import *
+    from table_border_syntax import *
+
 
 def create_syntax(table_configuration=None):
     return SimpleTableSyntax(table_configuration)
@@ -47,6 +50,8 @@ class SimpleTableSyntax(TableSyntax):
         self.hline_in_border='|'
         self.custom_column_alignment = self.table_configuration.custom_column_alignment or True
 
+    def table_driver(self, table):
+        return BorderTableDriver(table)
 
 
 class CustomAlignColumn(Column):
@@ -88,7 +93,7 @@ class CustomAlignRow(Row):
         return True
 
 
-class SimpleTableParser(TableParser):
+class SimpleTableParser(BorderTableParser):
 
     def _is_custom_align_row(self, str_cols):
         for col in str_cols:
@@ -101,7 +106,7 @@ class SimpleTableParser(TableParser):
               self._is_custom_align_row(line.str_cols())):
             row = CustomAlignRow(table)
         else:
-            row = TableParser.create_row(self, table, line)
+            row = BorderTableParser.create_row(self, table, line)
         return row
 
 

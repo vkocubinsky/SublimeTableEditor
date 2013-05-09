@@ -31,8 +31,10 @@ import re
 
 try:
     from .table_base import *
+    from .table_border_syntax import *
 except ValueError:
     from table_base import *
+    from table_border_syntax import *
 
 
 def create_syntax(table_configuration=None):
@@ -44,7 +46,10 @@ class EmacsOrgModeTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Emacs Org mode", table_configuration)
-        self.table_parser = TableParser(self)
+        self.table_parser = BorderTableParser(self)
         self.hline_out_border='|'
         self.hline_in_border='+'
+
+    def table_driver(self, table):
+        return BorderTableDriver(table)
 

@@ -31,8 +31,10 @@ import re
 
 try:
     from .table_base import *
+    from .table_border_syntax import *
 except ValueError:
     from table_base import *
+    from table_border_syntax import *
 
 
 def create_syntax(table_configuration=None):
@@ -47,6 +49,9 @@ class ReStructuredTextTableSyntax(TableSyntax):
         self.hline_out_border='+'
         self.hline_in_border='+'
         self.keep_space_left = self.table_configuration.keep_space_left or False
+
+    def table_driver(self, table):
+        return BorderTableDriver(table)
 
 
 class ReStructuredTextRow(Row):
@@ -76,7 +81,7 @@ class ReStructuredTextColumn(DataColumn):
         return norm
 
 
-class ReStructuredTextParser(TableParser):
+class ReStructuredTextParser(BorderTableParser):
 
     def create_data_row(self, table, line):
         return ReStructuredTextRow(table)

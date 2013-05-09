@@ -182,34 +182,6 @@ class Row:
         return r
 
 
-class SeparatorRow(Row):
-
-    def __init__(self, table, separator = '-', size = 0):
-        Row.__init__(self, table)
-        self.separator = separator
-        for i in range(size):
-            self.columns.append(SeparatorColumn(self, self.separator))
-
-    def new_empty_column(self):
-        return SeparatorColumn(self,self.separator)
-
-    def create_column(self, text):
-        return SeparatorColumn(self,self.separator)
-
-    def is_header_separator(self):
-        return True
-
-    def is_separator(self):
-        return True
-
-    def render(self):
-        r = self.syntax.hline_out_border
-        for ind, column in enumerate(self.columns):
-            if ind != 0:
-                r += self.syntax.hline_in_border
-            r += column.render()
-        r += self.syntax.hline_out_border
-        return r
 
 class DataRow(Row):
 
@@ -273,19 +245,6 @@ class DataColumn(Column):
             align_value = norm.ljust(total_col_len - space_len, ' ')
         return self.left_space + align_value + self.right_space
 
-
-class SeparatorColumn(Column):
-    def __init__(self, row, separator):
-        Column.__init__(self, row)
-        self.separator = separator
-
-
-    def min_len(self):
-        # '---' or '==='
-        return 3
-
-    def render(self):
-        return self.separator * self.col_len
 
 
 
@@ -543,16 +502,10 @@ class TableDriver:
         self.table.pack()
 
     def insert_single_separator_row(self, i):
-        assert i >= 0
-
-        self.table.rows.insert(i, SeparatorRow(self, '-'))
-        self.table.pack()
+        raise TableException("Syntax {0} doesn't support insert single line".format(self.syntax.name))
 
     def insert_double_separator_row(self, i):
-        assert i >= 0
-
-        self.table.rows.insert(i, SeparatorRow(self, '='))
-        self.table.pack()
+        raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
 
     def swap_rows(self, i, j):
@@ -612,33 +565,6 @@ class BaseTableParser:
 
 
 
-class TableParser(BaseTableParser):
-
-
-    def _is_single_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\-]+\s*$", col):
-                return False
-        return True
-
-    def _is_double_row_separator(self, str_cols):
-        for col in str_cols:
-            if not re.match(r"^\s*[\=]+\s*$", col):
-                return False
-        return True
-
-
-    def create_row(self, table, line):
-        if self._is_single_row_separator(line.str_cols()):
-            row = SeparatorRow(table, '-')
-        elif self._is_double_row_separator(line.str_cols()):
-            row = SeparatorRow(table, '=')
-        else:
-            row = self.create_data_row(table, line)
-        return row
-
-    def create_data_row(self, table, line):
-        return DataRow(table)
 
 
 class LineRegion:
