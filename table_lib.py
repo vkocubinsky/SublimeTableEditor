@@ -88,13 +88,13 @@ def parse_csv(syntax, text):
             row = DataRow(table)
             for col in cols:
                 row.columns.append(DataColumn(row,col))
-            table.add_row(row)
+            table.rows.append(row)
     except csv.Error:
         table = TextTable(syntax)
         for line in text.splitlines():
             row = Row(table, Row.ROW_DATA)
             row.columns.append(DataColumn(row,line))
-            table.add_row(self, row)
+            table.rows.append(row)
     table.pack()
     return table
 

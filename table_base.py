@@ -296,11 +296,6 @@ class TextTable:
         self.rows = []
         self.pack()
 
-
-    def add_row(self, row):
-        self.rows.append(row)
-
-
     def __len__(self):
         return len(self.rows)
 
@@ -424,122 +419,6 @@ class TextTable:
                             data_alignment[col_ind] = Column.ALIGN_LEFT
                     column.align = data_alignment[col_ind]
 
-
-    def delete_column(self, i):
-        assert self.is_col_colspan(i) == False
-
-        for row in self.rows:
-            if i < len(row):
-                del row.columns[i]
-        self.pack()
-
-
-    def swap_columns(self, i, j):
-        assert self.is_col_colspan(i) == False
-        assert self.is_col_colspan(j) == False
-
-        for row in self.rows:
-            if i < len(row) and j < len(row):
-                row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
-        self.pack()
-
-    def insert_empty_column(self, i):
-        assert i >= 0
-        assert self.is_col_colspan(i) == False
-
-        for row in self.rows:
-            row.columns.insert(i, row.new_empty_column())
-        self.pack()
-
-
-    def insert_empty_row(self, i):
-        assert i >= 0
-
-        self.rows.insert(i, DataRow(self))
-        self.pack()
-
-    def insert_single_separator_row(self, i):
-        assert i >= 0
-
-        self.rows.insert(i, SeparatorRow(self, '-'))
-        self.pack()
-
-    def insert_double_separator_row(self, i):
-        assert i >= 0
-
-        self.rows.insert(i, SeparatorRow(self, '='))
-        self.pack()
-
-
-    def swap_rows(self, i, j):
-        assert 0 <= i < len(self.rows) and 0 <= j < len(self.rows)
-
-        self.rows[i], self.rows[j] = self.rows[j], self.rows[i]
-        self.pack()
-
-    def delete_row(self, i ):
-        assert 0 <= i < len(self.rows)
-
-        del self.rows[i]
-        self.pack()
-
-    def visual_column_count(self, row):
-        return sum([1 for col in self[row].columns if not col.pseudo()])
-
-    def is_col_colspan(self, col):
-        for row in self.rows:
-            if col < len(row):
-                if row[col].pseudo() or row[col].colspan > 1:
-                    return True
-        return False
-
-    def is_row_colspan(self, row):
-        for column in self[row].columns:
-            if column.pseudo() or column.colspan > 1:
-                    return True
-        return False
-
-    def internal_to_visual_index(self, row, internal_index):
-        visual_ind = internal_index
-        for col in range(internal_index + 1):
-            if self[row][col].pseudo():
-                visual_ind -= 1
-        return visual_ind
-
-    def visual_to_internal_index(self, row, visual_index):
-        count_visual = 0
-        internal_ind = 0
-        for col in range(len(self[row])):
-            if not self[row][col].pseudo():
-                count_visual += 1
-                internal_ind = col
-            if count_visual == visual_index + 1:
-                break
-        else:
-            print("WARNING: Visual Index Not found")
-        return internal_ind
-
-
-    def get_cursor(self, row_ind, visual_col_ind):
-        #
-        # '   |  1 |  2  |  3_| 4 |'
-        col_ind = self.visual_to_internal_index(row_ind, visual_col_ind)
-        base_len = (len(self.prefix) +
-                   sum([column.col_len for column, ind
-                                in zip(self[row_ind].columns, range(col_ind))]) +
-                   col_ind + 1 # count of '|'
-                   )
-        text = self[row_ind][col_ind].render()
-        match = re.search(r"([^\s])\s*$",text)
-        if match:
-            col_pos = match.end(1)
-        else:
-            col_pos = 1
-        return base_len + col_pos
-
-
-
-
     def _is_number_column(self, start_row_ind, col_ind):
         assert self.rows[start_row_ind].is_data()
         for row in self.rows[start_row_ind:]:
@@ -571,8 +450,120 @@ class Driver:
 
     def __init__(self, table):
         self.table = table
-        self.syntax = table.sytax
+        self.syntax = table.syntax
 
+    def visual_column_count(self, row):
+        return sum([1 for col in self.table[row].columns if not col.pseudo()])
+
+    def is_col_colspan(self, col):
+        for row in self.table.rows:
+            if col < len(row):
+                if row[col].pseudo() or row[col].colspan > 1:
+                    return True
+        return False
+
+    def is_row_colspan(self, row):
+        for column in self.table[row].columns:
+            if column.pseudo() or column.colspan > 1:
+                    return True
+        return False
+
+    def internal_to_visual_index(self, row, internal_index):
+        visual_ind = internal_index
+        for col in range(internal_index + 1):
+            if self.table[row][col].pseudo():
+                visual_ind -= 1
+        return visual_ind
+
+    def visual_to_internal_index(self, row, visual_index):
+        count_visual = 0
+        internal_ind = 0
+        for col in range(len(self.table[row])):
+            if not self.table[row][col].pseudo():
+                count_visual += 1
+                internal_ind = col
+            if count_visual == visual_index + 1:
+                break
+        else:
+            print("WARNING: Visual Index Not found")
+        return internal_ind
+
+
+    def get_cursor(self, row_ind, visual_col_ind):
+        #
+        # '   |  1 |  2  |  3_| 4 |'
+        col_ind = self.visual_to_internal_index(row_ind, visual_col_ind)
+        base_len = (len(self.table.prefix) +
+                   sum([column.col_len for column, ind
+                                in zip(self.table[row_ind].columns, range(col_ind))]) +
+                   col_ind + 1 # count of '|'
+                   )
+        text = self.table[row_ind][col_ind].render()
+        match = re.search(r"([^\s])\s*$",text)
+        if match:
+            col_pos = match.end(1)
+        else:
+            col_pos = 1
+        return base_len + col_pos
+
+
+    def delete_column(self, i):
+        assert self.is_col_colspan(i) == False
+
+        for row in self.table.rows:
+            if i < len(row):
+                del row.columns[i]
+        self.table.pack()
+
+
+    def swap_columns(self, i, j):
+        assert self.is_col_colspan(i) == False
+        assert self.is_col_colspan(j) == False
+
+        for row in self.table.rows:
+            if i < len(row) and j < len(row):
+                row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
+        self.table.pack()
+
+    def insert_empty_column(self, i):
+        assert i >= 0
+        assert self.is_col_colspan(i) == False
+
+        for row in self.table.rows:
+            row.columns.insert(i, row.new_empty_column())
+        self.table.pack()
+
+
+    def insert_empty_row(self, i):
+        assert i >= 0
+
+        self.table.rows.insert(i, DataRow(self))
+        self.table.pack()
+
+    def insert_single_separator_row(self, i):
+        assert i >= 0
+
+        self.table.rows.insert(i, SeparatorRow(self, '-'))
+        self.table.pack()
+
+    def insert_double_separator_row(self, i):
+        assert i >= 0
+
+        self.table.rows.insert(i, SeparatorRow(self, '='))
+        self.table.pack()
+
+
+    def swap_rows(self, i, j):
+        assert 0 <= i < len(self.table.rows) and 0 <= j < len(self.table.rows)
+
+        self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
+        self.table.pack()
+
+    def delete_row(self, i ):
+        assert 0 <= i < len(self.table.rows)
+
+        del self.table.rows[i]
+        self.table.pack()
 
 
 class BaseTableParser:
@@ -613,7 +604,7 @@ class BaseTableParser:
             if ind == 0 :
                 table.prefix = line.prefix
             row = self.parse_row(table, line)
-            table.add_row(row)
+            table.rows.append(row)
         table.pack()
         return table
 

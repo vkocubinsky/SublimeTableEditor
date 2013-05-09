@@ -1,4 +1,4 @@
-# table_lib_test.py - unittest for tablelib
+# table_lib_test.py - unittest for table_lib
 
 # Copyright (C) 2012  Free Software Foundation, Inc.
 
@@ -135,7 +135,9 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.swap_columns(1,2)
+        d = table_lib.Driver(t)
+
+        d.swap_columns(1,2)
         self.assert_table_equals(expected,t.render())
 
 
@@ -158,7 +160,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.delete_column(1)
+        d = table_lib.Driver(t)
+        d.delete_column(1)
         self.assert_table_equals(expected,t.render())
 
 
@@ -181,7 +184,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.swap_rows(3,4)
+        d = table_lib.Driver(t)
+        d.swap_rows(3,4)
         self.assert_table_equals(expected,t.render())
 
     def testDeleteRow(self):
@@ -202,7 +206,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.delete_row(4)
+        d = table_lib.Driver(t)
+        d.delete_row(4)
         self.assert_table_equals(expected,t.render())
 
     def testInsertEmptyColumn(self):
@@ -224,7 +229,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.insert_empty_column(1)
+        d = table_lib.Driver(t)
+        d.insert_empty_column(1)
         self.assert_table_equals(expected,t.render())
 
     def testInsertEmptyRow(self):
@@ -247,7 +253,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.insert_empty_row(3)
+        d = table_lib.Driver(t)
+        d.insert_empty_row(3)
         self.assert_table_equals(expected,t.render())
 
     def testInsertSeparatorRow(self):
@@ -268,7 +275,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.insert_single_separator_row(2)
+        d = table_lib.Driver(t)
+        d.insert_single_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
 
@@ -290,7 +298,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        t.insert_double_separator_row(2)
+        d = table_lib.Driver(t)
+        d.insert_double_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
     def testParseCsv(self):
@@ -426,32 +435,33 @@ class TextileSyntaxTest(BaseTableTest):
 """.strip()
 
         t = self.syntax.table_parser.parse_text(unformatted)
+        d = table_lib.Driver(t)
         #formatted = t.render()
 
         # test visual_to_internal_index
-        self.assertEqual(0, t.visual_to_internal_index(1,0))
-        self.assertEqual(2, t.visual_to_internal_index(1,1))
-        self.assertEqual(3, t.visual_to_internal_index(1,2))
-        self.assertEqual(5, t.visual_to_internal_index(1,3))
+        self.assertEqual(0, d.visual_to_internal_index(1,0))
+        self.assertEqual(2, d.visual_to_internal_index(1,1))
+        self.assertEqual(3, d.visual_to_internal_index(1,2))
+        self.assertEqual(5, d.visual_to_internal_index(1,3))
 
-        self.assertEqual(5, t.visual_to_internal_index(1,1000))
+        self.assertEqual(5, d.visual_to_internal_index(1,1000))
 
         # test trivial
         for col in range(len(t[0])):
-            self.assertEqual(col, t.visual_to_internal_index(0,col))
-            self.assertEqual(col, t.visual_to_internal_index(2,col))
+            self.assertEqual(col, d.visual_to_internal_index(0,col))
+            self.assertEqual(col, d.visual_to_internal_index(2,col))
 
-            self.assertEqual(col, t.internal_to_visual_index(0,col))
-            self.assertEqual(col, t.internal_to_visual_index(2,col))
+            self.assertEqual(col, d.internal_to_visual_index(0,col))
+            self.assertEqual(col, d.internal_to_visual_index(2,col))
 
 
         # test internal_to_visual_index
-        self.assertEqual(0, t.internal_to_visual_index(1,0))
-        self.assertEqual(0, t.internal_to_visual_index(1,1))
-        self.assertEqual(1, t.internal_to_visual_index(1,2))
-        self.assertEqual(2, t.internal_to_visual_index(1,3))
-        self.assertEqual(2, t.internal_to_visual_index(1,4))
-        self.assertEqual(3, t.internal_to_visual_index(1,5))
+        self.assertEqual(0, d.internal_to_visual_index(1,0))
+        self.assertEqual(0, d.internal_to_visual_index(1,1))
+        self.assertEqual(1, d.internal_to_visual_index(1,2))
+        self.assertEqual(2, d.internal_to_visual_index(1,3))
+        self.assertEqual(2, d.internal_to_visual_index(1,4))
+        self.assertEqual(3, d.internal_to_visual_index(1,5))
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):
