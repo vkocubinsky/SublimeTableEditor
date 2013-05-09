@@ -78,6 +78,8 @@ class TableSyntax:
     def is_hline(self, text):
         return self.is_single_hline(text) or self.is_double_hline(text)
 
+    def table_driver(self, table):
+        return TableDriver(table)
 
 
 class Column(object):
@@ -446,7 +448,7 @@ class TableException(Exception):
 
 
 
-class Driver:
+class TableDriver:
 
     def __init__(self, table):
         self.table = table

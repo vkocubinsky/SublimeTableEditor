@@ -135,7 +135,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
 
         d.swap_columns(1,2)
         self.assert_table_equals(expected,t.render())
@@ -160,7 +160,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.delete_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -184,7 +184,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.swap_rows(3,4)
         self.assert_table_equals(expected,t.render())
 
@@ -206,7 +206,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.delete_row(4)
         self.assert_table_equals(expected,t.render())
 
@@ -229,7 +229,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.insert_empty_column(1)
         self.assert_table_equals(expected,t.render())
 
@@ -253,7 +253,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.insert_empty_row(3)
         self.assert_table_equals(expected,t.render())
 
@@ -275,7 +275,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.insert_single_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
@@ -298,7 +298,7 @@ class SimpleSyntaxTest(BaseTableTest):
 
 
         t = self.syntax.table_parser.parse_text(text)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         d.insert_double_separator_row(2)
         self.assert_table_equals(expected,t.render())
 
@@ -435,7 +435,7 @@ class TextileSyntaxTest(BaseTableTest):
 """.strip()
 
         t = self.syntax.table_parser.parse_text(unformatted)
-        d = table_lib.Driver(t)
+        d = self.syntax.table_driver(t)
         #formatted = t.render()
 
         # test visual_to_internal_index
