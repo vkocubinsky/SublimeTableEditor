@@ -293,39 +293,39 @@ class TextTable:
     def __init__(self, syntax):
         self.syntax = syntax
         self.prefix = ""
-        self._rows = []
+        self.rows = []
         self.pack()
 
 
     def add_row(self, row):
-        self._rows.append(row)
+        self.rows.append(row)
 
 
     def __len__(self):
-        return len(self._rows)
+        return len(self.rows)
 
     def empty(self):
-        return len(self._rows) == 0
+        return len(self.rows) == 0
 
     def __getitem__(self, index):
-        return self._rows[index]
+        return self.rows[index]
 
     def _max_column_count(self):
-        return max([len(row) for row in self._rows])
+        return max([len(row) for row in self.rows])
 
     def _rstrip(self):
-        if len(self._rows) <= 1:
+        if len(self.rows) <= 1:
             return
         max_column_count = self._max_column_count()
         long_lines_count = 0
         long_line_ind = 0
-        for row_ind, row in enumerate(self._rows):
+        for row_ind, row in enumerate(self.rows):
             if len(row) == max_column_count:
                 long_lines_count += 1
                 long_line_ind = row_ind
 
         if long_lines_count == 1:
-            row = self._rows[long_line_ind]
+            row = self.rows[long_line_ind]
             overspans = sum([column.colspan - 1 for column in row.columns])
             if row.is_data() and overspans > 0:
                 shift = 0
@@ -333,7 +333,7 @@ class TextTable:
                     if column.pseudo() or len(column.data.strip()) > 0:
                         break
                 if shift > 0:
-                    if len(self._rows) == 2:
+                    if len(self.rows) == 2:
                         if shift != overspans:
                             return
 
@@ -341,13 +341,13 @@ class TextTable:
 
 
     def pack(self):
-        if len(self._rows) == 0:
+        if len(self.rows) == 0:
             return
 
         column_count = self._max_column_count()
 
         if column_count == 0:
-            self._rows = []
+            self.rows = []
             return
 
         #intelligent formatting
@@ -360,7 +360,7 @@ class TextTable:
         #adjust/extend column count
 
         rowspans = [0] * column_count
-        for row in self._rows:
+        for row in self.rows:
             overcols = sum([rowspan for rowspan in rowspans if rowspan > 0])
 
             diff_count = column_count - len(row) - overcols
@@ -379,12 +379,12 @@ class TextTable:
 
         #calculate column lens
         col_lens = [0] * column_count
-        for row in self._rows:
+        for row in self.rows:
             for col_ind,column in enumerate(row.columns):
                 col_lens[col_ind] = max(col_lens[col_ind], column.min_len())
 
         #set column len
-        for row in self._rows:
+        for row in self.rows:
             for column, col_len in zip(row.columns, col_lens):
                 column.col_len = col_len
 
@@ -392,21 +392,21 @@ class TextTable:
         header_separator_index = -1
         first_data_index = -1
         if self.syntax.detect_header:
-            for row_ind,row in enumerate(self._rows):
+            for row_ind,row in enumerate(self.rows):
                 if first_data_index == -1 and row.is_data():
                     first_data_index = row_ind
                 if (first_data_index != -1 and header_separator_index == -1 and
                     row.is_header_separator()):
                     header_separator_index = row_ind
                     for header_index in range(first_data_index, header_separator_index):
-                        if self._rows[header_index].is_data():
-                            for column in self._rows[header_index].columns:
+                        if self.rows[header_index].is_data():
+                            for column in self.rows[header_index].columns:
                                 column.header = True
 
 
         #set column alignment
         data_alignment = [None] * len(col_lens)
-        for row_ind,row in enumerate(self._rows):
+        for row_ind,row in enumerate(self.rows):
             if row_ind < header_separator_index:
                 if row.is_align():
                     for col_ind,column in enumerate(row.columns):
@@ -428,7 +428,7 @@ class TextTable:
     def delete_column(self, i):
         assert self.is_col_colspan(i) == False
 
-        for row in self._rows:
+        for row in self.rows:
             if i < len(row):
                 del row.columns[i]
         self.pack()
@@ -438,7 +438,7 @@ class TextTable:
         assert self.is_col_colspan(i) == False
         assert self.is_col_colspan(j) == False
 
-        for row in self._rows:
+        for row in self.rows:
             if i < len(row) and j < len(row):
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.pack()
@@ -447,7 +447,7 @@ class TextTable:
         assert i >= 0
         assert self.is_col_colspan(i) == False
 
-        for row in self._rows:
+        for row in self.rows:
             row.columns.insert(i, row.new_empty_column())
         self.pack()
 
@@ -455,39 +455,39 @@ class TextTable:
     def insert_empty_row(self, i):
         assert i >= 0
 
-        self._rows.insert(i, DataRow(self))
+        self.rows.insert(i, DataRow(self))
         self.pack()
 
     def insert_single_separator_row(self, i):
         assert i >= 0
 
-        self._rows.insert(i, SeparatorRow(self, '-'))
+        self.rows.insert(i, SeparatorRow(self, '-'))
         self.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
 
-        self._rows.insert(i, SeparatorRow(self, '='))
+        self.rows.insert(i, SeparatorRow(self, '='))
         self.pack()
 
 
     def swap_rows(self, i, j):
-        assert 0 <= i < len(self._rows) and 0 <= j < len(self._rows)
+        assert 0 <= i < len(self.rows) and 0 <= j < len(self.rows)
 
-        self._rows[i], self._rows[j] = self._rows[j], self._rows[i]
+        self.rows[i], self.rows[j] = self.rows[j], self.rows[i]
         self.pack()
 
     def delete_row(self, i ):
-        assert 0 <= i < len(self._rows)
+        assert 0 <= i < len(self.rows)
 
-        del self._rows[i]
+        del self.rows[i]
         self.pack()
 
     def visual_column_count(self, row):
         return sum([1 for col in self[row].columns if not col.pseudo()])
 
     def is_col_colspan(self, col):
-        for row in self._rows:
+        for row in self.rows:
             if col < len(row):
                 if row[col].pseudo() or row[col].colspan > 1:
                     return True
@@ -541,8 +541,8 @@ class TextTable:
 
 
     def _is_number_column(self, start_row_ind, col_ind):
-        assert self._rows[start_row_ind].is_data()
-        for row in self._rows[start_row_ind:]:
+        assert self.rows[start_row_ind].is_data()
+        for row in self.rows[start_row_ind:]:
             if (row.is_data()
                 and col_ind < len(row.columns)
                 and len(row.columns[col_ind].data.strip()) > 0
@@ -551,7 +551,7 @@ class TextTable:
         return True
 
     def render_lines(self):
-        return [self.prefix + row.render() for row in self._rows]
+        return [self.prefix + row.render() for row in self.rows]
 
     def render(self):
         return "\n".join(self.render_lines())
