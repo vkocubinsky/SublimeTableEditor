@@ -605,7 +605,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
     or if next line is hline
     """
     def remove_rest_line(self, edit, sel):
-        end_region = self.view.find(self.detect_syntax().hline_border_pattern(),
+        end_region = self.view.find(self.detect_syntax().border_pattern,
                                     sel.begin())
         rest_region = sublime.Region(sel.begin(), end_region.begin())
         rest_data = self.view.substr(rest_region)
