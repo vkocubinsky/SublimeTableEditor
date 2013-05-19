@@ -28,6 +28,11 @@ from __future__ import division
 import math
 import re
 
+try:
+    from .table_line_parser import *
+except ValueError:
+    from table_line_parser import *
+
 
 class TableConfiguration:
     def __init__(self):
@@ -552,7 +557,7 @@ class BaseTableParser:
     def parse_text(self, text):
         table = TextTable(self.syntax)
         lines = text.splitlines()
-        lineParser = LineParser(self.syntax)
+        lineParser = LineParser(self.syntax.hline_border_pattern())
         for ind, line in enumerate(lines):
 
             line = lineParser.parse(line)
@@ -564,77 +569,4 @@ class BaseTableParser:
         return table
 
 
-
-
-
-class LineRegion:
-    def __init__(self, begin, end):
-        self.begin = begin
-        self.end = end
-
-class LineCell:
-    def __init__(self, line_text, left_border, right_border):
-        self.cell_region = LineRegion(left_border.end, right_border.begin)
-        self.left_border = left_border
-        self.right_border = right_border
-        self.text = line_text[self.cell_region.begin:self.cell_region.end]
-        if self.right_border.begin == self.right_border.end:
-            self.right_border_text = '|'
-        else:
-            self.right_border_text = line_text[self.right_border.begin:self.right_border.end]
-        self.left_border_text = line_text[self.left_border.begin:self.left_border.end]
-
-
-class Line:
-    def __init__(self):
-        self.cells = []
-        self.prefix = ""
-
-    def str_cols(self):
-        return [cell.text for cell in self.cells]
-
-    def field_num(self, pos):
-        for ind, cell in enumerate(self.cells):
-            if cell.right_border.end > pos:
-                return ind
-        else:
-            return len(self.cells) - 1
-
-
-
-class LineParser:
-    def __init__(self, syntax):
-        self.syntax = syntax
-
-    def parse(self, line_text):
-
-        line = Line()
-
-        mo = re.search(r"[^\s]", line_text)
-        if mo:
-            line.prefix = line_text[:mo.start()]
-        else:
-            line.prefix = ""
-
-        pattern = self.syntax.hline_border_pattern()
-
-
-        borders = []
-
-        last_border_end = 0
-        for m in re.finditer(pattern, line_text):
-            borders.append(LineRegion(m.start(),m.end()))
-            last_border_end = m.end()
-
-        if last_border_end < len(line_text.rstrip()):
-            borders.append(LineRegion(len(line_text), len(line_text)))
-
-        left_border = None
-        for right_border in borders:
-            if left_border is None:
-                left_border = right_border
-            else:
-                line.cells.append(LineCell(line_text, left_border, right_border))
-                left_border = right_border
-        return line
 
