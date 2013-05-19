@@ -64,14 +64,15 @@ class TableSyntax:
         self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
 
 
-    def hline_border_pattern(self):
-        return "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
+        self.border_pattern = "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
+        self.line_parser = LineParser(self.border_pattern)
+
 
     def single_hline_pattern(self):
-        return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
+        return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
                                                 line=r"(\s*[\-]+\s*)")
     def double_hline_pattern(self):
-        return r"(^\s*({border}|{line})+\s*$)".format(border=self.hline_border_pattern(),
+        return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
                                                 line=r"(\s*[\=]+\s*)")
 
     def is_single_hline(self, text):
@@ -550,17 +551,16 @@ class BaseTableParser:
         return column
 
     def is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.hline_border_pattern(),
+        return re.match(r"^\s*" + self.syntax.border_pattern,
                         row) is not None
 
 
     def parse_text(self, text):
         table = TextTable(self.syntax)
         lines = text.splitlines()
-        lineParser = LineParser(self.syntax.hline_border_pattern())
         for ind, line in enumerate(lines):
 
-            line = lineParser.parse(line)
+            line = self.syntax.line_parser.parse(line)
             if ind == 0 :
                 table.prefix = line.prefix
             row = self.parse_row(table, line)

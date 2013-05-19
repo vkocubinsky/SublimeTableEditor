@@ -45,12 +45,12 @@ class MultiMarkdownTableSyntax(TableSyntax):
         self.table_parser = MultiMarkdownTableParser(self)
         self.hline_out_border='|'
         self.hline_in_border='|'
-
-
-    def hline_border_pattern(self):
-        return "(?:{0}{0}+)|{1}".format(re.escape(self.vline),
-                                        TableSyntax.hline_border_pattern(self)
+        self.border_pattern = "(?:{0}{0}+)|{1}".format(
+                                        re.escape(self.vline),
+                                        self.border_pattern #pattern from base class
                                         )
+        self.line_parser = LineParser(self.border_pattern)
+
 
 
 class MultiMarkdownAlignColumn(Column):
