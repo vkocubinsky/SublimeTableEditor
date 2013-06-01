@@ -30,8 +30,20 @@ import csv
 
 try:
     from .table_base import *
+    from . import table_simple_syntax
+    from . import table_emacs_org_mode_syntax
+    from . import table_pandoc_syntax
+    from . import table_multi_markdown_syntax
+    from . import table_re_structured_text_syntax
+    from . import table_textile_syntax
 except ValueError:
     from table_base import *
+    import table_simple_syntax
+    import table_emacs_org_mode_syntax
+    import table_pandoc_syntax
+    import table_multi_markdown_syntax
+    import table_re_structured_text_syntax
+    import table_textile_syntax
 
 
 def simple_syntax(table_configuration=None):
@@ -55,23 +67,20 @@ def textile_syntax(table_configuration=None):
 
 def create_syntax(syntax_name, table_configuration=None):
     modules = {
-        "Simple" : "table_simple_syntax",
-        "EmacsOrgMode" : "table_emacs_org_mode_syntax",
-        "Pandoc" : "table_pandoc_syntax",
-        "MultiMarkdown" : "table_multi_markdown_syntax",
-        "reStructuredText" : "table_re_structured_text_syntax",
-        "Textile" : "table_textile_syntax"
+        "Simple" : table_simple_syntax,
+        "EmacsOrgMode" : table_emacs_org_mode_syntax,
+        "Pandoc" : table_pandoc_syntax,
+        "MultiMarkdown" : table_multi_markdown_syntax,
+        "reStructuredText" : table_re_structured_text_syntax,
+        "Textile" : table_textile_syntax
     }
 
     if syntax_name in modules:
-        module_name = modules[syntax_name]
+        module = modules[syntax_name]
     else:
-        module_name = syntax_name
+        raise ValueError("Syntax {syntax_name} doesn't supported"
+                         .format(syntax_name = syntax_name))
 
-    try:
-        module = __import__("Table Editor." + module_name, globals(), locals(), [module_name],0)
-    except ImportError:
-        module = __import__(module_name)
     syntax = module.create_syntax(table_configuration)
     return syntax
 
@@ -108,7 +117,6 @@ if __name__ == '__main__':
 
 
     syntax = create_syntax("MultiMarkdown")
-    syntax = create_syntax("table_multi_markdown_syntax")
     syntax.intelligent_formatting = True
     t = syntax.table_parser.parse_text(text.strip())
     print("Table:'\n{0}\n'".format(t.render()))
