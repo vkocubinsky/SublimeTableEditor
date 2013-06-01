@@ -46,7 +46,6 @@ class TableConfiguration:
         self.hline_in_border = '|'
 
 
-
 class TableSyntax:
 
     def __init__(self, name, table_configuration):
@@ -63,17 +62,16 @@ class TableSyntax:
         self.detect_header = self.table_configuration.detect_header or True
         self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
 
-
         self.border_pattern = "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
         self.line_parser = LineParser(self.border_pattern)
 
-
     def single_hline_pattern(self):
         return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
-                                                line=r"(\s*[\-]+\s*)")
+                                                      line=r"(\s*[\-]+\s*)")
+
     def double_hline_pattern(self):
         return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
-                                                line=r"(\s*[\=]+\s*)")
+                                                      line=r"(\s*[\=]+\s*)")
 
     def is_single_hline(self, text):
         return re.match(self.single_hline_pattern(), text) is not None
@@ -106,7 +104,6 @@ class Column(object):
         self.left_border_text = self.syntax.vline
         self.right_border_text = self.syntax.vline
 
-
     def min_len(self):
         raise NotImplementedError
 
@@ -135,6 +132,7 @@ class PseudoColumn(Column):
 
     def pseudo(self):
         return True
+
 
 class Row:
 
@@ -168,13 +166,11 @@ class Row:
             column.pseudo_columns.append(psedo_column)
             self.columns.append(psedo_column)
 
-
     def new_empty_column(self):
         raise NotImplementedError
 
     def create_column(self, text):
         raise NotImplementedError
-
 
     def render(self):
         r = ""
@@ -188,11 +184,10 @@ class Row:
         return r
 
 
-
 class DataRow(Row):
 
     def new_empty_column(self):
-        return DataColumn(self,'')
+        return DataColumn(self, '')
 
     def create_column(self, text):
         return DataColumn(self, text)
@@ -209,14 +204,11 @@ class DataColumn(Column):
         self.left_space = ' '
         self.right_space = ' '
 
-
-
     def norm(self):
         return self.data.strip()
 
     def min_len(self):
         return int(math.ceil(self.total_min_len()/self.colspan))
-
 
     def total_min_len(self):
         # min of '   ' or ' xxxx '
@@ -227,22 +219,19 @@ class DataColumn(Column):
         total_min_len = total_min_len + (len(self.left_border_text) - 1) + (len(self.right_border_text) - 1)
         return total_min_len
 
-
     def render(self):
         # colspan -1 is count of '|'
-        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+        total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
 
         #if self.syntax.multi_markdown_syntax():
         #    total_col_len = total_col_len - (self.colspan - 1)
         total_col_len = total_col_len - (len(self.left_border_text) - 1) - (len(self.right_border_text) - 1)
 
-
-
         norm = self.norm()
         space_len = len(self.left_space) + len(self.right_space)
 
         if self.header and self.syntax.detect_header:
-            align_value =  norm.center(total_col_len - space_len, ' ')
+            align_value = norm.center(total_col_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
             align_value = norm.rjust(total_col_len - space_len, ' ')
         elif self.align == Column.ALIGN_CENTER:
@@ -252,10 +241,7 @@ class DataColumn(Column):
         return self.left_space + align_value + self.right_space
 
 
-
-
 class TextTable:
-
 
     def __init__(self, syntax):
         self.syntax = syntax
@@ -301,7 +287,6 @@ class TextTable:
 
                     row.columns = row.columns[:-shift]
 
-
     def pack(self):
         if len(self.rows) == 0:
             return
@@ -317,10 +302,7 @@ class TextTable:
             self._rstrip()
             column_count = self._max_column_count()
 
-
-
         #adjust/extend column count
-
         rowspans = [0] * column_count
         for row in self.rows:
             overcols = sum([rowspan for rowspan in rowspans if rowspan > 0])
@@ -342,7 +324,7 @@ class TextTable:
         #calculate column lens
         col_lens = [0] * column_count
         for row in self.rows:
-            for col_ind,column in enumerate(row.columns):
+            for col_ind, column in enumerate(row.columns):
                 col_lens[col_ind] = max(col_lens[col_ind], column.min_len())
 
         #set column len
@@ -354,31 +336,30 @@ class TextTable:
         header_separator_index = -1
         first_data_index = -1
         if self.syntax.detect_header:
-            for row_ind,row in enumerate(self.rows):
+            for row_ind, row in enumerate(self.rows):
                 if first_data_index == -1 and row.is_data():
                     first_data_index = row_ind
-                if (first_data_index != -1 and header_separator_index == -1 and
-                    row.is_header_separator()):
+                if (first_data_index != -1 and header_separator_index == -1
+                        and row.is_header_separator()):
                     header_separator_index = row_ind
                     for header_index in range(first_data_index, header_separator_index):
                         if self.rows[header_index].is_data():
                             for column in self.rows[header_index].columns:
                                 column.header = True
 
-
         #set column alignment
         data_alignment = [None] * len(col_lens)
-        for row_ind,row in enumerate(self.rows):
+        for row_ind, row in enumerate(self.rows):
             if row_ind < header_separator_index:
                 if row.is_align():
-                    for col_ind,column in enumerate(row.columns):
+                    for col_ind, column in enumerate(row.columns):
                         data_alignment[col_ind] = column.align_follow()
                 continue
             elif row.is_align():
-                for col_ind,column in enumerate(row.columns):
+                for col_ind, column in enumerate(row.columns):
                     data_alignment[col_ind] = column.align_follow()
             elif row.is_data():
-                for col_ind,column in enumerate(row.columns):
+                for col_ind, column in enumerate(row.columns):
                     if data_alignment[col_ind] is None:
                         if self.syntax.align_number_right and self._is_number_column(row_ind, col_ind):
                             data_alignment[col_ind] = Column.ALIGN_RIGHT
@@ -390,9 +371,9 @@ class TextTable:
         assert self.rows[start_row_ind].is_data()
         for row in self.rows[start_row_ind:]:
             if (row.is_data()
-                and col_ind < len(row.columns)
-                and len(row.columns[col_ind].data.strip()) > 0
-                and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
+                    and col_ind < len(row.columns)
+                    and len(row.columns[col_ind].data.strip()) > 0
+                    and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
                 return False
         return True
 
@@ -409,8 +390,7 @@ class TableException(Exception):
         self.value = value
 
     def __str__(self):
-         return repr(self.value)
-
+        return repr(self.value)
 
 
 class TableDriver:
@@ -455,37 +435,34 @@ class TableDriver:
             print("WARNING: Visual Index Not found")
         return internal_ind
 
-
     def get_cursor(self, row_ind, visual_col_ind):
         #
         # '   |  1 |  2  |  3_| 4 |'
         col_ind = self.visual_to_internal_index(row_ind, visual_col_ind)
-        base_len = (len(self.table.prefix) +
-                   sum([column.col_len for column, ind
-                                in zip(self.table[row_ind].columns, range(col_ind))]) +
-                   col_ind + 1 # count of '|'
-                   )
+        base_len = (len(self.table.prefix)
+                    + sum([column.col_len for column, ind
+                          in zip(self.table[row_ind].columns, range(col_ind))])
+                    + col_ind + 1  # count of '|'
+                    )
         text = self.table[row_ind][col_ind].render()
-        match = re.search(r"([^\s])\s*$",text)
+        match = re.search(r"([^\s])\s*$", text)
         if match:
             col_pos = match.end(1)
         else:
             col_pos = 1
         return base_len + col_pos
 
-
     def delete_column(self, i):
-        assert self.is_col_colspan(i) == False
+        assert self.is_col_colspan(i) is False
 
         for row in self.table.rows:
             if i < len(row):
                 del row.columns[i]
         self.table.pack()
 
-
     def swap_columns(self, i, j):
-        assert self.is_col_colspan(i) == False
-        assert self.is_col_colspan(j) == False
+        assert self.is_col_colspan(i) is False
+        assert self.is_col_colspan(j) is False
 
         for row in self.table.rows:
             if i < len(row) and j < len(row):
@@ -494,12 +471,11 @@ class TableDriver:
 
     def insert_empty_column(self, i):
         assert i >= 0
-        assert self.is_col_colspan(i) == False
+        assert self.is_col_colspan(i) is False
 
         for row in self.table.rows:
             row.columns.insert(i, row.new_empty_column())
         self.table.pack()
-
 
     def insert_empty_row(self, i):
         assert i >= 0
@@ -513,14 +489,13 @@ class TableDriver:
     def insert_double_separator_row(self, i):
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
-
     def swap_rows(self, i, j):
         assert 0 <= i < len(self.table.rows) and 0 <= j < len(self.table.rows)
 
         self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
         self.table.pack()
 
-    def delete_row(self, i ):
+    def delete_row(self, i):
         assert 0 <= i < len(self.table.rows)
 
         del self.table.rows[i]
@@ -531,7 +506,6 @@ class BaseTableParser:
 
     def __init__(self, syntax):
         self.syntax = syntax
-
 
     def parse_row(self, table, line):
         row = self.create_row(table, line)
@@ -554,19 +528,15 @@ class BaseTableParser:
         return re.match(r"^\s*" + self.syntax.border_pattern,
                         row) is not None
 
-
     def parse_text(self, text):
         table = TextTable(self.syntax)
         lines = text.splitlines()
         for ind, line in enumerate(lines):
 
             line = self.syntax.line_parser.parse(line)
-            if ind == 0 :
+            if ind == 0:
                 table.prefix = line.prefix
             row = self.parse_row(table, line)
             table.rows.append(row)
         table.pack()
         return table
-
-
-

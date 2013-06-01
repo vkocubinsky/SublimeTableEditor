@@ -25,9 +25,6 @@
 from __future__ import print_function
 from __future__ import division
 
-import math
-import re
-
 
 try:
     from .table_base import *
@@ -46,8 +43,8 @@ class ReStructuredTextTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "reStructuredText", table_configuration)
         self.table_parser = ReStructuredTextParser(self)
-        self.hline_out_border='+'
-        self.hline_in_border='+'
+        self.hline_out_border = '+'
+        self.hline_in_border = '+'
         self.keep_space_left = self.table_configuration.keep_space_left or False
 
     def table_driver(self, table):
@@ -57,7 +54,7 @@ class ReStructuredTextTableSyntax(TableSyntax):
 class ReStructuredTextRow(Row):
 
     def new_empty_column(self):
-        return ReStructuredTextColumn(self,'')
+        return ReStructuredTextColumn(self, '')
 
     def create_column(self, text):
         return ReStructuredTextColumn(self, text)
@@ -75,7 +72,7 @@ class ReStructuredTextColumn(DataColumn):
             else:
                 norm = self.data.rstrip()
                 if norm[:1] == ' ':
-                     norm = norm[1:]
+                    norm = norm[1:]
         else:
             norm = self.data.strip()
         return norm
@@ -85,5 +82,3 @@ class ReStructuredTextParser(BorderTableParser):
 
     def create_data_row(self, table, line):
         return ReStructuredTextRow(table)
-
-

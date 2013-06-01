@@ -38,6 +38,7 @@ class LineRegion:
     def __str__(self):
         return self.__repr__()
 
+
 class LineCell:
     def __init__(self, line_text, left_border, right_border):
         self.cell_region = LineRegion(left_border.end, right_border.begin)
@@ -71,7 +72,6 @@ class LineParser:
     def __init__(self, border_pattern):
         self.border_pattern = border_pattern
 
-
     def parse(self, line_text):
 
         line = Line()
@@ -82,13 +82,11 @@ class LineParser:
         else:
             line.prefix = ""
 
-
-
         borders = []
 
         last_border_end = 0
         for m in re.finditer(self.border_pattern, line_text):
-            borders.append(LineRegion(m.start(),m.end()))
+            borders.append(LineRegion(m.start(), m.end()))
             last_border_end = m.end()
 
         if last_border_end < len(line_text.rstrip()):
@@ -104,7 +102,6 @@ class LineParser:
         return line
 
 
-
 if __name__ == '__main__':
 
     line_parser = LineParser(r"(?:\|\|+)|\|")
@@ -114,5 +111,3 @@ if __name__ == '__main__':
     for cell in line.cells:
         print("text : '{0.text}', left '{0.left_border_text}' right '{0.right_border_text}'".format(cell))
         print(cell.left_border, cell.right_border)
-
-

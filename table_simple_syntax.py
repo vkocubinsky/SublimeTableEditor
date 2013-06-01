@@ -25,7 +25,6 @@
 from __future__ import print_function
 from __future__ import division
 
-import math
 import re
 
 
@@ -46,8 +45,8 @@ class SimpleTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Simple", table_configuration)
         self.table_parser = SimpleTableParser(self)
-        self.hline_out_border='|'
-        self.hline_in_border='|'
+        self.hline_out_border = '|'
+        self.hline_in_border = '|'
         self.custom_column_alignment = self.table_configuration.custom_column_alignment or True
 
     def table_driver(self, table):
@@ -72,7 +71,6 @@ class CustomAlignColumn(Column):
         # ' < ' or ' > ' or ' # '
         return 3
 
-
     def render(self):
         return ' ' + self.align_char * (self.col_len - 2) + ' '
 
@@ -84,10 +82,10 @@ class CustomAlignColumn(Column):
 class CustomAlignRow(Row):
 
     def new_empty_column(self):
-        return CustomAlignColumn(self,'#')
+        return CustomAlignColumn(self, '#')
 
     def create_column(self, text):
-        return CustomAlignColumn(self,text)
+        return CustomAlignColumn(self, text)
 
     def is_align(self):
         return True
@@ -103,10 +101,8 @@ class SimpleTableParser(BorderTableParser):
 
     def create_row(self, table, line):
         if (self.syntax.custom_column_alignment and
-              self._is_custom_align_row(line.str_cols())):
+                self._is_custom_align_row(line.str_cols())):
             row = CustomAlignRow(table)
         else:
             row = BorderTableParser.create_row(self, table, line)
         return row
-
-

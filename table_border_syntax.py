@@ -26,7 +26,6 @@
 from __future__ import print_function
 from __future__ import division
 
-import math
 import re
 
 try:
@@ -37,17 +36,17 @@ except ValueError:
 
 class SeparatorRow(Row):
 
-    def __init__(self, table, separator = '-', size = 0):
+    def __init__(self, table, separator='-', size=0):
         Row.__init__(self, table)
         self.separator = separator
         for i in range(size):
             self.columns.append(SeparatorColumn(self, self.separator))
 
     def new_empty_column(self):
-        return SeparatorColumn(self,self.separator)
+        return SeparatorColumn(self, self.separator)
 
     def create_column(self, text):
-        return SeparatorColumn(self,self.separator)
+        return SeparatorColumn(self, self.separator)
 
     def is_header_separator(self):
         return True
@@ -69,7 +68,6 @@ class SeparatorColumn(Column):
     def __init__(self, row, separator):
         Column.__init__(self, row)
         self.separator = separator
-
 
     def min_len(self):
         # '---' or '==='
@@ -94,9 +92,7 @@ class BorderTableDriver(TableDriver):
         self.table.pack()
 
 
-
 class BorderTableParser(BaseTableParser):
-
 
     def _is_single_row_separator(self, str_cols):
         for col in str_cols:
@@ -110,7 +106,6 @@ class BorderTableParser(BaseTableParser):
                 return False
         return True
 
-
     def create_row(self, table, line):
         if self._is_single_row_separator(line.str_cols()):
             row = SeparatorRow(table, '-')
@@ -122,4 +117,3 @@ class BorderTableParser(BaseTableParser):
 
     def create_data_row(self, table, line):
         return DataRow(table)
-

@@ -34,6 +34,7 @@ try:
 except ValueError:
     from table_base import *
 
+
 def create_syntax(table_configuration=None):
     return MultiMarkdownTableSyntax(table_configuration)
 
@@ -43,14 +44,13 @@ class MultiMarkdownTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Multi Markdown", table_configuration)
         self.table_parser = MultiMarkdownTableParser(self)
-        self.hline_out_border='|'
-        self.hline_in_border='|'
-        self.border_pattern = "(?:{0}{0}+)|{1}".format(
-                                        re.escape(self.vline),
-                                        self.border_pattern #pattern from base class
-                                        )
+        self.hline_out_border = '|'
+        self.hline_in_border = '|'
+        self.border_pattern = "(?:{0}{0}+)|{1}".format(re.escape(self.vline),
+                                                       #pattern from base class
+                                                       self.border_pattern
+                                                       )
         self.line_parser = LineParser(self.border_pattern)
-
 
 
 class MultiMarkdownAlignColumn(Column):
@@ -75,9 +75,8 @@ class MultiMarkdownAlignColumn(Column):
         # ' :-: ' or ' :-- ' or ' --: ' or ' --- '
         return 5 + self.colspan - 1
 
-
     def render(self):
-        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+        total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
         total_col_len = total_col_len - (self.colspan - 1)
 
         if self._align_follow == Column.ALIGN_CENTER:
@@ -97,15 +96,13 @@ class MultiMarkdownAlignColumn(Column):
         return re.match(MultiMarkdownAlignColumn.PATTERN, str_col)
 
 
-
 class MultiMarkdownAlignRow(Row):
 
     def new_empty_column(self):
-        return MultiMarkdownAlignColumn(self,'-')
+        return MultiMarkdownAlignColumn(self, '-')
 
     def create_column(self, text):
         return MultiMarkdownAlignColumn(self, text)
-
 
     def is_header_separator(self):
         return True
@@ -114,9 +111,7 @@ class MultiMarkdownAlignRow(Row):
         return True
 
 
-
 class MultiMarkdownTableParser(BaseTableParser):
-
 
     def _is_multi_markdown_align_row(self, str_cols):
         for col in str_cols:

@@ -25,9 +25,6 @@
 from __future__ import print_function
 from __future__ import division
 
-import math
-import re
-
 
 try:
     from .table_base import *
@@ -35,7 +32,6 @@ try:
 except ValueError:
     from table_base import *
     from table_border_syntax import *
-
 
 
 def create_syntax(table_configuration=None):
@@ -52,4 +48,3 @@ class PandocTableSyntax(TableSyntax):
 
     def table_driver(self, table):
         return BorderTableDriver(table)
-

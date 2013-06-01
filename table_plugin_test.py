@@ -143,8 +143,6 @@ class GridTableTest(CallbackTest):
 |           |           |""".format(self.description)
 
 
-
-
 class ColumnsTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Work with columns")
@@ -371,7 +369,7 @@ Click ctrl+w to close this window""".format(len(tests))})
         self.view.run_command(command.name, command.args)
         if command_ind + 1 < len(test.commands):
             sublime.set_timeout(lambda: self.run_tests(tests, test_ind, command_ind + 1),
-                        TableEditorTestSuite.COMMAND_TIMEOUT)
+                                TableEditorTestSuite.COMMAND_TIMEOUT)
         else:
             text = self.get_buffer_text()
             if text.strip() != tests[test_ind].expected_value().strip():
@@ -390,7 +388,7 @@ Test {0} executed sucessfully
 """.format(tests[test_ind].name)})
 
                 sublime.set_timeout(lambda: self.run_tests(tests, test_ind + 1, 0),
-                    TableEditorTestSuite.TEST_TIMEOUT)
+                                    TableEditorTestSuite.TEST_TIMEOUT)
 
     def get_buffer_text(self):
         return self.view.substr(sublime.Region(0, self.view.size()))

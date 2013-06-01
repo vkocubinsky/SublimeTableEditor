@@ -34,6 +34,7 @@ try:
 except ValueError:
     from table_base import *
 
+
 def create_syntax(table_configuration=None):
     return TextileTableSyntax(table_configuration)
 
@@ -43,8 +44,8 @@ class TextileTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Textile", table_configuration)
         self.table_parser = TextileTableParser(self)
-        self.hline_out_border='|'
-        self.hline_in_border='|'
+        self.hline_out_border = '|'
+        self.hline_in_border = '|'
 
 
 class TextileCellColumn(Column):
@@ -78,8 +79,6 @@ class TextileCellColumn(Column):
         if rowspan_mo:
             self.rowspan = int(rowspan_mo.group(1))
 
-
-
     def min_len(self):
         return int(math.ceil(self.total_min_len()/self.colspan))
 
@@ -89,7 +88,7 @@ class TextileCellColumn(Column):
 
     def render(self):
         # colspan -1 is count of '|'
-        total_col_len = self.col_len + (self.colspan - 1 )+ sum([col.col_len for col in self.pseudo_columns])
+        total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
 
         if '>' in self.attr and not '<>' in self.attr:
             return self.attr + ' ' + self.data.rjust(total_col_len - len(self.attr) - 2, ' ') + ' '
@@ -103,14 +102,10 @@ class TextileCellColumn(Column):
         return re.match(TextileCellColumn.PATTERN, str_col)
 
 
-
-
-
-
 class TextileRow(Row):
 
     def new_empty_column(self):
-        return DataColumn(self,'')
+        return DataColumn(self, '')
 
     def create_column(self, text):
         if TextileCellColumn.match_cell(text):
@@ -122,10 +117,7 @@ class TextileRow(Row):
         return True
 
 
-
 class TextileTableParser(BaseTableParser):
 
     def create_row(self, table, line):
         return TextileRow(table)
-
-

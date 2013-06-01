@@ -23,13 +23,13 @@
 
 import sublime
 import sublime_plugin
-import csv
 import re
 
 try:
     from . import table_lib
 except ValueError:
     import table_lib
+
 
 class TableContext:
 
@@ -48,13 +48,10 @@ class TableContext:
         self.table_driver = self.syntax.table_driver(self.table)
         self.field_num = self.table_driver.visual_to_internal_index(self.row_num, self.visual_field_num)
 
-
     def _get_table_text(self, first_table_row, last_table_row):
-        begin_point = self.view.line(
-                                     self.view.text_point(first_table_row, 0)
-                                    ).begin()
-        end_point = self.view.line(
-                                   self.view.text_point(last_table_row, 0)
+        begin_point = self.view.line(self.view.text_point(first_table_row, 0)
+                                     ).begin()
+        end_point = self.view.line(self.view.text_point(last_table_row, 0)
                                    ).end()
         return self.view.substr(sublime.Region(begin_point, end_point))
 
@@ -79,7 +76,6 @@ class TableContext:
         text = self._get_text(row)
         return self.syntax.table_parser.is_table_row(text)
 
-
     def _visual_field_num(self, sel_row, sel_col):
         line_text = self._get_text(sel_row)
         line = self.syntax.line_parser.parse(line_text)
@@ -88,7 +84,7 @@ class TableContext:
     def _hline_count(self, text, start, end):
         if self.syntax.is_hline(text):
             return sum([text.count(ch, start, end)
-                                        for ch in self.syntax.hline_borders])
+                        for ch in self.syntax.hline_borders])
         else:
             return text.count(self.syntax.vline, start, end)
 
@@ -109,10 +105,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
 
         table_configuration = table_lib.TableConfiguration()
 
-        border_style = (self.view.settings().get("table_editor_border_style",
-                                                   None) or
-                         self.view.settings().get("table_editor_style",
-                         None))
+        border_style = (self.view.settings().get("table_editor_border_style", None)
+                        or self.view.settings().get("table_editor_style", None))
         if border_style == "emacs":
             table_configuration.hline_out_border = '|'
             table_configuration.hline_in_border = '+'
@@ -138,25 +132,20 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().has("table_editor_intelligent_formatting"):
             table_configuration.intelligent_formatting = self.view.settings().get("table_editor_intelligent_formatting")
 
-
-
         syntax = table_lib.create_syntax(syntax_name, table_configuration)
         return syntax
-
 
     def auto_detect_syntax_name(self):
         view_syntax = self.view.settings().get('syntax')
         if (view_syntax == 'Packages/Markdown/MultiMarkdown.tmLanguage' or
-            view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
+                view_syntax == 'Packages/Markdown/Markdown.tmLanguage'):
             return "MultiMarkdown"
         elif view_syntax == 'Packages/Textile/Textile.tmLanguage':
             return "Textile"
-        elif (view_syntax ==
-                     'Packages/RestructuredText/reStructuredText.tmLanguage'):
+        elif (view_syntax == 'Packages/RestructuredText/reStructuredText.tmLanguage'):
             return "reStructuredText"
         else:
             return "Simple"
-
 
     def merge(self, edit, ctx):
         table = ctx.table
@@ -461,11 +450,10 @@ class TableEditorKillRow(AbstractTableCommand):
 
         ctx.table_driver.delete_row(row_num)
         self.merge(edit, ctx)
-        if row_num == len(ctx.table): # just deleted one row
+        if row_num == len(ctx.table):  # just deleted one row
             row_num = row_num - 1
         sublime.status_message("Table Editor: Row deleted")
         return self.field_sel(ctx, row_num, field_num)
-
 
 
 class TableEditorInsertRow(AbstractTableCommand):
@@ -506,7 +494,6 @@ class TableEditorMoveRowUp(AbstractTableCommand):
             sublime.status_message("Table Editor: Move row up doesn't make sense for first row")
         self.merge(edit, ctx)
         return self.field_sel(ctx, row_num, field_num)
-
 
 
 class TableEditorMoveRowDown(AbstractTableCommand):
@@ -588,7 +575,6 @@ class TableEditorHlineAndMove(AbstractTableCommand):
         else:
             ctx.table_driver.insert_empty_row(row_num + 2)
 
-
         self.merge(edit, ctx)
 
         row_num = row_num + 2
@@ -624,7 +610,6 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
                 sublime.status_message("Table Editor: Split column is not permitted to colspan column")
                 return self.field_sel(ctx, row_num, field_num)
 
-
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)
 
@@ -644,7 +629,6 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         return self.field_sel(ctx, row_num, field_num)
 
 
-
 class TableEditorJoinLines(AbstractTableCommand):
     """
     Key: ctrl+j
@@ -660,10 +644,10 @@ class TableEditorJoinLines(AbstractTableCommand):
             and ctx.table[row_num].is_data()
             and ctx.table[row_num + 1].is_data()
             and not ctx.table_driver.is_row_colspan(row_num)
-            and not ctx.table_driver.is_row_colspan(row_num + 1)):
+                and not ctx.table_driver.is_row_colspan(row_num + 1)):
 
             for curr_col, next_col in zip(ctx.table[row_num].columns,
-                                          ctx.table[row_num +1].columns):
+                                          ctx.table[row_num + 1].columns):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
             ctx.table_driver.delete_row(row_num + 1)
