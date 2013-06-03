@@ -178,10 +178,14 @@ class Row:
             if column.pseudo():
                 continue
             if ind == 0:
-                r += column.left_border_text
+                r += self.convert_border(column.left_border_text)
             r += column.render()
-            r += column.right_border_text
+            r += self.convert_border(column.right_border_text)
         return r
+
+    def convert_border(self, border_text):
+        # if separator converts to data
+        return border_text.replace('+', self.syntax.vline)
 
 
 class DataRow(Row):
