@@ -95,12 +95,16 @@ class BorderTableDriver(TableDriver):
 class BorderTableParser(BaseTableParser):
 
     def _is_single_row_separator(self, str_cols):
+        if len(str_cols) == 0:
+            return False
         for col in str_cols:
             if not re.match(r"^\s*[\-]+\s*$", col):
                 return False
         return True
 
     def _is_double_row_separator(self, str_cols):
+        if len(str_cols) == 0:
+            return False
         for col in str_cols:
             if not re.match(r"^\s*[\=]+\s*$", col):
                 return False
