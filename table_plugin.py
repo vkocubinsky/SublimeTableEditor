@@ -81,13 +81,6 @@ class TableContext:
         line = self.syntax.line_parser.parse(line_text)
         return line.field_num(sel_col)
 
-    def _hline_count(self, text, start, end):
-        if self.syntax.is_hline(text):
-            return sum([text.count(ch, start, end)
-                        for ch in self.syntax.hline_borders])
-        else:
-            return text.count(self.syntax.vline, start, end)
-
     def _get_text(self, row):
         point = self.view.text_point(row, 0)
         region = self.view.line(point)

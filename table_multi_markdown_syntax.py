@@ -46,10 +46,7 @@ class MultiMarkdownTableSyntax(TableSyntax):
         self.table_parser = MultiMarkdownTableParser(self)
         self.hline_out_border = '|'
         self.hline_in_border = '|'
-        self.border_pattern = "(?:{0}{0}+)|{1}".format(re.escape(self.vline),
-                                                       #pattern from base class
-                                                       self.border_pattern
-                                                       )
+        self.border_pattern = "(?:\|\|+)|(?:(?:\+)|(?:\|))"
         self.line_parser = LineParser(self.border_pattern)
 
 

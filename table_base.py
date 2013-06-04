@@ -62,7 +62,7 @@ class TableSyntax:
         self.detect_header = self.table_configuration.detect_header or True
         self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
 
-        self.border_pattern = "(?:" + "|".join(["(?:" + re.escape(ch) + ")" for ch in self.hline_borders]) + ")"
+        self.border_pattern = "(?:(?:\+)|(?:\|))"
         self.line_parser = LineParser(self.border_pattern)
 
     def single_hline_pattern(self):
