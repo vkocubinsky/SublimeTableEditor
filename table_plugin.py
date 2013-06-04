@@ -523,9 +523,12 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        ctx.table_driver.insert_single_separator_row(row_num + 1)
-        self.merge(edit, ctx)
-        sublime.status_message("Table Editor: Single separator row inserted")
+        try:
+            ctx.table_driver.insert_single_separator_row(row_num + 1)
+            self.merge(edit, ctx)
+            sublime.status_message("Table Editor: Single separator row inserted")
+        except table_lib.TableException as err:
+            sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 
 
@@ -541,9 +544,12 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        ctx.table_driver.insert_double_separator_row(row_num + 1)
-        self.merge(edit, ctx)
-        sublime.status_message("Table Editor: Double separator row inserted")
+        try:
+            ctx.table_driver.insert_double_separator_row(row_num + 1)
+            self.merge(edit, ctx)
+            sublime.status_message("Table Editor: Double separator row inserted")
+        except table_lib.TableException as err:
+            sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 
 
@@ -556,23 +562,25 @@ class TableEditorHlineAndMove(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-
         field_num = ctx.field_num
         row_num = ctx.row_num
 
-        ctx.table_driver.insert_single_separator_row(row_num + 1)
+        try:
+            ctx.table_driver.insert_single_separator_row(row_num + 1)
 
-        if row_num + 2 < len(ctx.table):
-            if ctx.table[row_num + 2].is_separator():
+            if row_num + 2 < len(ctx.table):
+                if ctx.table[row_num + 2].is_separator():
+                    ctx.table_driver.insert_empty_row(row_num + 2)
+            else:
                 ctx.table_driver.insert_empty_row(row_num + 2)
-        else:
-            ctx.table_driver.insert_empty_row(row_num + 2)
 
-        self.merge(edit, ctx)
+            self.merge(edit, ctx)
 
-        row_num = row_num + 2
-        field_num = 0
-        sublime.status_message("Table Editor: Single separator row inserted")
+            row_num = row_num + 2
+            field_num = 0
+            sublime.status_message("Table Editor: Single separator row inserted")
+        except table_lib.TableException as err:
+            sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 
 
