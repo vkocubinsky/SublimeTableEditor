@@ -51,12 +51,9 @@ class TableSyntax:
     def __init__(self, name, table_configuration):
         self.name = name
         self.table_configuration = table_configuration or TableConfiguration()
-        self.vline = '|'
         #should be set in subclass
         self.hline_out_border = '|'
         self.hline_in_border = '|'
-        #characters from all styles correct switch from one style to other
-        self.hline_borders = ['+', '|']
 
         self.align_number_right = self.table_configuration.align_number_right or True
         self.detect_header = self.table_configuration.detect_header or True
@@ -84,8 +81,8 @@ class Column(object):
         self.colspan = 1
         self.rowspan = 1
         self.pseudo_columns = []
-        self.left_border_text = self.syntax.vline
-        self.right_border_text = self.syntax.vline
+        self.left_border_text = '|'
+        self.right_border_text = '|'
 
     def min_len(self):
         raise NotImplementedError
@@ -168,7 +165,7 @@ class Row:
 
     def convert_border(self, border_text):
         # if separator converts to data
-        return border_text.replace('+', self.syntax.vline)
+        return border_text.replace('+', '|')
 
 
 class DataRow(Row):
