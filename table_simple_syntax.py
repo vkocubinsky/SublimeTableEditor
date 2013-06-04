@@ -45,8 +45,6 @@ class SimpleTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Simple", table_configuration)
         self.table_parser = SimpleTableParser(self)
-        self.hline_out_border = '|'
-        self.hline_in_border = '|'
         self.custom_column_alignment = self.table_configuration.custom_column_alignment or True
 
     def table_driver(self, table):

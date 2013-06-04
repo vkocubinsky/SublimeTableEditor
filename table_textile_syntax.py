@@ -44,8 +44,6 @@ class TextileTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Textile", table_configuration)
         self.table_parser = TextileTableParser(self)
-        self.hline_out_border = '|'
-        self.hline_in_border = '|'
 
 
 class TextileCellColumn(Column):

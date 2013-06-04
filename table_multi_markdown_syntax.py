@@ -44,8 +44,6 @@ class MultiMarkdownTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Multi Markdown", table_configuration)
         self.table_parser = MultiMarkdownTableParser(self)
-        self.hline_out_border = '|'
-        self.hline_in_border = '|'
         self.border_pattern = "(?:\|\|+)|(?:(?:\+)|(?:\|))"
         self.line_parser = LineParser(self.border_pattern)
 
