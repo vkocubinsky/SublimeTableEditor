@@ -65,23 +65,6 @@ class TableSyntax:
         self.border_pattern = "(?:(?:\+)|(?:\|))"
         self.line_parser = LineParser(self.border_pattern)
 
-    def single_hline_pattern(self):
-        return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
-                                                      line=r"(\s*[\-]+\s*)")
-
-    def double_hline_pattern(self):
-        return r"(^\s*({border}|{line})+\s*$)".format(border=self.border_pattern,
-                                                      line=r"(\s*[\=]+\s*)")
-
-    def is_single_hline(self, text):
-        return re.match(self.single_hline_pattern(), text) is not None
-
-    def is_double_hline(self, text):
-        return re.match(self.double_hline_pattern(), text) is not None
-
-    def is_hline(self, text):
-        return self.is_single_hline(text) or self.is_double_hline(text)
-
     def table_driver(self, table):
         return TableDriver(table)
 
