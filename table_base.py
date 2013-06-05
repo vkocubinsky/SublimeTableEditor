@@ -59,8 +59,9 @@ class TableSyntax:
         self.detect_header = self.table_configuration.detect_header or True
         self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
 
-        self.border_pattern = "(?:(?:\+)|(?:\|))"
-        self.line_parser = LineParser(self.border_pattern)
+        self.line_parser = LineParser("(?:(?:\+)|(?:\|))")
+        # Should be set in sublass constructor
+        self.table_parser = None
 
     def table_driver(self, table):
         return TableDriver(table)
@@ -509,7 +510,7 @@ class BaseTableParser:
         return column
 
     def is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.border_pattern,
+        return re.match(r"^\s*" + self.syntax.line_parser.border_pattern,
                         row) is not None
 
     def parse_text(self, text):
