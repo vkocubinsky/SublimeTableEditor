@@ -684,6 +684,6 @@ You can make a donation online, using the link below with PayPal service
 
 Test environment
 
-- Ubuntu 12.04 64bit
+- Ubuntu 12.04 64bit on VirtualBox
 - Windows 7 64bit
-- OS X 10.8.2
+- OS X 10.8.4

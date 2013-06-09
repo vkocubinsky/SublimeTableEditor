@@ -534,6 +534,30 @@ class ReStructuredTextSyntaxTest(BaseTableTest):
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
+    def testDetectHeader(self):
+        unformatted = """\
++---------+
+|  header |
++------------------------------+
+|    long and shifted data row |
++------------------------------+
+""".rstrip()
+
+        expected = """\
++------------------------------+
+|  header                      |
++------------------------------+
+|    long and shifted data row |
++------------------------------+
+""".rstrip()
+
+        self.syntax.detect_header = False
+        self.syntax.keep_space_left = True
+        t = self.syntax.table_parser.parse_text(unformatted)
+        formatted = t.render()
+        self.assert_table_equals(expected, formatted)
+
+
 
 if __name__ == '__main__':
     unittest.main()

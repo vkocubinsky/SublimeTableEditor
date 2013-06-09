@@ -42,43 +42,11 @@ class ReStructuredTextTableSyntax(TableSyntax):
 
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "reStructuredText", table_configuration)
-        self.table_parser = ReStructuredTextParser(self)
+        self.table_parser = BorderTableParser(self)
         self.hline_out_border = '+'
         self.hline_in_border = '+'
-        self.keep_space_left = self.table_configuration.keep_space_left or False
 
     def table_driver(self, table):
         return BorderTableDriver(table)
 
 
-class ReStructuredTextRow(Row):
-
-    def new_empty_column(self):
-        return ReStructuredTextColumn(self, '')
-
-    def create_column(self, text):
-        return ReStructuredTextColumn(self, text)
-
-    def is_data(self):
-        return True
-
-
-class ReStructuredTextColumn(DataColumn):
-
-    def norm(self):
-        if self.syntax.keep_space_left:
-            if self.header:
-                norm = self.data.strip()
-            else:
-                norm = self.data.rstrip()
-                if norm[:1] == ' ':
-                    norm = norm[1:]
-        else:
-            norm = self.data.strip()
-        return norm
-
-
-class ReStructuredTextParser(BorderTableParser):
-
-    def create_data_row(self, table, line):
-        return ReStructuredTextRow(table)

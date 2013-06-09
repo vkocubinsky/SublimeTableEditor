@@ -55,9 +55,10 @@ class TableSyntax:
         self.hline_out_border = '|'
         self.hline_in_border = '|'
 
-        self.align_number_right = self.table_configuration.align_number_right or True
-        self.detect_header = self.table_configuration.detect_header or True
-        self.intelligent_formatting = self.table_configuration.intelligent_formatting or False
+        self.align_number_right = self.table_configuration.align_number_right
+        self.detect_header = self.table_configuration.detect_header
+        self.keep_space_left = self.table_configuration.keep_space_left
+        self.intelligent_formatting = self.table_configuration.intelligent_formatting
 
         self.line_parser = LineParser("(?:(?:\+)|(?:\|))")
         # Should be set in sublass constructor
@@ -189,8 +190,17 @@ class DataColumn(Column):
         self.left_space = ' '
         self.right_space = ' '
 
-    def norm(self):
-        return self.data.strip()
+    def _norm(self):
+        if self.syntax.keep_space_left:
+            if self.header:
+                norm = self.data.strip()
+            else:
+                norm = self.data.rstrip()
+                if norm[:1] == ' ':
+                    norm = norm[1:]
+        else:
+            norm = self.data.strip()
+        return norm
 
     def min_len(self):
         return int(math.ceil(self.total_min_len()/self.colspan))
@@ -198,7 +208,7 @@ class DataColumn(Column):
     def total_min_len(self):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
-        total_min_len = max(space_len + 1, len(self.norm()) + space_len)
+        total_min_len = max(space_len + 1, len(self._norm()) + space_len)
         # if self.syntax.multi_markdown_syntax():
         #     total_min_len += self.colspan - 1
         total_min_len = total_min_len + (len(self.left_border_text) - 1) + (len(self.right_border_text) - 1)
@@ -212,7 +222,7 @@ class DataColumn(Column):
         #    total_col_len = total_col_len - (self.colspan - 1)
         total_col_len = total_col_len - (len(self.left_border_text) - 1) - (len(self.right_border_text) - 1)
 
-        norm = self.norm()
+        norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
 
         if self.header and self.syntax.detect_header:
