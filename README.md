@@ -315,7 +315,7 @@ Colspan(alpha status):
     | :---------------------------------------: |||
 
 
-**RestrucuredText**
+**RestructuredText**
 
     |    Name   | Age |
     +-----------+-----+

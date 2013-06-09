@@ -34,9 +34,16 @@ class CommandDef:
 
 
 class CallbackTest:
-    def __init__(self, name):
+    def __init__(self, name, syntax):
         self.name = name
         self.commands = []
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": syntax}))
+        self.commands.append(CommandDef("table_editor_disable_for_current_view", {"prop": "table_editor_keep_space_left"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_detect_header"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_align_number_right"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_intelligent_formatting"}))
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
 
     def expected_value(self):
         pass
@@ -47,10 +54,7 @@ class CallbackTest:
 
 class SimpleBasicEditingTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Basic Editing")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Basic Editing", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 | Name | Phone |
@@ -86,10 +90,7 @@ class SimpleBasicEditingTest(CallbackTest):
 
 class SimpleQuickTableCreateTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Quick Table Creation")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Quick Table Creation", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 | Name | Phone"""}))
@@ -111,10 +112,7 @@ class SimpleQuickTableCreateTest(CallbackTest):
 
 class SimpleGridTableTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Grid Table Creation")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Grid Table Creation", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 | Name | Phone |
@@ -151,10 +149,7 @@ class SimpleGridTableTest(CallbackTest):
 
 class SimpleColumnsTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Work with columns")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Work with columns", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 | Name | Phone |
@@ -202,10 +197,7 @@ class SimpleColumnsTest(CallbackTest):
 
 class SimpleRowsTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Work with rows")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Work with rows", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 |    Name   |   Phone   | Age |
@@ -237,10 +229,7 @@ class SimpleRowsTest(CallbackTest):
 
 class SimpleLongRowsTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Work with long rows")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Work with long rows", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 |    Name   |   Phone   | Age |             Position             |
@@ -286,10 +275,7 @@ class SimpleLongRowsTest(CallbackTest):
 class SimpleCustomAlignTest(CallbackTest):
 
     def __init__(self):
-        CallbackTest.__init__(self, "Custom align test")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
+        CallbackTest.__init__(self, "Custom align test", "Simple")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 | column A | column B | column C |
@@ -351,12 +337,8 @@ class SimpleCustomAlignTest(CallbackTest):
 
 class reStructuredTextKeepSpaceLeftTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Keep Spece left")
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "reStructuredText"}))
+        CallbackTest.__init__(self, "Keep Spece left", "reStructuredText")
         self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_keep_space_left"}))
-
-        self.commands.append(CommandDef("select_all"))
-        self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 +-------------+
@@ -386,9 +368,205 @@ class reStructuredTextKeepSpaceLeftTest(CallbackTest):
 +-----------------------------------------------+""".format(self.description)
 
 
+class reStructuredTextDisableDetectHeaderTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Disable Detect Header Test", "reStructuredText")
+        self.commands.append(CommandDef("table_editor_disable_for_current_view", {"prop": "table_editor_detect_header"}))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
++--------+
+| header |
++--------+
+| long and shifted data row |
++---------------------------+"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+
+    @property
+    def description(self):
+        return """Test: {0}
+- reStructuredText Syntax
+- Disable detect header
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
++---------------------------+
+| header                    |
++---------------------------+
+| long and shifted data row |
++---------------------------+""".format(self.description)
+
+
+class PandocAlignTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Pandoc Align Test", "Pandoc")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
++-----------+-----------+-----+
+|    Name   |   Phone   | Age |
++===========+===========+=====+
+| Anna      | 123456789 |  32 |
++-----------+-----------+-----+
+| Alexander | 987654321 |  28 |
++-----------+-----------+-----+"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Pandoc Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
++-----------+-----------+-----+
+|    Name   |   Phone   | Age |
++===========+===========+=====+
+| Anna      | 123456789 |  32 |
++-----------+-----------+-----+
+| Alexander | 987654321 |  28 |
++-----------+-----------+-----+""".format(self.description)
+
+
+class EmacsOrgModeAlignTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "EmacsOrgMode Align Test", "EmacsOrgMode")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+|-----------+-----------+-----|
+|    Name   |   Phone   | Age |
+|===========+===========+=====|
+| Anna      | 123456789 |  32 |
+|-----------+-----------+-----|
+| Alexander | 987654321 |  28 |
+|-----------+-----------+-----|"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- EmacsOrgMode Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|-----------+-----------+-----|
+|    Name   |   Phone   | Age |
+|===========+===========+=====|
+| Anna      | 123456789 |  32 |
+|-----------+-----------+-----|
+| Alexander | 987654321 |  28 |
+|-----------+-----------+-----|""".format(self.description)
+
+
+class MarkdownColspanTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Markdown Colspan Test", "Markdow")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+|              |           Grouping          ||
+| First Header | Second Header | Third Header |
+| ------------ | :-----------: | -----------: |
+| Content      |         *Long Cell*         ||
+| Content      |    **Cell**   |         Cell |
+| New section  |      More     |         Data |
+| And more     |    And more   |              |
+| :---------------------------------------: |||"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Markdown Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|              |           Grouping          ||
+| First Header | Second Header | Third Header |
+| ------------ | :-----------: | -----------: |
+| Content      |         *Long Cell*         ||
+| Content      |    **Cell**   |         Cell |
+| New section  |      More     |         Data |
+| And more     |    And more   |              |
+| :---------------------------------------: |||""".format(self.description)
+
+
+class TextileAlignTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Textile Align Test", "Textile")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
+|_.   Name  |_. Age |_. Custom Alignment Demo |
+| Anna      | 20 |<. left                  |
+| Alexander | 27 |>.                 right |
+| Misha     | 42 |=.         center        |
+|           |    |                         |"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Textile Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
+|_.   Name  |_. Age |_. Custom Alignment Demo |
+| Anna      | 20    |<. left                  |
+| Alexander | 27    |>.                 right |
+| Misha     | 42    |=.         center        |
+|           |       |                         |""".format(self.description)
+
+
+class TextileColspanTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Textile Colspan Test", "Textile")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": r"""
+|\2. spans two cols   |
+| col 1    | col 2    |"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Textile Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return r"""{0}
+|\2. spans two cols   |
+| col 1    | col 2    |""".format(self.description)
+
+
+class TextileRowspanTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Textile Rowspan Test", "Textile")
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": r"""
+|/3. spans 3 rows | a |
+| b |
+| c |"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+    @property
+    def description(self):
+        return """Test: {0}
+- Textile Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return r"""{0}
+|/3. spans 3 rows | a |
+| b               |
+| c               |""".format(self.description)
+
+
 class TableEditorTestSuite(sublime_plugin.TextCommand):
-    COMMAND_TIMEOUT = 100
-    TEST_TIMEOUT = 200
+    COMMAND_TIMEOUT = 25
+    TEST_TIMEOUT = 50
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
@@ -403,6 +581,14 @@ class TableEditorTestSuite(sublime_plugin.TextCommand):
         tests.append(SimpleLongRowsTest())
         tests.append(SimpleCustomAlignTest())
         tests.append(reStructuredTextKeepSpaceLeftTest())
+        tests.append(reStructuredTextDisableDetectHeaderTest())
+        tests.append(PandocAlignTest())
+        tests.append(EmacsOrgModeAlignTest())
+        tests.append(MarkdownColspanTest())
+        tests.append(TextileAlignTest())
+        tests.append(TextileColspanTest())
+        tests.append(TextileRowspanTest())
+
         self.run_tests(tests, 0, 0)
 
     def run_tests(self, tests, test_ind, command_ind):
@@ -452,8 +638,6 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
         view = self.window.new_file()
         view.set_scratch(True)
         view.set_name("Sublime Table Editor Film")
-
         view.run_command("table_editor_enable_for_current_view", {"prop": "enable_table_editor"})
-
         suite = TableEditorTestSuite(view)
         suite.run()
