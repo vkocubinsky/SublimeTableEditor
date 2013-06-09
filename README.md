@@ -445,9 +445,9 @@ You can control table syntax with settings
 - Other -> Simple
 
 
-### Override Table Border Style
+### Override Table Border For Simple Syntax
 
-Table Border Style is a part of Table Syntax and usually we should not change this. But if you like you can override table border style. Table editor supports next table border styles:
+You can override table border style for Simple Syntax. Table editor supports next table border styles:
 
 * simple: *|---|---|*
 * emacs: org mode *|---+---|*
@@ -458,21 +458,17 @@ Table Border Style is a part of Table Syntax and usually we should not change th
     // Override border style for Table Editor
     // Valid options are: "simple", "grid", "emacs"
     "table_editor_border_style": "simple"
-
-    // Deprecated 
-    // see "table_editor_border_style"
-    // "table_editor_style": "simple"
 }
 ```
 
-### Override custom column alignment
+### Override custom column alignment for Simple Syntax
 
-This settings by default enabled only for Simple Table Syntax, but you enable it for other syntax
+This settings by default is enabled, but you can disable  it 
 
 ```javascript
 {
     // If table_editor_custom_column_alignment is true, supports '<', '>', '#' column alignment
-    "table_editor_custom_column_alignment": true
+    "table_editor_custom_column_alignment": false
 }
 ```
 
@@ -645,15 +641,19 @@ and this result of Table Editor with
 **ctrl+k, -**
 
         Insert single horizontal line below current row. 
+        Doesn't make sense and doesn't supported for Textile syntax
 
 **ctrl+k, =**
 
         Insert double horizontal line below current row. 
+        Doesn't make sense and doesn't supported for Markdow, Textile syntaxes
 
 
 **ctrl+k, enter**
 
         Insert a horizontal line below current row, and move the cursor into the row below that line. 
+        Doesn't make sense and doesn't supported for Textile syntaxes
+
 
 **ctrl+k, |**
 

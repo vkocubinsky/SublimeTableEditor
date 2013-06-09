@@ -82,13 +82,13 @@ class BorderTableDriver(TableDriver):
     def insert_single_separator_row(self, i):
         assert i >= 0
 
-        self.table.rows.insert(i, SeparatorRow(self, '-'))
+        self.table.rows.insert(i, SeparatorRow(self.table, '-'))
         self.table.pack()
 
     def insert_double_separator_row(self, i):
         assert i >= 0
 
-        self.table.rows.insert(i, SeparatorRow(self, '='))
+        self.table.rows.insert(i, SeparatorRow(self.table, '='))
         self.table.pack()
 
 

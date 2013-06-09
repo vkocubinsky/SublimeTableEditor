@@ -114,6 +114,13 @@ class TextileRow(Row):
     def is_data(self):
         return True
 
+    def __is_header_separator(self):
+        for column in self.columns:
+            if '_' not in column.attr:
+                return False
+        return True
+
+
 
 class TextileTableParser(BaseTableParser):
 

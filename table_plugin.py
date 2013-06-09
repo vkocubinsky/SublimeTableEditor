@@ -27,8 +27,10 @@ import re
 
 try:
     from . import table_lib
+    from . import table_base
 except ValueError:
     import table_lib
+    import table_base
 
 
 class TableContext:
@@ -527,7 +529,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
             ctx.table_driver.insert_single_separator_row(row_num + 1)
             self.merge(edit, ctx)
             sublime.status_message("Table Editor: Single separator row inserted")
-        except table_lib.TableException as err:
+        except table_base.TableException as err:
             sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 
@@ -548,7 +550,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
             ctx.table_driver.insert_double_separator_row(row_num + 1)
             self.merge(edit, ctx)
             sublime.status_message("Table Editor: Double separator row inserted")
-        except table_lib.TableException as err:
+        except table_base.TableException as err:
             sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 
@@ -579,7 +581,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
             row_num = row_num + 2
             field_num = 0
             sublime.status_message("Table Editor: Single separator row inserted")
-        except table_lib.TableException as err:
+        except table_base.TableException as err:
             sublime.status_message("Table Editor: {0}".format(err))
         return self.field_sel(ctx, row_num, field_num)
 

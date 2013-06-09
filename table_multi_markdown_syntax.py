@@ -46,6 +46,10 @@ class MultiMarkdownTableSyntax(TableSyntax):
         self.table_parser = MultiMarkdownTableParser(self)
         self.line_parser = LineParser("(?:\|\|+)|(?:(?:\+)|(?:\|))")
 
+    def table_driver(self, table):
+        return MultiMarkdownTableDriver(table)
+
+
 
 class MultiMarkdownAlignColumn(Column):
     PATTERN = r"^\s*([\:]?[\-]+[\:]?)\s*$"
@@ -125,3 +129,12 @@ class MultiMarkdownTableParser(BaseTableParser):
         if len(line_cell.right_border_text) > 1:
             column.colspan = len(line_cell.right_border_text)
         return column
+
+
+class MultiMarkdownTableDriver(TableDriver):
+
+    def insert_single_separator_row(self, i):
+        assert i >= 0
+
+        self.table.rows.insert(i, MultiMarkdownAlignRow(self.table))
+        self.table.pack()

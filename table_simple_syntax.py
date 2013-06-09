@@ -45,7 +45,12 @@ class SimpleTableSyntax(TableSyntax):
     def __init__(self, table_configuration):
         TableSyntax.__init__(self, "Simple", table_configuration)
         self.table_parser = SimpleTableParser(self)
-        self.custom_column_alignment = self.table_configuration.custom_column_alignment or True
+        self.custom_column_alignment = self.table_configuration.custom_column_alignment
+
+        if self.table_configuration.hline_out_border is not None:
+            self.hline_out_border = self.table_configuration.hline_out_border
+        if self.table_configuration.hline_in_border is not None:
+            self.hline_in_border = self.table_configuration.hline_in_border
 
     def table_driver(self, table):
         return BorderTableDriver(table)

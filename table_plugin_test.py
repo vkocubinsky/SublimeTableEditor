@@ -638,6 +638,7 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
         view = self.window.new_file()
         view.set_scratch(True)
         view.set_name("Sublime Table Editor Film")
+        view.settings().set("table_editor_border_style", "simple")
         view.run_command("table_editor_enable_for_current_view", {"prop": "enable_table_editor"})
         suite = TableEditorTestSuite(view)
         suite.run()

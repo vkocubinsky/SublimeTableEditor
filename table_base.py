@@ -36,14 +36,15 @@ except ValueError:
 
 class TableConfiguration:
     def __init__(self):
-        self.custom_column_alignment = False
         self.keep_space_left = False
         self.align_number_right = True
         self.detect_header = True
         self.intelligent_formatting = True
 
-        self.hline_out_border = '|'
-        self.hline_in_border = '|'
+        #only for simple syntax
+        self.hline_out_border = None
+        self.hline_in_border = None
+        self.custom_column_alignment = True
 
 
 class TableSyntax:
@@ -475,7 +476,7 @@ class TableDriver:
     def insert_empty_row(self, i):
         assert i >= 0
 
-        self.table.rows.insert(i, DataRow(self))
+        self.table.rows.insert(i, DataRow(self.table))
         self.table.pack()
 
     def insert_single_separator_row(self, i):
