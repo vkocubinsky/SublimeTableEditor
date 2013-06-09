@@ -45,9 +45,10 @@ class CallbackTest:
         pass
 
 
-class BasicEditingTest(CallbackTest):
+class SimpleBasicEditingTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Basic Editing")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -67,6 +68,7 @@ class BasicEditingTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Create simple table
 - Navigate with tab key
 - Automatic row creation
@@ -82,9 +84,10 @@ class BasicEditingTest(CallbackTest):
 |           |           |""".format(self.description)
 
 
-class QuickTableCreateTest(CallbackTest):
+class SimpleQuickTableCreateTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Quick Table Creation")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -95,6 +98,7 @@ class QuickTableCreateTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Quick table creation with key ctrl+k,enter
 """.format(self.name)
 
@@ -105,9 +109,10 @@ class QuickTableCreateTest(CallbackTest):
 |      |       |""".format(self.description)
 
 
-class GridTableTest(CallbackTest):
+class SimpleGridTableTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Grid Table Creation")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -127,6 +132,7 @@ class GridTableTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Create simple table
 - Use double hline
 - Add lines separated by single hline
@@ -143,9 +149,10 @@ class GridTableTest(CallbackTest):
 |           |           |""".format(self.description)
 
 
-class ColumnsTest(CallbackTest):
+class SimpleColumnsTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Work with columns")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -177,6 +184,7 @@ class ColumnsTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Create simple table
 - Insert And Fill Column
 - Move Column Right
@@ -192,9 +200,10 @@ class ColumnsTest(CallbackTest):
 |           |           |""".format(self.description)
 
 
-class RowsTest(CallbackTest):
+class SimpleRowsTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Work with rows")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -212,6 +221,7 @@ class RowsTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Insert Row
 - Delete Row
 """.format(self.name)
@@ -225,9 +235,10 @@ class RowsTest(CallbackTest):
 |           |           |     |""".format(self.description)
 
 
-class LongRowsTest(CallbackTest):
+class SimpleLongRowsTest(CallbackTest):
     def __init__(self):
         CallbackTest.__init__(self, "Work with long rows")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -255,6 +266,7 @@ class LongRowsTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
+- Simple Table Syntax
 - Split Row
 - Join Rows
 - Insert hlines
@@ -271,10 +283,11 @@ class LongRowsTest(CallbackTest):
 |           |           |     |                                  |""".format(self.description)
 
 
-class CustomAlignTest(CallbackTest):
+class SimpleCustomAlignTest(CallbackTest):
 
     def __init__(self):
         CallbackTest.__init__(self, "Custom align test")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "Simple"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
         self.commands.append(CommandDef("insert", {"characters": self.description}))
@@ -317,9 +330,10 @@ class CustomAlignTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
-- create table with separator
-- navigate with tab key
-- custom align
+- Simple Table Syntax
+- Create table with separator
+- Navigate with tab key
+- Custom align
 """.format(self.name)
 
     def expected_value(self):
@@ -335,22 +349,60 @@ class CustomAlignTest(CallbackTest):
 |          |          |          |""".format(self.description)
 
 
+class reStructuredTextKeepSpaceLeftTest(CallbackTest):
+    def __init__(self):
+        CallbackTest.__init__(self, "Keep Spece left")
+        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": "reStructuredText"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_keep_space_left"}))
+
+        self.commands.append(CommandDef("select_all"))
+        self.commands.append(CommandDef("cut"))
+        self.commands.append(CommandDef("insert", {"characters": self.description}))
+        self.commands.append(CommandDef("insert", {"characters": """
++-------------+
+| widget code |
++===============================================+
+| code-block::javascript                        |
+|                                               |
+|    widget.dispatchEvent('onSetTags', object); |
++-----------------------------------------------+"""}))
+        self.commands.append(CommandDef("table_editor_align"))
+
+
+    @property
+    def description(self):
+        return """Test: {0}
+- reStructuredText Syntax
+""".format(self.name)
+
+    def expected_value(self):
+        return """{0}
++-----------------------------------------------+
+|                  widget code                  |
++===============================================+
+| code-block::javascript                        |
+|                                               |
+|    widget.dispatchEvent('onSetTags', object); |
++-----------------------------------------------+""".format(self.description)
+
+
 class TableEditorTestSuite(sublime_plugin.TextCommand):
-    COMMAND_TIMEOUT = 250
-    TEST_TIMEOUT = 500
+    COMMAND_TIMEOUT = 100
+    TEST_TIMEOUT = 200
 
     def __init__(self, view):
         sublime_plugin.TextCommand.__init__(self, view)
 
     def run(self):
         tests = []
-        tests.append(BasicEditingTest())
-        tests.append(QuickTableCreateTest())
-        tests.append(GridTableTest())
-        tests.append(ColumnsTest())
-        tests.append(RowsTest())
-        tests.append(LongRowsTest())
-        tests.append(CustomAlignTest())
+        tests.append(SimpleBasicEditingTest())
+        tests.append(SimpleQuickTableCreateTest())
+        tests.append(SimpleGridTableTest())
+        tests.append(SimpleColumnsTest())
+        tests.append(SimpleRowsTest())
+        tests.append(SimpleLongRowsTest())
+        tests.append(SimpleCustomAlignTest())
+        tests.append(reStructuredTextKeepSpaceLeftTest())
         self.run_tests(tests, 0, 0)
 
     def run_tests(self, tests, test_ind, command_ind):
@@ -401,8 +453,7 @@ class TableEditorFilmCommand(sublime_plugin.WindowCommand):
         view.set_scratch(True)
         view.set_name("Sublime Table Editor Film")
 
-        view.run_command("table_editor_enable_for_current_view", {"props": "enable_table_editor"})
-        view.run_command("table_editor_set_syntax", {"syntax": "Simple"})
+        view.run_command("table_editor_enable_for_current_view", {"prop": "enable_table_editor"})
 
         suite = TableEditorTestSuite(view)
         suite.run()

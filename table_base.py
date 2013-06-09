@@ -36,11 +36,11 @@ except ValueError:
 
 class TableConfiguration:
     def __init__(self):
-        self.custom_column_alignment = None
-        self.keep_space_left = None
-        self.align_number_right = None
-        self.detect_header = None
-        self.intelligent_formatting = None
+        self.custom_column_alignment = False
+        self.keep_space_left = False
+        self.align_number_right = True
+        self.detect_header = True
+        self.intelligent_formatting = True
 
         self.hline_out_border = '|'
         self.hline_in_border = '|'
