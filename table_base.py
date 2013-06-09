@@ -478,6 +478,11 @@ class TableDriver:
         assert 0 <= i < len(self.table.rows) and 0 <= j < len(self.table.rows)
 
         self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
+        for column in self.table.rows[i].columns:
+            column.header = False
+        for column in self.table.rows[j].columns:
+            column.header = False
+
         self.table.pack()
 
     def delete_row(self, i):
