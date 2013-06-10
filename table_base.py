@@ -343,7 +343,6 @@ class TextTable:
                             for column in self.rows[header_index].columns:
                                 column.header = True
 
-        print("header_separator_index", header_separator_index)
         #set column alignment
         data_alignment = [None] * len(col_lens)
         for row_ind, row in enumerate(self.rows):
