@@ -514,9 +514,9 @@ class TextileAlignTest(CallbackTest):
     def expected_value(self):
         return """{0}
 |_.   Name  |_. Age |_. Custom Alignment Demo |
-| Anna      | 20    |<. left                  |
-| Alexander | 27    |>.                 right |
-| Misha     | 42    |=.         center        |
+| Anna      |    20 |<. left                  |
+| Alexander |    27 |>.                 right |
+| Misha     |    42 |=.         center        |
 |           |       |                         |""".format(self.description)
 
 
