@@ -188,9 +188,15 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             self.view.show(sel, False)
 
     def run_one_sel(self, edit, sel):
-        return sel
-
-
+        ctx = self.create_context(sel)
+        try:
+            msg, pos = self.run_operation(ctx)
+            self.merge(edit, ctx)
+            sublime.status_message("Table Editor: {0}".format(msg))
+            return self.table_pos_sel(ctx, pos)
+        except table_base.TableException as err:
+            sublime.status_message("Table Editor: {0}".format(err))
+            return self.table_pos_sel(ctx, ctx.pos)
 
     def visual_field_sel(self, ctx, row_num, visual_field_num):
         if ctx.table.empty():
@@ -349,19 +355,10 @@ class TableEditorNextRow(AbstractTableCommand):
 class TableEditorMoveColumnLeft(AbstractTableCommand):
     """
     Key: alt+left
-    Move the current column right.
+    Move the current column left.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        try:
-            msg, pos = ctx.table_driver.move_column_left(ctx.table, ctx.table_pos)
-            self.merge(edit, ctx)
-            sublime.status_message("Table Editor: {0}".format(msg))
-            return self.table_pos_sel(ctx, pos)
-        except table_base.TableException as err:
-            sublime.status_message("Table Editor: {0}".format(err))
-            return self.table_pos_sel(ctx, ctx.pos)
+    def run_operation(self, ctx):
+        return ctx.table_driver.move_column_left(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
@@ -370,16 +367,8 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
     Move the current column right.
     """
 
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        try:
-            msg, pos = ctx.table_driver.move_column_right(ctx.table, ctx.table_pos)
-            self.merge(edit, ctx)
-            sublime.status_message("Table Editor: {0}".format(msg))
-            return self.table_pos_sel(ctx, pos)
-        except table_base.TableException as err:
-            sublime.status_message("Table Editor: {0}".format(err))
-            return self.table_pos_sel(ctx, ctx.pos)
+    def run_operation(self, ctx):
+        return ctx.table_driver.move_column_right(ctx.table, ctx.table_pos)
 
 
 class TableEditorDeleteColumn(AbstractTableCommand):
