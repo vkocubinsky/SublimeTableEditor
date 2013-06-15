@@ -503,6 +503,23 @@ class TableDriver:
                                  "make sence for the first column in the "
                                  "table.")
 
+    def move_column_right(self, table, table_pos):
+        field_num = self.visual_to_internal_index(table_pos.row_num,
+                                                  table_pos.field_num)
+        if field_num < len(table[table_pos.row_num]) - 1:
+            if (self.is_col_colspan(field_num) or
+                    self.is_col_colspan(field_num + 1)):
+                raise TableException("Move Column Right is not "
+                                     "permitted for colspan column")
+            else:
+                self.swap_columns(field_num, field_num + 1)
+                return ("Column moved to right",
+                        TablePos(table_pos.row_num, table_pos.field_num + 1))
+        else:
+            raise TableException("Move Column Right doesn't "
+                                 "make sence for the last column in the "
+                                 "table.")
+
     def insert_empty_column(self, i):
         assert i >= 0
         assert self.is_col_colspan(i) is False
