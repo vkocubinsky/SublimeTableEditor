@@ -389,6 +389,19 @@ class TableException(Exception):
         return repr(self.value)
 
 
+class TablePos:
+
+    def __init__(self, row_num, field_num):
+        self.row_num = row_num
+        self.field_num = field_num
+
+    def __repr__(self):
+        return "TablePos({self.row_num}, {self.field_num})".format(self=self)
+
+    def __str__(self):
+        return self.__repr__()
+
+
 class TableDriver:
 
     def __init__(self, table):
@@ -457,13 +470,38 @@ class TableDriver:
         self.table.pack()
 
     def swap_columns(self, i, j):
-        assert self.is_col_colspan(i) is False
-        assert self.is_col_colspan(j) is False
+        self.checkCondition(self.is_col_colspan(i) is False,
+                            "Expected not colspan column, but column {0}"
+                            " is colpan".format(i))
+        self.checkCondition(self.is_col_colspan(j) is False,
+                            "Expected not colspan column, but column {0}"
+                            " is colspan".format(j))
 
         for row in self.table.rows:
             if i < len(row) and j < len(row):
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.table.pack()
+
+    def checkCondition(self, condition, message):
+        if not condition:
+            raise TableException(message)
+
+    def move_column_left(self, table, table_pos):
+        field_num = self.visual_to_internal_index(table_pos.row_num,
+                                                  table_pos.field_num)
+        if field_num > 0:
+            if (self.is_col_colspan(field_num) or
+                    self.is_col_colspan(field_num - 1)):
+                raise TableException("Move Column Left is not "
+                                     "permitted for colspan column")
+            else:
+                self.swap_columns(field_num, field_num - 1)
+                return ("Column moved to left",
+                        TablePos(table_pos.row_num, table_pos.field_num - 1))
+        else:
+            raise TableException("Move Column Left doesn't "
+                                 "make sence for the first column in the "
+                                 "table.")
 
     def insert_empty_column(self, i):
         assert i >= 0

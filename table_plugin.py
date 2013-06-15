@@ -28,9 +28,11 @@ import re
 try:
     from . import table_lib
     from . import table_base
+    from .table_base import TablePos
 except ValueError:
     import table_lib
     import table_base
+    from table_base import TablePos
 
 
 class TableContext:
@@ -45,6 +47,8 @@ class TableContext:
         self.table_text = self._get_table_text(self.first_table_row, self.last_table_row)
         self.visual_field_num = self._visual_field_num(sel_row, sel_col)
         self.row_num = sel_row - self.first_table_row
+
+        self.table_pos = TablePos(self.row_num, self.visual_field_num)
 
         self.table = self.syntax.table_parser.parse_text(self.table_text)
         self.table_driver = self.syntax.table_driver(self.table)
@@ -186,6 +190,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def run_one_sel(self, edit, sel):
         return sel
 
+
+
     def visual_field_sel(self, ctx, row_num, visual_field_num):
         if ctx.table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
@@ -193,6 +199,10 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             col = ctx.table_driver.get_cursor(row_num, visual_field_num)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
+
+    def table_pos_sel(self, ctx, table_pos):
+        return self.visual_field_sel(ctx, table_pos.row_num,
+                                     table_pos.field_num)
 
     def field_sel(self, ctx, row_num, field_num):
         if ctx.table.empty():
@@ -344,21 +354,14 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
 
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if field_num > 0:
-            if ctx.table_driver.is_col_colspan(field_num) or ctx.table_driver.is_col_colspan(field_num - 1):
-                sublime.status_message("Table Editor: Move column Left is not permitted for colspan column")
-            else:
-                ctx.table_driver.swap_columns(field_num, field_num - 1)
-                field_num = field_num - 1
-                sublime.status_message("Table Editor: Column moved")
-        else:
-            sublime.status_message("Table Editor: Move column left doesn't make sense for first column")
-        self.merge(edit, ctx)
-        return self.field_sel(ctx, row_num, field_num)
+        try:
+            msg, pos = ctx.table_driver.move_column_left(ctx.table, ctx.table_pos)
+            self.merge(edit, ctx)
+            sublime.status_message("Table Editor: {0}".format(msg))
+            return self.table_pos_sel(ctx, pos)
+        except table_base.TableException as err:
+            sublime.status_message("Table Editor: {0}".format(err))
+            return self.table_pos_sel(ctx, ctx.pos)
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
