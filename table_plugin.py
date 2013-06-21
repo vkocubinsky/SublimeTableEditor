@@ -190,13 +190,13 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
     def run_one_sel(self, edit, sel):
         ctx = self.create_context(sel)
         try:
-            msg, pos = self.run_operation(ctx)
+            msg, table_pos = self.run_operation(ctx)
             self.merge(edit, ctx)
             sublime.status_message("Table Editor: {0}".format(msg))
-            return self.table_pos_sel(ctx, pos)
+            return self.table_pos_sel(ctx, table_pos)
         except table_base.TableException as err:
             sublime.status_message("Table Editor: {0}".format(err))
-            return self.table_pos_sel(ctx, ctx.pos)
+            return self.table_pos_sel(ctx, ctx.table_pos)
 
     def visual_field_sel(self, ctx, row_num, visual_field_num):
         if ctx.table.empty():
@@ -459,20 +459,8 @@ class TableEditorMoveRowUp(AbstractTableCommand):
     Move the current row up.
     """
 
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if row_num > 0:
-            ctx.table_driver.swap_rows(row_num, row_num - 1)
-            sublime.status_message("Table Editor: Row moved up")
-            row_num = row_num - 1
-        else:
-            sublime.status_message("Table Editor: Move row up doesn't make sense for first row")
-        self.merge(edit, ctx)
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.move_row_up(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveRowDown(AbstractTableCommand):
@@ -481,20 +469,8 @@ class TableEditorMoveRowDown(AbstractTableCommand):
     Move the current row down.
     """
 
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if row_num + 1 < len(ctx.table):
-            ctx.table_driver.swap_rows(row_num, row_num + 1)
-            sublime.status_message("Table Editor: Row moved down")
-            row_num = row_num + 1
-        else:
-            sublime.status_message("Table Editor: Move row down doesn't make sense for last row")
-        self.merge(edit, ctx)
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.move_row_down(ctx.table, ctx.table_pos)
 
 
 class TableEditorInsertSingleHline(AbstractTableCommand):

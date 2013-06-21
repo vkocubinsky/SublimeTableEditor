@@ -517,8 +517,26 @@ class TableDriver:
                         TablePos(table_pos.row_num, table_pos.field_num + 1))
         else:
             raise TableException("Move Column Right doesn't "
-                                 "make sence for the last column in the "
+                                 "make sense for the last column in the "
                                  "table.")
+
+    def move_row_up(self, table, table_pos):
+        if table_pos.row_num > 0:
+            self.swap_rows(table_pos.row_num, table_pos.row_num - 1)
+            return("Row moved up",
+                   TablePos(table_pos.row_num - 1, table_pos.field_num))
+        else:
+            raise TableException("Move Row Up doesn't make sense for the "
+                                 "first row in the table")
+
+    def move_row_down(self, table, table_pos):
+        if table_pos.row_num + 1 < len(table):
+            self.swap_rows(table_pos.row_num, table_pos.row_num + 1)
+            return ("Row moved down",
+                    TablePos(table_pos.row_num + 1, table_pos.field_num))
+        else:
+            raise TableException("Move Row Down doesn't make sense for the "
+                                 "last row in the table")
 
     def insert_empty_column(self, i):
         assert i >= 0
@@ -541,7 +559,9 @@ class TableDriver:
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
     def swap_rows(self, i, j):
-        assert 0 <= i < len(self.table.rows) and 0 <= j < len(self.table.rows)
+        self.checkCondition((0 <= i < len(self.table.rows) and
+                             0 <= j < len(self.table.rows)),
+                            "Index out of range")
 
         self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
         for column in self.table.rows[i].columns:
