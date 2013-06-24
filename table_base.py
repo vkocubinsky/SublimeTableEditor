@@ -603,6 +603,10 @@ class TableDriver:
         return("Table Editor: Single separator row inserted",
                TablePos(table_pos.row_num + 2, 0))
 
+    def editor_align(self, table, table_pos):
+        return ("Table aligned",
+                TablePos(table_pos.row_num, table_pos.field_num))
+
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")
         self.check_condition(self.is_col_colspan(i) is False,

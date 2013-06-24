@@ -224,12 +224,8 @@ class TableEditorAlignCommand(AbstractTableCommand):
     Re-align the table without change the current table field.
     Move cursor to begin of the current table field.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        self.merge(edit, ctx)
-        sublime.status_message("Table Editor: Table aligned")
-        return self.visual_field_sel(ctx, ctx.row_num, ctx.visual_field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_align(ctx.table, ctx.table_pos)
 
 
 class TableEditorNextField(AbstractTableCommand):
