@@ -582,6 +582,16 @@ class TableDriver:
         return ("Row inserted",
                 TablePos(table_pos.row_num, table_pos.field_num))
 
+    def editor_insert_single_hline(self, table, table_pos):
+        self.insert_single_separator_row(table_pos.row_num + 1)
+        return ("Single separator row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))
+
+    def editor_insert_double_hline(self, table, table_pos):
+        self.insert_double_separator_row(table_pos.row_num + 1)
+        return ("Double separator row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))
+
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")
         self.check_condition(self.is_col_colspan(i) is False,

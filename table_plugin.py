@@ -406,7 +406,6 @@ class TableEditorMoveRowDown(AbstractTableCommand):
     Key: alt+down
     Move the current row down.
     """
-
     def run_operation(self, ctx):
         return ctx.table_driver.editor_move_row_down(ctx.table, ctx.table_pos)
 
@@ -416,20 +415,9 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
     Key: ctrl+k,-
     Insert single horizontal line below current row.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        try:
-            ctx.table_driver.insert_single_separator_row(row_num + 1)
-            self.merge(edit, ctx)
-            sublime.status_message("Table Editor: Single separator row inserted")
-        except table_base.TableException as err:
-            sublime.status_message("Table Editor: {0}".format(err))
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_insert_single_hline(ctx.table,
+                                                           ctx.table_pos)
 
 
 class TableEditorInsertDoubleHline(AbstractTableCommand):
@@ -437,20 +425,9 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
     Key: ctrl+k,=
     Insert double horizontal line below current row.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        try:
-            ctx.table_driver.insert_double_separator_row(row_num + 1)
-            self.merge(edit, ctx)
-            sublime.status_message("Table Editor: Double separator row inserted")
-        except table_base.TableException as err:
-            sublime.status_message("Table Editor: {0}".format(err))
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_insert_double_hline(ctx.table,
+                                                           ctx.table_pos)
 
 
 class TableEditorHlineAndMove(AbstractTableCommand):
