@@ -538,6 +538,15 @@ class TableDriver:
             raise TableException("Move Row Down doesn't make sense for the "
                                  "last row in the table")
 
+    def next_row(self, table, table_pos):
+        if table_pos.row_num + 1 < len(table):
+            if table[table_pos.row_num + 1].is_header_separator():
+                self.insert_empty_row(table_pos.row_num + 1)
+        else:
+            self.insert_empty_row(len(table))
+        return ("Moved to next row",
+                TablePos(table_pos.row_num + 1, table_pos.field_num))
+
     def insert_empty_column(self, i):
         assert i >= 0
         assert self.is_col_colspan(i) is False

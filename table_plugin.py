@@ -332,24 +332,8 @@ class TableEditorNextRow(AbstractTableCommand):
     Creates a new row if necessary.
     At the beginning or end of a line, enter still does new line.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        self.merge(edit, ctx)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if row_num + 1 < len(ctx.table):
-            if ctx.table[row_num + 1].is_header_separator():
-                ctx.table_driver.insert_empty_row(row_num + 1)
-                self.merge(edit, ctx)
-        else:
-            ctx.table_driver.insert_empty_row(len(ctx.table))
-            self.merge(edit, ctx)
-        row_num = row_num + 1
-        sublime.status_message("Table Editor: Moved to next row")
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.next_row(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveColumnLeft(AbstractTableCommand):
