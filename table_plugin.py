@@ -360,22 +360,9 @@ class TableEditorDeleteColumn(AbstractTableCommand):
     Key: alt+shift+left
     Kill the current column.
     """
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_delete_column(ctx.table, ctx.table_pos)
 
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if ctx.table_driver.is_col_colspan(field_num):
-            sublime.status_message("Table Editor: Delete column is not permitted for colspan column")
-        else:
-            ctx.table_driver.delete_column(field_num)
-            sublime.status_message("Table Editor: Column deleted")
-            self.merge(edit, ctx)
-            if not ctx.table.empty() and field_num == len(ctx.table[row_num]):
-                field_num = field_num - 1
-        return self.field_sel(ctx, row_num, field_num)
 
 
 class TableEditorInsertColumn(AbstractTableCommand):

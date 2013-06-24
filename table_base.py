@@ -547,6 +547,19 @@ class TableDriver:
         return ("Moved to next row",
                 TablePos(table_pos.row_num + 1, table_pos.field_num))
 
+    def editor_delete_column(self, table, table_pos):
+        if self.is_col_colspan(table_pos.field_num):
+            raise TableException("Delete column is not permitted for "
+                                 "colspan column")
+        else:
+            self.delete_column(table_pos.field_num)
+            new_table_pos = TablePos(table_pos.row_num,
+                                     table_pos.field_num)
+            if (not table.empty() and
+                    table_pos.field_num == len(table[table_pos.row_num])):
+                new_table_pos.field_num = new_table_pos.field_num - 1
+            return("Column deleted", new_table_pos)
+
     def insert_empty_column(self, i):
         assert i >= 0
         assert self.is_col_colspan(i) is False
