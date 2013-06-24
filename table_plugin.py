@@ -333,7 +333,7 @@ class TableEditorNextRow(AbstractTableCommand):
     At the beginning or end of a line, enter still does new line.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.next_row(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_next_row(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveColumnLeft(AbstractTableCommand):
@@ -342,7 +342,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
     Move the current column left.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.move_column_left(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_column_left(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
@@ -352,7 +352,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
     """
 
     def run_operation(self, ctx):
-        return ctx.table_driver.move_column_right(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_column_right(ctx.table, ctx.table_pos)
 
 
 class TableEditorDeleteColumn(AbstractTableCommand):
@@ -364,26 +364,13 @@ class TableEditorDeleteColumn(AbstractTableCommand):
         return ctx.table_driver.editor_delete_column(ctx.table, ctx.table_pos)
 
 
-
 class TableEditorInsertColumn(AbstractTableCommand):
     """
     Keys: alt+shift+right
     Insert a new column to the left of the cursor position.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        row_num = ctx.row_num
-        field_num = ctx.field_num
-
-        if ctx.table_driver.is_col_colspan(field_num):
-            sublime.status_message("Table Editor: Insert column is not permitted for colspan column")
-        else:
-            ctx.table_driver.insert_empty_column(field_num)
-            sublime.status_message("Column inserted")
-            self.merge(edit, ctx)
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_insert_column(ctx.table, ctx.table_pos)
 
 
 class TableEditorKillRow(AbstractTableCommand):
@@ -431,7 +418,7 @@ class TableEditorMoveRowUp(AbstractTableCommand):
     """
 
     def run_operation(self, ctx):
-        return ctx.table_driver.move_row_up(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_row_up(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveRowDown(AbstractTableCommand):
@@ -441,7 +428,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
     """
 
     def run_operation(self, ctx):
-        return ctx.table_driver.move_row_down(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_row_down(ctx.table, ctx.table_pos)
 
 
 class TableEditorInsertSingleHline(AbstractTableCommand):

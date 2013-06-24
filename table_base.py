@@ -470,23 +470,23 @@ class TableDriver:
         self.table.pack()
 
     def swap_columns(self, i, j):
-        self.checkCondition(self.is_col_colspan(i) is False,
-                            "Expected not colspan column, but column {0}"
-                            " is colpan".format(i))
-        self.checkCondition(self.is_col_colspan(j) is False,
-                            "Expected not colspan column, but column {0}"
-                            " is colspan".format(j))
+        self.check_condition(self.is_col_colspan(i) is False,
+                             "Expected not colspan column, but column {0}"
+                             " is colpan".format(i))
+        self.check_condition(self.is_col_colspan(j) is False,
+                             "Expected not colspan column, but column {0}"
+                             " is colspan".format(j))
 
         for row in self.table.rows:
             if i < len(row) and j < len(row):
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.table.pack()
 
-    def checkCondition(self, condition, message):
+    def check_condition(self, condition, message):
         if not condition:
             raise TableException(message)
 
-    def move_column_left(self, table, table_pos):
+    def editor_move_column_left(self, table, table_pos):
         field_num = self.visual_to_internal_index(table_pos.row_num,
                                                   table_pos.field_num)
         if field_num > 0:
@@ -503,7 +503,7 @@ class TableDriver:
                                  "make sence for the first column in the "
                                  "table.")
 
-    def move_column_right(self, table, table_pos):
+    def editor_move_column_right(self, table, table_pos):
         field_num = self.visual_to_internal_index(table_pos.row_num,
                                                   table_pos.field_num)
         if field_num < len(table[table_pos.row_num]) - 1:
@@ -520,7 +520,7 @@ class TableDriver:
                                  "make sense for the last column in the "
                                  "table.")
 
-    def move_row_up(self, table, table_pos):
+    def editor_move_row_up(self, table, table_pos):
         if table_pos.row_num > 0:
             self.swap_rows(table_pos.row_num, table_pos.row_num - 1)
             return("Row moved up",
@@ -529,7 +529,7 @@ class TableDriver:
             raise TableException("Move Row Up doesn't make sense for the "
                                  "first row in the table")
 
-    def move_row_down(self, table, table_pos):
+    def editor_move_row_down(self, table, table_pos):
         if table_pos.row_num + 1 < len(table):
             self.swap_rows(table_pos.row_num, table_pos.row_num + 1)
             return ("Row moved down",
@@ -538,7 +538,7 @@ class TableDriver:
             raise TableException("Move Row Down doesn't make sense for the "
                                  "last row in the table")
 
-    def next_row(self, table, table_pos):
+    def editor_next_row(self, table, table_pos):
         if table_pos.row_num + 1 < len(table):
             if table[table_pos.row_num + 1].is_header_separator():
                 self.insert_empty_row(table_pos.row_num + 1)
@@ -560,9 +560,20 @@ class TableDriver:
                 new_table_pos.field_num = new_table_pos.field_num - 1
             return("Column deleted", new_table_pos)
 
+    def editor_insert_column(self, table, table_pos):
+        if self.is_col_colspan(table_pos.field_num):
+            raise TableException("Insert column is not permitted for "
+                                 "colspan column")
+        else:
+            self.insert_empty_column(table_pos.field_num)
+            return ("Column inserted",
+                    TablePos(table_pos.row_num, table_pos.field_num))
+
     def insert_empty_column(self, i):
-        assert i >= 0
-        assert self.is_col_colspan(i) is False
+        self.check_condition(i >= 0, "Index should be positive")
+        self.check_condition(self.is_col_colspan(i) is False,
+                             "Expected not colspan column, but "
+                             "Column {0} is colspan".format(i))
 
         for row in self.table.rows:
             row.columns.insert(i, row.new_empty_column())
@@ -581,7 +592,7 @@ class TableDriver:
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
     def swap_rows(self, i, j):
-        self.checkCondition((0 <= i < len(self.table.rows) and
+        self.check_condition((0 <= i < len(self.table.rows) and
                              0 <= j < len(self.table.rows)),
                             "Index out of range")
 
