@@ -378,19 +378,8 @@ class TableEditorKillRow(AbstractTableCommand):
     Key : alt+shift+up
     Kill the current row.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        row_num = ctx.row_num
-        field_num = ctx.field_num
-
-        ctx.table_driver.delete_row(row_num)
-        self.merge(edit, ctx)
-        if row_num == len(ctx.table):  # just deleted one row
-            row_num = row_num - 1
-        sublime.status_message("Table Editor: Row deleted")
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_kill_row(ctx.table, ctx.table_pos)
 
 
 class TableEditorInsertRow(AbstractTableCommand):
@@ -398,17 +387,8 @@ class TableEditorInsertRow(AbstractTableCommand):
     Key: alt+shift+down
     Insert a new row above the current row.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        ctx.table_driver.insert_empty_row(row_num)
-        self.merge(edit, ctx)
-        sublime.status_message("Table Editor: Row inserted")
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_insert_row(ctx.table, ctx.table_pos)
 
 
 class TableEditorMoveRowUp(AbstractTableCommand):

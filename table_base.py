@@ -569,6 +569,19 @@ class TableDriver:
             return ("Column inserted",
                     TablePos(table_pos.row_num, table_pos.field_num))
 
+    def editor_kill_row(self, table, table_pos):
+        self.delete_row(table_pos.row_num)
+        new_table_pos = TablePos(table_pos.row_num,
+                                 table_pos.field_num)
+        if table_pos.row_num == len(table):
+            new_table_pos.row_num = new_table_pos.row_num - 1
+        return ("Row deleted", new_table_pos)
+
+    def editor_insert_row(self, table, table_pos):
+        self.insert_empty_row(table_pos.row_num)
+        return ("Row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))
+
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")
         self.check_condition(self.is_col_colspan(i) is False,
