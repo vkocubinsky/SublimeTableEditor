@@ -436,29 +436,9 @@ class TableEditorHlineAndMove(AbstractTableCommand):
     Insert a horizontal line below current row,
     and move the cursor into the row below that line.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        try:
-            ctx.table_driver.insert_single_separator_row(row_num + 1)
-
-            if row_num + 2 < len(ctx.table):
-                if ctx.table[row_num + 2].is_separator():
-                    ctx.table_driver.insert_empty_row(row_num + 2)
-            else:
-                ctx.table_driver.insert_empty_row(row_num + 2)
-
-            self.merge(edit, ctx)
-
-            row_num = row_num + 2
-            field_num = 0
-            sublime.status_message("Table Editor: Single separator row inserted")
-        except table_base.TableException as err:
-            sublime.status_message("Table Editor: {0}".format(err))
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_insert_hline_and_move(ctx.table,
+                                                             ctx.table_pos)
 
 
 class TableEditorSplitColumnDown(AbstractTableCommand):

@@ -592,6 +592,17 @@ class TableDriver:
         return ("Double separator row inserted",
                 TablePos(table_pos.row_num, table_pos.field_num))
 
+    def editor_insert_hline_and_move(self, table, table_pos):
+        self.insert_single_separator_row(table_pos.row_num + 1)
+
+        if table_pos.row_num + 2 < len(table):
+            if table[table_pos.row_num + 2].is_separator():
+                self.insert_empty_row(table_pos.row_num + 2)
+        else:
+            self.insert_empty_row(table_pos.row_num + 2)
+        return("Table Editor: Single separator row inserted",
+               TablePos(table_pos.row_num + 2, 0))
+
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")
         self.check_condition(self.is_col_colspan(i) is False,
