@@ -234,49 +234,8 @@ class TableEditorNextField(AbstractTableCommand):
     Re-align the table, move to the next field.
     Creates a new row if necessary.
     """
-
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-        self.merge(edit, ctx)
-
-        visual_field_num = ctx.visual_field_num
-        row_num = ctx.row_num
-
-        moved = False
-        while True:
-            if ctx.table[row_num].is_separator():
-                if row_num + 1 < len(ctx.table):
-                    visual_field_num = 0
-                    row_num = row_num + 1
-                    moved = True
-                    continue
-                else:
-                    #sel_row == last_table_row
-                    ctx.table_driver.insert_empty_row(len(ctx.table))
-                    self.merge(edit, ctx)
-                    visual_field_num = 0
-                    row_num = row_num + 1
-                    break
-            elif moved:
-                break
-            elif visual_field_num + 1 < ctx.table_driver.visual_column_count(row_num):
-                visual_field_num = visual_field_num + 1
-                break
-            elif row_num + 1 < len(ctx.table):
-                visual_field_num = 0
-                row_num = row_num + 1
-                moved = True
-                continue
-            else:
-                #sel_row == last_table_row
-                ctx.table_driver.insert_empty_row(len(ctx.table))
-                self.merge(edit, ctx)
-                visual_field_num = 0
-                row_num = row_num + 1
-                break
-        sublime.status_message("Table Editor: Cursor position changed")
-
-        return self.visual_field_sel(ctx, row_num, visual_field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_next_field(ctx.table, ctx.table_pos)
 
 
 class TableEditorPreviousField(AbstractTableCommand):

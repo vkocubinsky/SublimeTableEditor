@@ -624,6 +624,40 @@ class TableDriver:
         else:
             raise TableException("Join columns is not permitted")
 
+    def editor_next_field(self, table, table_pos):
+        pos = TablePos(table_pos.row_num, table_pos.field_num)
+
+        moved = False
+        while True:
+            if table[pos.row_num].is_separator():
+                if pos.row_num + 1 < len(table):
+                    pos.field_num = 0
+                    pos.row_num += 1
+                    moved = True
+                    continue
+                else:
+                    #sel_row == last_table_row
+                    self.insert_empty_row(len(table))
+                    pos.field_num = 0
+                    pos.row_num += 1
+                    break
+            elif moved:
+                break
+            elif pos.field_num + 1 < self.visual_column_count(pos.row_num):
+                pos.field_num += 1
+                break
+            elif pos.row_num + 1 < len(table):
+                pos.field_num = 0
+                pos.row_num += 1
+                moved = True
+                continue
+            else:
+                #sel_row == last_table_row
+                self.insert_empty_row(len(table))
+                pos.field_num = 0
+                pos.row_num += 1
+                break
+        return ("Cursor position changed", pos)
 
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")
