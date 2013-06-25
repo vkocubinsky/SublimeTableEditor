@@ -600,12 +600,30 @@ class TableDriver:
                 self.insert_empty_row(table_pos.row_num + 2)
         else:
             self.insert_empty_row(table_pos.row_num + 2)
-        return("Table Editor: Single separator row inserted",
+        return("Single separator row inserted",
                TablePos(table_pos.row_num + 2, 0))
 
     def editor_align(self, table, table_pos):
         return ("Table aligned",
                 TablePos(table_pos.row_num, table_pos.field_num))
+
+    def editor_join_lines(self, table, table_pos):
+        if (table_pos.row_num + 1 < len(table)
+            and table[table_pos.row_num].is_data()
+            and table[table_pos.row_num + 1].is_data()
+            and not self.is_row_colspan(table_pos.row_num)
+                and not self.is_row_colspan(table_pos.row_num + 1)):
+
+            for curr_col, next_col in zip(table[table_pos.row_num].columns,
+                                          table[table_pos.row_num + 1].columns):
+                curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
+
+            self.delete_row(table_pos.row_num + 1)
+            return ("Rows joined",
+                    TablePos(table_pos.row_num, table_pos.field_num))
+        else:
+            raise TableException("Join columns is not permitted")
+
 
     def insert_empty_column(self, i):
         self.check_condition(i >= 0, "Index should be positive")

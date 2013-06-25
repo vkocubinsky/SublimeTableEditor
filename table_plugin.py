@@ -488,28 +488,8 @@ class TableEditorJoinLines(AbstractTableCommand):
     Key: ctrl+j
     Join current row and next row into one if next row is not hline
     """
-    def run_one_sel(self, edit, sel):
-        ctx = self.create_context(sel)
-
-        field_num = ctx.field_num
-        row_num = ctx.row_num
-
-        if (row_num + 1 < len(ctx.table)
-            and ctx.table[row_num].is_data()
-            and ctx.table[row_num + 1].is_data()
-            and not ctx.table_driver.is_row_colspan(row_num)
-                and not ctx.table_driver.is_row_colspan(row_num + 1)):
-
-            for curr_col, next_col in zip(ctx.table[row_num].columns,
-                                          ctx.table[row_num + 1].columns):
-                curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
-
-            ctx.table_driver.delete_row(row_num + 1)
-            self.merge(edit, ctx)
-            sublime.status_message("Table Editor: Row joined")
-        else:
-            sublime.status_message("Table Editor: Join columns is not permitted")
-        return self.field_sel(ctx, row_num, field_num)
+    def run_operation(self, ctx):
+        return ctx.table_driver.editor_join_lines(ctx.table, ctx.table_pos)
 
 
 class TableEditorCsvToTable(AbstractTableCommand):
