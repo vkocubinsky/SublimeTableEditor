@@ -272,7 +272,6 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
     Key: alt+right
     Move the current column right.
     """
-
     def run_operation(self, ctx):
         return ctx.table_driver.editor_move_column_right(ctx.table, ctx.table_pos)
 
@@ -318,7 +317,6 @@ class TableEditorMoveRowUp(AbstractTableCommand):
     Key: alt+up
     Move the current row up.
     """
-
     def run_operation(self, ctx):
         return ctx.table_driver.editor_move_row_up(ctx.table, ctx.table_pos)
 
