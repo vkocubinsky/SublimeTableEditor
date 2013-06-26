@@ -462,7 +462,9 @@ class TableDriver:
         return base_len + col_pos
 
     def delete_column(self, i):
-        assert self.is_col_colspan(i) is False
+        self.check_condition(self.is_col_colspan(i) is False,
+                             "Expected not colspan column, but column {0}"
+                             " is colpan".format(i))
 
         for row in self.table.rows:
             if i < len(row):
