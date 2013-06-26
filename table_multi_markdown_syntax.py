@@ -46,9 +46,8 @@ class MultiMarkdownTableSyntax(TableSyntax):
         self.table_parser = MultiMarkdownTableParser(self)
         self.line_parser = LineParser("(?:\|\|+)|(?:(?:\+)|(?:\|))")
 
-    def table_driver(self, table):
-        return MultiMarkdownTableDriver(table)
-
+    def table_driver(self, table, position):
+        return MultiMarkdownTableDriver(table, position)
 
 
 class MultiMarkdownAlignColumn(Column):

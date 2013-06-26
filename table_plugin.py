@@ -51,7 +51,7 @@ class TableContext:
         self.table_pos = TablePos(self.row_num, self.visual_field_num)
 
         self.table = self.syntax.table_parser.parse_text(self.table_text)
-        self.table_driver = self.syntax.table_driver(self.table)
+        self.table_driver = self.syntax.table_driver(self.table, self.table_pos)
         self.field_num = self.table_driver.visual_to_internal_index(self.row_num, self.visual_field_num)
 
     def _get_table_text(self, first_table_row, last_table_row):

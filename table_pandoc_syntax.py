@@ -46,5 +46,5 @@ class PandocTableSyntax(TableSyntax):
         self.hline_out_border = '+'
         self.hline_in_border = '+'
 
-    def table_driver(self, table):
-        return BorderTableDriver(table)
+    def table_driver(self, table, position):
+        return BorderTableDriver(table, position)

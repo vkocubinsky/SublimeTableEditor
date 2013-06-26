@@ -52,8 +52,8 @@ class SimpleTableSyntax(TableSyntax):
         if self.table_configuration.hline_in_border is not None:
             self.hline_in_border = self.table_configuration.hline_in_border
 
-    def table_driver(self, table):
-        return BorderTableDriver(table)
+    def table_driver(self, table, positon):
+        return BorderTableDriver(table, positon)
 
 
 class CustomAlignColumn(Column):

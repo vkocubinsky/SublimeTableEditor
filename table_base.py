@@ -65,8 +65,8 @@ class TableSyntax:
         # Should be set in sublass constructor
         self.table_parser = None
 
-    def table_driver(self, table):
-        return TableDriver(table)
+    def table_driver(self, table, position):
+        return TableDriver(table, position)
 
 
 class Column(object):
@@ -404,8 +404,9 @@ class TablePos:
 
 class TableDriver:
 
-    def __init__(self, table):
+    def __init__(self, table, table_pos):
         self.table = table
+        self.table_pos = table_pos
         self.syntax = table.syntax
 
     def visual_column_count(self, row):
@@ -465,7 +466,6 @@ class TableDriver:
         self.check_condition(self.is_col_colspan(i) is False,
                              "Expected not colspan column, but column {0}"
                              " is colpan".format(i))
-
         for row in self.table.rows:
             if i < len(row):
                 del row.columns[i]
