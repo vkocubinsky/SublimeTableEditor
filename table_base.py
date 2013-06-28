@@ -391,6 +391,12 @@ class TextTable:
                     return True
         return False
 
+    def is_row_colspan(self, row):
+        for column in self[row].columns:
+            if column.pseudo() or column.colspan > 1:
+                    return True
+        return False
+
     def assert_not_col_colspan(self, col):
         check_condition(self.is_col_colspan(col) is False,
                         "Expected not colspan column, but column {0}"
@@ -437,11 +443,6 @@ class TableDriver:
         return sum([1 for col in self.table[row].columns if not col.pseudo()])
 
 
-    def is_row_colspan(self, row):
-        for column in self.table[row].columns:
-            if column.pseudo() or column.colspan > 1:
-                    return True
-        return False
 
     def internal_to_visual_index(self, row, internal_index):
         visual_ind = internal_index
@@ -613,8 +614,8 @@ class TableDriver:
         if (self.table_pos.row_num + 1 < len(self.table)
             and self.table[self.table_pos.row_num].is_data()
             and self.table[self.table_pos.row_num + 1].is_data()
-            and not self.is_row_colspan(self.table_pos.row_num)
-                and not self.is_row_colspan(self.table_pos.row_num + 1)):
+            and not self.table.is_row_colspan(self.table_pos.row_num)
+                and not self.table.is_row_colspan(self.table_pos.row_num + 1)):
 
             for curr_col, next_col in zip(self.table[self.table_pos.row_num].columns,
                                           self.table[self.table_pos.row_num + 1].columns):
