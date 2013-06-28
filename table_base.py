@@ -423,6 +423,19 @@ class TextTable:
         del self.rows[i]
         self.pack()
 
+    def swap_rows(self, i, j):
+        check_condition((0 <= i < len(self.rows) and
+                        0 <= j < len(self.rows)),
+                        "Index out of range")
+
+        self.rows[i], self.rows[j] = self.rows[j], self.rows[i]
+        for column in self.rows[i].columns:
+            column.header = False
+        for column in self.rows[j].columns:
+            column.header = False
+
+        self.pack()
+
 
 class TableException(Exception):
 
@@ -529,7 +542,7 @@ class TableDriver:
 
     def editor_move_row_up(self):
         if self.table_pos.row_num > 0:
-            self.swap_rows(self.table_pos.row_num, self.table_pos.row_num - 1)
+            self.table.swap_rows(self.table_pos.row_num, self.table_pos.row_num - 1)
             return("Row moved up",
                    TablePos(self.table_pos.row_num - 1, self.table_pos.field_num))
         else:
@@ -538,7 +551,7 @@ class TableDriver:
 
     def editor_move_row_down(self):
         if self.table_pos.row_num + 1 < len(self.table):
-            self.swap_rows(self.table_pos.row_num, self.table_pos.row_num + 1)
+            self.table.swap_rows(self.table_pos.row_num, self.table_pos.row_num + 1)
             return ("Row moved down",
                     TablePos(self.table_pos.row_num + 1, self.table_pos.field_num))
         else:
@@ -715,18 +728,6 @@ class TableDriver:
     def insert_double_separator_row(self, i):
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
-    def swap_rows(self, i, j):
-        check_condition((0 <= i < len(self.table.rows) and
-                        0 <= j < len(self.table.rows)),
-                        "Index out of range")
-
-        self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
-        for column in self.table.rows[i].columns:
-            column.header = False
-        for column in self.table.rows[j].columns:
-            column.header = False
-
-        self.table.pack()
 
 
 
