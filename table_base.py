@@ -472,6 +472,9 @@ class TablePos:
     def __str__(self):
         return self.__repr__()
 
+    def __eq__(self, other):
+        return self.row_num == other.row_num and self.field_num == other.field_num
+
 
 class TableDriver:
 
@@ -727,8 +730,6 @@ class TableDriver:
 
     def insert_double_separator_row(self, i):
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
-
-
 
 
 class BaseTableParser:
