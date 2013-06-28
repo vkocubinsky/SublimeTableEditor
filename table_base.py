@@ -436,6 +436,20 @@ class TextTable:
 
         self.pack()
 
+    def insert_empty_row(self, i):
+        check_condition(i >= 0, "Index should be more than zero")
+
+        self.rows.insert(i, DataRow(self))
+        self.pack()
+
+    def insert_empty_column(self, i):
+        check_condition(i >= 0, "Index should be more than zero")
+        self.assert_not_col_colspan(i)
+
+        for row in self.rows:
+            row.columns.insert(i, row.new_empty_column())
+        self.pack()
+
 
 class TableException(Exception):
 
@@ -561,9 +575,9 @@ class TableDriver:
     def editor_next_row(self):
         if self.table_pos.row_num + 1 < len(self.table):
             if self.table[self.table_pos.row_num + 1].is_header_separator():
-                self.insert_empty_row(self.table_pos.row_num + 1)
+                self.table.insert_empty_row(self.table_pos.row_num + 1)
         else:
-            self.insert_empty_row(len(self.table))
+            self.table.insert_empty_row(len(self.table))
         return ("Moved to next row",
                 TablePos(self.table_pos.row_num + 1, self.table_pos.field_num))
 
@@ -581,11 +595,11 @@ class TableDriver:
             return("Column deleted", new_table_pos)
 
     def editor_insert_column(self):
-        if self.is_col_colspan(self.table_pos.field_num):
+        if self.table.is_col_colspan(self.table_pos.field_num):
             raise TableException("Insert column is not permitted for "
                                  "colspan column")
         else:
-            self.insert_empty_column(self.table_pos.field_num)
+            self.table.insert_empty_column(self.table_pos.field_num)
             return ("Column inserted",
                     TablePos(self.table_pos.row_num, self.table_pos.field_num))
 
@@ -598,7 +612,7 @@ class TableDriver:
         return ("Row deleted", new_table_pos)
 
     def editor_insert_row(self):
-        self.insert_empty_row(self.table_pos.row_num)
+        self.table.insert_empty_row(self.table_pos.row_num)
         return ("Row inserted",
                 TablePos(self.table_pos.row_num, self.table_pos.field_num))
 
@@ -617,9 +631,9 @@ class TableDriver:
 
         if self.table_pos.row_num + 2 < len(self.table):
             if self.table[self.table_pos.row_num + 2].is_separator():
-                self.insert_empty_row(self.table_pos.row_num + 2)
+                self.table.insert_empty_row(self.table_pos.row_num + 2)
         else:
-            self.insert_empty_row(self.table_pos.row_num + 2)
+            self.table.insert_empty_row(self.table_pos.row_num + 2)
         return("Single separator row inserted",
                TablePos(self.table_pos.row_num + 2, 0))
 
@@ -657,7 +671,7 @@ class TableDriver:
                     continue
                 else:
                     #sel_row == last_table_row
-                    self.insert_empty_row(len(self.table))
+                    self.table.insert_empty_row(len(self.table))
                     pos.field_num = 0
                     pos.row_num += 1
                     break
@@ -673,7 +687,7 @@ class TableDriver:
                 continue
             else:
                 #sel_row == last_table_row
-                self.insert_empty_row(len(self.table))
+                self.table.insert_empty_row(len(self.table))
                 pos.field_num = 0
                 pos.row_num += 1
                 break
@@ -707,20 +721,6 @@ class TableDriver:
                 #row_num == 0
                 break
         return ("Cursor position changed", pos)
-
-    def insert_empty_column(self, i):
-        check_condition(i >= 0, "Index should be positive")
-        self.table.assert_not_col_colspan(i)
-
-        for row in self.table.rows:
-            row.columns.insert(i, row.new_empty_column())
-        self.table.pack()
-
-    def insert_empty_row(self, i):
-        assert i >= 0
-
-        self.table.rows.insert(i, DataRow(self.table))
-        self.table.pack()
 
     def insert_single_separator_row(self, i):
         raise TableException("Syntax {0} doesn't support insert single line".format(self.syntax.name))

@@ -244,7 +244,7 @@ class SimpleSyntaxTest(BaseTableTest):
         d.editor_kill_row()
         self.assert_table_equals(expected, t.render())
 
-    def testInsertEmptyColumn(self):
+    def testInsertColumn(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -262,11 +262,11 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
         t = self.syntax.table_parser.parse_text(text)
-        d = self.syntax.table_driver(t, table_lib.TablePos(0,0))
-        d.insert_empty_column(1)
+        d = self.syntax.table_driver(t, table_lib.TablePos(0, 1))
+        d.editor_insert_column()
         self.assert_table_equals(expected, t.render())
 
-    def testInsertEmptyRow(self):
+    def testInsertRow(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -285,8 +285,8 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
         t = self.syntax.table_parser.parse_text(text)
-        d = self.syntax.table_driver(t, table_lib.TablePos(0,0))
-        d.insert_empty_row(3)
+        d = self.syntax.table_driver(t, table_lib.TablePos(3, 0))
+        d.editor_insert_row()
         self.assert_table_equals(expected, t.render())
 
     def testInsertSeparatorRow(self):
