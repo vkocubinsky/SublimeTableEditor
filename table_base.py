@@ -409,6 +409,14 @@ class TextTable:
                 del row.columns[col]
         self.pack()
 
+    def swap_columns(self, i, j):
+        self.assert_not_col_colspan(i)
+        self.assert_not_col_colspan(j)
+        for row in self.rows:
+            if i < len(row) and j < len(row):
+                row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
+        self.pack()
+
 
 class TableException(Exception):
 
@@ -481,24 +489,16 @@ class TableDriver:
             col_pos = 1
         return base_len + col_pos
 
-    def swap_columns(self, i, j):
-        self.table.assert_not_col_colspan(i)
-        self.table.assert_not_col_colspan(j)
-        for row in self.table.rows:
-            if i < len(row) and j < len(row):
-                row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
-        self.table.pack()
-
     def editor_move_column_left(self):
         field_num = self.visual_to_internal_index(self.table_pos.row_num,
                                                   self.table_pos.field_num)
         if field_num > 0:
-            if (self.is_col_colspan(field_num) or
-                    self.is_col_colspan(field_num - 1)):
+            if (self.table.is_col_colspan(field_num) or
+                    self.table.is_col_colspan(field_num - 1)):
                 raise TableException("Move Column Left is not "
                                      "permitted for colspan column")
             else:
-                self.swap_columns(field_num, field_num - 1)
+                self.table.swap_columns(field_num, field_num - 1)
                 return ("Column moved to left",
                         TablePos(self.table_pos.row_num, self.table_pos.field_num - 1))
         else:
@@ -510,12 +510,12 @@ class TableDriver:
         field_num = self.visual_to_internal_index(self.table_pos.row_num,
                                                   self.table_pos.field_num)
         if field_num < len(self.table[self.table_pos.row_num]) - 1:
-            if (self.is_col_colspan(field_num) or
-                    self.is_col_colspan(field_num + 1)):
+            if (self.table.is_col_colspan(field_num) or
+                    self.table.is_col_colspan(field_num + 1)):
                 raise TableException("Move Column Right is not "
                                      "permitted for colspan column")
             else:
-                self.swap_columns(field_num, field_num + 1)
+                self.table.swap_columns(field_num, field_num + 1)
                 return ("Column moved to right",
                         TablePos(self.table_pos.row_num, self.table_pos.field_num + 1))
         else:

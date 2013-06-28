@@ -111,7 +111,7 @@ class SimpleSyntaxTest(BaseTableTest):
         formatted = t.render()
         self.assert_table_equals(expected, formatted)
 
-    def testSwapColumn(self):
+    def testMoveColumnRight(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -129,9 +129,32 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
         t = self.syntax.table_parser.parse_text(text)
-        d = self.syntax.table_driver(t, table_lib.TablePos(0,0))
+        d = self.syntax.table_driver(t, table_lib.TablePos(0, 1))
 
-        d.swap_columns(1, 2)
+        d.editor_move_column_right()
+        self.assert_table_equals(expected, t.render())
+
+    def testMoveColumnLeft(self):
+        text = """
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.strip()
+
+        expected = """
+|     Name    |      Age      |    Gender   |
+| Text Column | Number Column | Char Column |
+|-------------|---------------|-------------|
+| Alisa       |            21 | F           |
+| Alex        |            22 | M           |
+        """.strip()
+
+        t = self.syntax.table_parser.parse_text(text)
+        d = self.syntax.table_driver(t, table_lib.TablePos(0, 2))
+
+        d.editor_move_column_left()
         self.assert_table_equals(expected, t.render())
 
     def testDeleteColumn(self):
@@ -156,7 +179,7 @@ class SimpleSyntaxTest(BaseTableTest):
         d.editor_delete_column()
         self.assert_table_equals(expected, t.render())
 
-    def testSwapRows(self):
+    def testMoveRowDown(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -174,8 +197,30 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
         t = self.syntax.table_parser.parse_text(text)
-        d = self.syntax.table_driver(t, table_lib.TablePos(0,0))
-        d.swap_rows(3, 4)
+        d = self.syntax.table_driver(t, table_lib.TablePos(3,0))
+        d.editor_move_row_down()
+        self.assert_table_equals(expected, t.render())
+
+    def testMoveRowUp(self):
+        text = """
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.strip()
+
+        expected = """
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alex        | M           |            22 |
+| Alisa       | F           |            21 |
+        """.strip()
+
+        t = self.syntax.table_parser.parse_text(text)
+        d = self.syntax.table_driver(t, table_lib.TablePos(4,0))
+        d.editor_move_row_up()
         self.assert_table_equals(expected, t.render())
 
     def testDeleteRow(self):
