@@ -237,6 +237,11 @@ class DataColumn(Column):
         return self.left_space + align_value + self.right_space
 
 
+def check_condition(condition, message):
+    if not condition:
+        raise TableException(message)
+
+
 class TextTable:
 
     def __init__(self, syntax):
@@ -463,7 +468,7 @@ class TableDriver:
         return base_len + col_pos
 
     def delete_column(self, i):
-        self.check_condition(self.is_col_colspan(i) is False,
+        check_condition(self.is_col_colspan(i) is False,
                              "Expected not colspan column, but column {0}"
                              " is colpan".format(i))
         for row in self.table.rows:
@@ -472,10 +477,10 @@ class TableDriver:
         self.table.pack()
 
     def swap_columns(self, i, j):
-        self.check_condition(self.is_col_colspan(i) is False,
+        check_condition(self.is_col_colspan(i) is False,
                              "Expected not colspan column, but column {0}"
                              " is colpan".format(i))
-        self.check_condition(self.is_col_colspan(j) is False,
+        check_condition(self.is_col_colspan(j) is False,
                              "Expected not colspan column, but column {0}"
                              " is colspan".format(j))
 
@@ -484,9 +489,6 @@ class TableDriver:
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.table.pack()
 
-    def check_condition(self, condition, message):
-        if not condition:
-            raise TableException(message)
 
     def editor_move_column_left(self):
         field_num = self.visual_to_internal_index(self.table_pos.row_num,
@@ -691,8 +693,8 @@ class TableDriver:
         return ("Cursor position changed", pos)
 
     def insert_empty_column(self, i):
-        self.check_condition(i >= 0, "Index should be positive")
-        self.check_condition(self.is_col_colspan(i) is False,
+        check_condition(i >= 0, "Index should be positive")
+        check_condition(self.is_col_colspan(i) is False,
                              "Expected not colspan column, but "
                              "Column {0} is colspan".format(i))
 
@@ -713,7 +715,7 @@ class TableDriver:
         raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
     def swap_rows(self, i, j):
-        self.check_condition((0 <= i < len(self.table.rows) and
+        check_condition((0 <= i < len(self.table.rows) and
                              0 <= j < len(self.table.rows)),
                             "Index out of range")
 
