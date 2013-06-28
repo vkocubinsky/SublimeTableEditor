@@ -417,6 +417,12 @@ class TextTable:
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.pack()
 
+    def delete_row(self, i):
+        assert 0 <= i < len(self.rows)
+
+        del self.rows[i]
+        self.pack()
+
 
 class TableException(Exception):
 
@@ -449,8 +455,6 @@ class TableDriver:
 
     def visual_column_count(self, row):
         return sum([1 for col in self.table[row].columns if not col.pseudo()])
-
-
 
     def internal_to_visual_index(self, row, internal_index):
         visual_ind = internal_index
@@ -573,7 +577,7 @@ class TableDriver:
                     TablePos(self.table_pos.row_num, self.table_pos.field_num))
 
     def editor_kill_row(self):
-        self.delete_row(self.table_pos.row_num)
+        self.table.delete_row(self.table_pos.row_num)
         new_table_pos = TablePos(self.table_pos.row_num,
                                  self.table_pos.field_num)
         if self.table_pos.row_num == len(self.table):
@@ -621,7 +625,7 @@ class TableDriver:
                                           self.table[self.table_pos.row_num + 1].columns):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
-            self.delete_row(self.table_pos.row_num + 1)
+            self.table.delete_row(self.table_pos.row_num + 1)
             return ("Rows joined",
                     TablePos(self.table_pos.row_num, self.table_pos.field_num))
         else:
@@ -713,8 +717,8 @@ class TableDriver:
 
     def swap_rows(self, i, j):
         check_condition((0 <= i < len(self.table.rows) and
-                             0 <= j < len(self.table.rows)),
-                            "Index out of range")
+                        0 <= j < len(self.table.rows)),
+                        "Index out of range")
 
         self.table.rows[i], self.table.rows[j] = self.table.rows[j], self.table.rows[i]
         for column in self.table.rows[i].columns:
@@ -724,11 +728,6 @@ class TableDriver:
 
         self.table.pack()
 
-    def delete_row(self, i):
-        assert 0 <= i < len(self.table.rows)
-
-        del self.table.rows[i]
-        self.table.pack()
 
 
 class BaseTableParser:
