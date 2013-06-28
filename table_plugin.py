@@ -225,7 +225,7 @@ class TableEditorAlignCommand(AbstractTableCommand):
     Move cursor to begin of the current table field.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_align(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_align()
 
 
 class TableEditorNextField(AbstractTableCommand):
@@ -235,7 +235,7 @@ class TableEditorNextField(AbstractTableCommand):
     Creates a new row if necessary.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_next_field(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_next_field()
 
 
 class TableEditorPreviousField(AbstractTableCommand):
@@ -244,7 +244,7 @@ class TableEditorPreviousField(AbstractTableCommand):
     Re-align, move to previous field.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_previous_field(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_previous_field()
 
 
 class TableEditorNextRow(AbstractTableCommand):
@@ -255,7 +255,7 @@ class TableEditorNextRow(AbstractTableCommand):
     At the beginning or end of a line, enter still does new line.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_next_row(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_next_row()
 
 
 class TableEditorMoveColumnLeft(AbstractTableCommand):
@@ -264,7 +264,7 @@ class TableEditorMoveColumnLeft(AbstractTableCommand):
     Move the current column left.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_move_column_left(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_column_left()
 
 
 class TableEditorMoveColumnRight(AbstractTableCommand):
@@ -273,7 +273,7 @@ class TableEditorMoveColumnRight(AbstractTableCommand):
     Move the current column right.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_move_column_right(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_column_right()
 
 
 class TableEditorDeleteColumn(AbstractTableCommand):
@@ -282,7 +282,7 @@ class TableEditorDeleteColumn(AbstractTableCommand):
     Kill the current column.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_delete_column(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_delete_column()
 
 
 class TableEditorInsertColumn(AbstractTableCommand):
@@ -291,7 +291,7 @@ class TableEditorInsertColumn(AbstractTableCommand):
     Insert a new column to the left of the cursor position.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_insert_column(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_insert_column()
 
 
 class TableEditorKillRow(AbstractTableCommand):
@@ -300,7 +300,7 @@ class TableEditorKillRow(AbstractTableCommand):
     Kill the current row.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_kill_row(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_kill_row()
 
 
 class TableEditorInsertRow(AbstractTableCommand):
@@ -309,7 +309,7 @@ class TableEditorInsertRow(AbstractTableCommand):
     Insert a new row above the current row.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_insert_row(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_insert_row()
 
 
 class TableEditorMoveRowUp(AbstractTableCommand):
@@ -318,7 +318,7 @@ class TableEditorMoveRowUp(AbstractTableCommand):
     Move the current row up.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_move_row_up(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_row_up()
 
 
 class TableEditorMoveRowDown(AbstractTableCommand):
@@ -327,7 +327,7 @@ class TableEditorMoveRowDown(AbstractTableCommand):
     Move the current row down.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_move_row_down(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_move_row_down()
 
 
 class TableEditorInsertSingleHline(AbstractTableCommand):
@@ -336,8 +336,7 @@ class TableEditorInsertSingleHline(AbstractTableCommand):
     Insert single horizontal line below current row.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_insert_single_hline(ctx.table,
-                                                           ctx.table_pos)
+        return ctx.table_driver.editor_insert_single_hline()
 
 
 class TableEditorInsertDoubleHline(AbstractTableCommand):
@@ -346,8 +345,7 @@ class TableEditorInsertDoubleHline(AbstractTableCommand):
     Insert double horizontal line below current row.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_insert_double_hline(ctx.table,
-                                                           ctx.table_pos)
+        return ctx.table_driver.editor_insert_double_hline()
 
 
 class TableEditorHlineAndMove(AbstractTableCommand):
@@ -357,8 +355,7 @@ class TableEditorHlineAndMove(AbstractTableCommand):
     and move the cursor into the row below that line.
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_insert_hline_and_move(ctx.table,
-                                                             ctx.table_pos)
+        return ctx.table_driver.editor_insert_hline_and_move()
 
 
 class TableEditorSplitColumnDown(AbstractTableCommand):
@@ -413,7 +410,7 @@ class TableEditorJoinLines(AbstractTableCommand):
     Join current row and next row into one if next row is not hline
     """
     def run_operation(self, ctx):
-        return ctx.table_driver.editor_join_lines(ctx.table, ctx.table_pos)
+        return ctx.table_driver.editor_join_lines()
 
 
 class TableEditorCsvToTable(AbstractTableCommand):
