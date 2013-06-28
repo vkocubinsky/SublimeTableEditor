@@ -394,7 +394,7 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         row_num = ctx.row_num
 
         if row_num + 1 == len(ctx.table) or ctx.table[row_num + 1].is_separator():
-            ctx.table_driver.insert_empty_row(row_num + 1)
+            ctx.table.insert_empty_row(row_num + 1)
 
         row_num = row_num + 1
         ctx.table[row_num][field_num].data = rest_data + " " + ctx.table[row_num][field_num].data.strip()
