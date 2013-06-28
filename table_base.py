@@ -384,6 +384,25 @@ class TextTable:
     def render(self):
         return "\n".join(self.render_lines())
 
+    def is_col_colspan(self, col):
+        for row in self.rows:
+            if col < len(row):
+                if row[col].pseudo() or row[col].colspan > 1:
+                    return True
+        return False
+
+    def assert_not_col_colspan(self, col):
+        check_condition(self.is_col_colspan(col) is False,
+                        "Expected not colspan column, but column {0}"
+                        " is colspan".format(col))
+
+    def delete_column(self, col):
+        self.assert_not_col_colspan(col)
+        for row in self.rows:
+            if col < len(row):
+                del row.columns[col]
+        self.pack()
+
 
 class TableException(Exception):
 
@@ -417,12 +436,6 @@ class TableDriver:
     def visual_column_count(self, row):
         return sum([1 for col in self.table[row].columns if not col.pseudo()])
 
-    def is_col_colspan(self, col):
-        for row in self.table.rows:
-            if col < len(row):
-                if row[col].pseudo() or row[col].colspan > 1:
-                    return True
-        return False
 
     def is_row_colspan(self, row):
         for column in self.table[row].columns:
@@ -467,28 +480,13 @@ class TableDriver:
             col_pos = 1
         return base_len + col_pos
 
-    def delete_column(self, i):
-        check_condition(self.is_col_colspan(i) is False,
-                             "Expected not colspan column, but column {0}"
-                             " is colpan".format(i))
-        for row in self.table.rows:
-            if i < len(row):
-                del row.columns[i]
-        self.table.pack()
-
     def swap_columns(self, i, j):
-        check_condition(self.is_col_colspan(i) is False,
-                             "Expected not colspan column, but column {0}"
-                             " is colpan".format(i))
-        check_condition(self.is_col_colspan(j) is False,
-                             "Expected not colspan column, but column {0}"
-                             " is colspan".format(j))
-
+        self.table.assert_not_col_colspan(i)
+        self.table.assert_not_col_colspan(j)
         for row in self.table.rows:
             if i < len(row) and j < len(row):
                 row.columns[i], row.columns[j] = row.columns[j], row.columns[i]
         self.table.pack()
-
 
     def editor_move_column_left(self):
         field_num = self.visual_to_internal_index(self.table_pos.row_num,
@@ -552,11 +550,11 @@ class TableDriver:
                 TablePos(self.table_pos.row_num + 1, self.table_pos.field_num))
 
     def editor_delete_column(self):
-        if self.is_col_colspan(self.table_pos.field_num):
+        if self.table.is_col_colspan(self.table_pos.field_num):
             raise TableException("Delete column is not permitted for "
                                  "colspan column")
         else:
-            self.delete_column(self.table_pos.field_num)
+            self.table.delete_column(self.table_pos.field_num)
             new_table_pos = TablePos(self.table_pos.row_num,
                                      self.table_pos.field_num)
             if (not self.table.empty() and
@@ -694,9 +692,7 @@ class TableDriver:
 
     def insert_empty_column(self, i):
         check_condition(i >= 0, "Index should be positive")
-        check_condition(self.is_col_colspan(i) is False,
-                             "Expected not colspan column, but "
-                             "Column {0} is colspan".format(i))
+        self.table.assert_not_col_colspan(i)
 
         for row in self.table.rows:
             row.columns.insert(i, row.new_empty_column())

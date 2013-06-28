@@ -152,8 +152,8 @@ class SimpleSyntaxTest(BaseTableTest):
         """.strip()
 
         t = self.syntax.table_parser.parse_text(text)
-        d = self.syntax.table_driver(t, table_lib.TablePos(0,0))
-        d.delete_column(1)
+        d = self.syntax.table_driver(t, table_lib.TablePos(0,1))
+        d.editor_delete_column()
         self.assert_table_equals(expected, t.render())
 
     def testSwapRows(self):
