@@ -26,8 +26,10 @@ import difflib
 
 try:
     from . import table_lib
+    from .table_base import TablePos
 except ValueError:
     import table_lib
+    from table_base import TablePos
 
 
 class BaseTableTest(unittest.TestCase):
@@ -130,7 +132,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_move_column_right(t, table_lib.TablePos(0, 1))
+        msg, pos = d.editor_move_column_right(t, TablePos(0, 1))
+        self.assertEqual(TablePos(0, 2), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveColumnLeft(self):
@@ -152,7 +155,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_move_column_left(t, table_lib.TablePos(0, 2))
+        msg, pos = d.editor_move_column_left(t, TablePos(0, 2))
+        self.assertEqual(TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testDeleteColumn(self):
@@ -174,7 +178,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_delete_column(t, table_lib.TablePos(0, 1))
+        msg, pos = d.editor_delete_column(t, TablePos(0, 1))
+        self.assertEqual(TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveRowDown(self):
@@ -196,7 +201,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_move_row_down(t, table_lib.TablePos(3, 0))
+        msg, pos = d.editor_move_row_down(t, TablePos(3, 0))
+        self.assertEqual(TablePos(4, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveRowUp(self):
@@ -218,7 +224,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_move_row_up(t, table_lib.TablePos(4, 0))
+        msg, pos = d.editor_move_row_up(t, TablePos(4, 0))
+        self.assertEqual(TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testKillRow(self):
@@ -239,7 +246,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_kill_row(t, table_lib.TablePos(4, 0))
+        msg, pos = d.editor_kill_row(t, TablePos(4, 0))
+        self.assertEqual(TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertColumn(self):
@@ -261,7 +269,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_insert_column(t, table_lib.TablePos(0, 1))
+        msg, pos = d.editor_insert_column(t, TablePos(0, 1))
+        self.assertEqual(TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertRow(self):
@@ -284,10 +293,11 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_insert_row(t, table_lib.TablePos(3, 0))
+        msg, pos = d.editor_insert_row(t, TablePos(3, 0))
+        self.assertEqual(TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
-    def testInsertSeparatorRow(self):
+    def testInsertSingleHline(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -305,10 +315,34 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_insert_single_hline(t, table_lib.TablePos(1, 0))
+        msg, pos = d.editor_insert_single_hline(t, TablePos(1, 0))
+        self.assertEqual(TablePos(1, 0), pos)
         self.assert_table_equals(expected, t.render())
 
-    def testInsertDoubleSeparatorRow(self):
+
+    def testInsertHlineAndMove(self):
+        text = """
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.strip()
+
+        expected = """
+|     Name    |    Gender   |      Age      |
+| Text Column | Char Column | Number Column |
+|-------------|-------------|---------------|
+| Alisa       | F           |            21 |
+| Alex        | M           |            22 |
+        """.strip()
+
+        t = self.syntax.table_parser.parse_text(text)
+        d = self.syntax.table_driver
+        msg, pos = d.editor_insert_hline_and_move(t, TablePos(1, 0))
+        self.assertEqual(TablePos(3, 0), pos)
+        self.assert_table_equals(expected, t.render())
+
+    def testInsertDoubleHline(self):
         text = """
 |     Name    |    Gender   |      Age      |
 | Text Column | Char Column | Number Column |
@@ -326,7 +360,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        d.editor_insert_double_hline(t, table_lib.TablePos(1, 0))
+        msg, pos = d.editor_insert_double_hline(t, TablePos(1, 0))
+        self.assertEqual(TablePos(1, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testParseCsv(self):
