@@ -319,7 +319,6 @@ class SimpleSyntaxTest(BaseTableTest):
         self.assertEqual(TablePos(1, 0), pos)
         self.assert_table_equals(expected, t.render())
 
-
     def testInsertHlineAndMove(self):
         text = """
 |     Name    |    Gender   |      Age      |
