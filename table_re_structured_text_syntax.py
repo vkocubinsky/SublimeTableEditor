@@ -45,6 +45,4 @@ class ReStructuredTextTableSyntax(TableSyntax):
         self.table_parser = BorderTableParser(self)
         self.hline_out_border = '+'
         self.hline_in_border = '+'
-
-    def table_driver(self, table, position):
-        return BorderTableDriver(table, position)
+        self.table_driver = BorderTableDriver()

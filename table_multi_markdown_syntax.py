@@ -45,9 +45,7 @@ class MultiMarkdownTableSyntax(TableSyntax):
         TableSyntax.__init__(self, "Multi Markdown", table_configuration)
         self.table_parser = MultiMarkdownTableParser(self)
         self.line_parser = LineParser("(?:\|\|+)|(?:(?:\+)|(?:\|))")
-
-    def table_driver(self, table, position):
-        return MultiMarkdownTableDriver(table, position)
+        self.table_driver = MultiMarkdownTableDriver()
 
 
 class MultiMarkdownAlignColumn(Column):
@@ -132,8 +130,8 @@ class MultiMarkdownTableParser(BaseTableParser):
 
 class MultiMarkdownTableDriver(TableDriver):
 
-    def insert_single_separator_row(self, i):
-        assert i >= 0
-
-        self.table.rows.insert(i, MultiMarkdownAlignRow(self.table))
-        self.table.pack()
+    def editor_insert_single_hline(self, table, table_pos):
+        table.rows.insert(table_pos.row_num + 1, MultiMarkdownAlignRow(table))
+        table.pack()
+        return ("Single separator row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))

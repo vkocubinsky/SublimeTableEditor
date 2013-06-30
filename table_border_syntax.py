@@ -79,17 +79,28 @@ class SeparatorColumn(Column):
 
 class BorderTableDriver(TableDriver):
 
-    def insert_single_separator_row(self, i):
-        assert i >= 0
+    def editor_insert_single_hline(self, table, table_pos):
+        table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '-'))
+        table.pack()
+        return ("Single separator row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))
 
-        self.table.rows.insert(i, SeparatorRow(self.table, '-'))
-        self.table.pack()
+    def editor_insert_double_hline(self, table, table_pos):
+        table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '='))
+        table.pack()
+        return ("Double separator row inserted",
+                TablePos(table_pos.row_num, table_pos.field_num))
 
-    def insert_double_separator_row(self, i):
-        assert i >= 0
-
-        self.table.rows.insert(i, SeparatorRow(self.table, '='))
-        self.table.pack()
+    def editor_insert_hline_and_move(self, table, table_pos):
+        table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '-'))
+        table.pack()
+        if table_pos.row_num + 2 < len(table):
+            if table[table_pos.row_num + 2].is_separator():
+                table.insert_empty_row(table_pos.row_num + 2)
+        else:
+            table.insert_empty_row(table_pos.row_num + 2)
+        return("Single separator row inserted",
+               TablePos(table_pos.row_num + 2, 0))
 
 
 class BorderTableParser(BaseTableParser):

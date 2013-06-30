@@ -64,9 +64,7 @@ class TableSyntax:
         self.line_parser = LineParser("(?:(?:\+)|(?:\|))")
         # Should be set in sublass constructor
         self.table_parser = None
-
-    def table_driver(self, table, position):
-        return TableDriver(table, position)
+        self.table_driver = TableDriver()
 
 
 class Column(object):
@@ -473,49 +471,49 @@ class TablePos:
         return self.__repr__()
 
     def __eq__(self, other):
-        return self.row_num == other.row_num and self.field_num == other.field_num
+        return (self.row_num == other.row_num
+                and self.field_num == other.field_num)
 
 
 class TableDriver:
 
-    def __init__(self, table, table_pos):
-        self.table = table
-        self.table_pos = table_pos
-        self.syntax = table.syntax
+    def __init__(self):
+        pass
 
-    def visual_column_count(self, row):
-        return sum([1 for col in self.table[row].columns if not col.pseudo()])
+    def visual_column_count(self, table, row_ind):
+        return sum([1 for column in table[row_ind].columns
+                   if not column.pseudo()])
 
-    def internal_to_visual_index(self, row, internal_index):
-        visual_ind = internal_index
-        for col in range(internal_index + 1):
-            if self.table[row][col].pseudo():
+    def internal_to_visual_index(self, table, row_ind, internal_ind):
+        visual_ind = internal_ind
+        for col_ind in range(internal_ind + 1):
+            if table[row_ind][col_ind].pseudo():
                 visual_ind -= 1
         return visual_ind
 
-    def visual_to_internal_index(self, row, visual_index):
+    def visual_to_internal_index(self, table, row_ind, visual_ind):
         count_visual = 0
         internal_ind = 0
-        for col in range(len(self.table[row])):
-            if not self.table[row][col].pseudo():
+        for col_ind in range(len(table[row_ind])):
+            if not table[row_ind][col_ind].pseudo():
                 count_visual += 1
-                internal_ind = col
-            if count_visual == visual_index + 1:
+                internal_ind = col_ind
+            if count_visual == visual_ind + 1:
                 break
         else:
             print("WARNING: Visual Index Not found")
         return internal_ind
 
-    def get_cursor(self, row_ind, visual_col_ind):
+    def get_cursor(self, table, row_ind, visual_col_ind):
         #
         # '   |  1 |  2  |  3_| 4 |'
-        col_ind = self.visual_to_internal_index(row_ind, visual_col_ind)
-        base_len = (len(self.table.prefix)
+        col_ind = self.visual_to_internal_index(table, row_ind, visual_col_ind)
+        base_len = (len(table.prefix)
                     + sum([column.col_len for column, ind
-                          in zip(self.table[row_ind].columns, range(col_ind))])
+                          in zip(table[row_ind].columns, range(col_ind))])
                     + col_ind + 1  # count of '|'
                     )
-        text = self.table[row_ind][col_ind].render()
+        text = table[row_ind][col_ind].render()
         match = re.search(r"([^\s])\s*$", text)
         if match:
             col_pos = match.end(1)
@@ -523,187 +521,177 @@ class TableDriver:
             col_pos = 1
         return base_len + col_pos
 
-    def editor_move_column_left(self):
-        field_num = self.visual_to_internal_index(self.table_pos.row_num,
-                                                  self.table_pos.field_num)
+    def editor_move_column_left(self, table, table_pos):
+        field_num = self.visual_to_internal_index(table, table_pos.row_num,
+                                                  table_pos.field_num)
         if field_num > 0:
-            if (self.table.is_col_colspan(field_num) or
-                    self.table.is_col_colspan(field_num - 1)):
+            if (table.is_col_colspan(field_num) or
+                    table.is_col_colspan(field_num - 1)):
                 raise TableException("Move Column Left is not "
                                      "permitted for colspan column")
             else:
-                self.table.swap_columns(field_num, field_num - 1)
+                table.swap_columns(field_num, field_num - 1)
                 return ("Column moved to left",
-                        TablePos(self.table_pos.row_num, self.table_pos.field_num - 1))
+                        TablePos(table_pos.row_num, table_pos.field_num - 1))
         else:
             raise TableException("Move Column Left doesn't "
                                  "make sence for the first column in the "
                                  "table.")
 
-    def editor_move_column_right(self):
-        field_num = self.visual_to_internal_index(self.table_pos.row_num,
-                                                  self.table_pos.field_num)
-        if field_num < len(self.table[self.table_pos.row_num]) - 1:
-            if (self.table.is_col_colspan(field_num) or
-                    self.table.is_col_colspan(field_num + 1)):
+    def editor_move_column_right(self, table, table_pos):
+        field_num = self.visual_to_internal_index(table, table_pos.row_num,
+                                                  table_pos.field_num)
+        if field_num < len(table[table_pos.row_num]) - 1:
+            if (table.is_col_colspan(field_num) or
+                    table.is_col_colspan(field_num + 1)):
                 raise TableException("Move Column Right is not "
                                      "permitted for colspan column")
             else:
-                self.table.swap_columns(field_num, field_num + 1)
+                table.swap_columns(field_num, field_num + 1)
                 return ("Column moved to right",
-                        TablePos(self.table_pos.row_num, self.table_pos.field_num + 1))
+                        TablePos(table_pos.row_num, table_pos.field_num + 1))
         else:
             raise TableException("Move Column Right doesn't "
                                  "make sense for the last column in the "
                                  "table.")
 
-    def editor_move_row_up(self):
-        if self.table_pos.row_num > 0:
-            self.table.swap_rows(self.table_pos.row_num, self.table_pos.row_num - 1)
+    def editor_move_row_up(self, table, table_pos):
+        if table_pos.row_num > 0:
+            table.swap_rows(table_pos.row_num, table_pos.row_num - 1)
             return("Row moved up",
-                   TablePos(self.table_pos.row_num - 1, self.table_pos.field_num))
+                   TablePos(table_pos.row_num - 1, table_pos.field_num))
         else:
             raise TableException("Move Row Up doesn't make sense for the "
                                  "first row in the table")
 
-    def editor_move_row_down(self):
-        if self.table_pos.row_num + 1 < len(self.table):
-            self.table.swap_rows(self.table_pos.row_num, self.table_pos.row_num + 1)
+    def editor_move_row_down(self, table, table_pos):
+        if table_pos.row_num + 1 < len(table):
+            table.swap_rows(table_pos.row_num, table_pos.row_num + 1)
             return ("Row moved down",
-                    TablePos(self.table_pos.row_num + 1, self.table_pos.field_num))
+                    TablePos(table_pos.row_num + 1, table_pos.field_num))
         else:
             raise TableException("Move Row Down doesn't make sense for the "
                                  "last row in the table")
 
-    def editor_next_row(self):
-        if self.table_pos.row_num + 1 < len(self.table):
-            if self.table[self.table_pos.row_num + 1].is_header_separator():
-                self.table.insert_empty_row(self.table_pos.row_num + 1)
+    def editor_next_row(self, table, table_pos):
+        if table_pos.row_num + 1 < len(table):
+            if table[table_pos.row_num + 1].is_header_separator():
+                table.insert_empty_row(table_pos.row_num + 1)
         else:
-            self.table.insert_empty_row(len(self.table))
+            table.insert_empty_row(len(table))
         return ("Moved to next row",
-                TablePos(self.table_pos.row_num + 1, self.table_pos.field_num))
+                TablePos(table_pos.row_num + 1, table_pos.field_num))
 
-    def editor_delete_column(self):
-        if self.table.is_col_colspan(self.table_pos.field_num):
+    def editor_delete_column(self, table, table_pos):
+        if table.is_col_colspan(table_pos.field_num):
             raise TableException("Delete column is not permitted for "
                                  "colspan column")
         else:
-            self.table.delete_column(self.table_pos.field_num)
-            new_table_pos = TablePos(self.table_pos.row_num,
-                                     self.table_pos.field_num)
-            if (not self.table.empty() and
-                    self.table_pos.field_num == len(self.table[self.table_pos.row_num])):
+            table.delete_column(table_pos.field_num)
+            new_table_pos = TablePos(table_pos.row_num,
+                                     table_pos.field_num)
+            if (not table.empty() and
+                    table_pos.field_num == len(table[table_pos.row_num])):
                 new_table_pos.field_num = new_table_pos.field_num - 1
             return("Column deleted", new_table_pos)
 
-    def editor_insert_column(self):
-        if self.table.is_col_colspan(self.table_pos.field_num):
+    def editor_insert_column(self, table, table_pos):
+        if table.is_col_colspan(table_pos.field_num):
             raise TableException("Insert column is not permitted for "
                                  "colspan column")
         else:
-            self.table.insert_empty_column(self.table_pos.field_num)
+            table.insert_empty_column(table_pos.field_num)
             return ("Column inserted",
-                    TablePos(self.table_pos.row_num, self.table_pos.field_num))
+                    TablePos(table_pos.row_num, table_pos.field_num))
 
-    def editor_kill_row(self):
-        self.table.delete_row(self.table_pos.row_num)
-        new_table_pos = TablePos(self.table_pos.row_num,
-                                 self.table_pos.field_num)
-        if self.table_pos.row_num == len(self.table):
+    def editor_kill_row(self, table, table_pos):
+        table.delete_row(table_pos.row_num)
+        new_table_pos = TablePos(table_pos.row_num, table_pos.field_num)
+        if table_pos.row_num == len(table):
             new_table_pos.row_num = new_table_pos.row_num - 1
         return ("Row deleted", new_table_pos)
 
-    def editor_insert_row(self):
-        self.table.insert_empty_row(self.table_pos.row_num)
+    def editor_insert_row(self, table, table_pos):
+        table.insert_empty_row(table_pos.row_num)
         return ("Row inserted",
-                TablePos(self.table_pos.row_num, self.table_pos.field_num))
+                TablePos(table_pos.row_num, table_pos.field_num))
 
-    def editor_insert_single_hline(self):
-        self.insert_single_separator_row(self.table_pos.row_num + 1)
-        return ("Single separator row inserted",
-                TablePos(self.table_pos.row_num, self.table_pos.field_num))
+    def editor_insert_single_hline(self, table, table_pos):
+        raise TableException("Syntax {0} doesn't support insert single line"
+                             .format(self.syntax.name))
 
-    def editor_insert_double_hline(self):
-        self.insert_double_separator_row(self.table_pos.row_num + 1)
-        return ("Double separator row inserted",
-                TablePos(self.table_pos.row_num, self.table_pos.field_num))
+    def editor_insert_double_hline(self, table, table_pos):
+        raise TableException("Syntax {0} doesn't support insert double line"
+                             .format(self.syntax.name))
 
-    def editor_insert_hline_and_move(self):
-        self.insert_single_separator_row(self.table_pos.row_num + 1)
+    def editor_insert_hline_and_move(self, table, table_pos):
+        raise TableException("Syntax {0} doesn't support insert single line "
+                             "and move".format(self.syntax.name))
 
-        if self.table_pos.row_num + 2 < len(self.table):
-            if self.table[self.table_pos.row_num + 2].is_separator():
-                self.table.insert_empty_row(self.table_pos.row_num + 2)
-        else:
-            self.table.insert_empty_row(self.table_pos.row_num + 2)
-        return("Single separator row inserted",
-               TablePos(self.table_pos.row_num + 2, 0))
-
-    def editor_align(self):
+    def editor_align(self, table, table_pos):
         return ("Table aligned",
-                TablePos(self.table_pos.row_num, self.table_pos.field_num))
+                TablePos(table_pos.row_num, table_pos.field_num))
 
-    def editor_join_lines(self):
-        if (self.table_pos.row_num + 1 < len(self.table)
-            and self.table[self.table_pos.row_num].is_data()
-            and self.table[self.table_pos.row_num + 1].is_data()
-            and not self.table.is_row_colspan(self.table_pos.row_num)
-                and not self.table.is_row_colspan(self.table_pos.row_num + 1)):
+    def editor_join_lines(self, table, table_pos):
+        if (table_pos.row_num + 1 < len(table)
+            and table[table_pos.row_num].is_data()
+            and table[table_pos.row_num + 1].is_data()
+            and not table.is_row_colspan(table_pos.row_num)
+                and not table.is_row_colspan(table_pos.row_num + 1)):
 
-            for curr_col, next_col in zip(self.table[self.table_pos.row_num].columns,
-                                          self.table[self.table_pos.row_num + 1].columns):
+            for curr_col, next_col in zip(table[table_pos.row_num].columns,
+                                          table[table_pos.row_num + 1].columns):
                 curr_col.data = curr_col.data.strip() + " " + next_col.data.strip()
 
-            self.table.delete_row(self.table_pos.row_num + 1)
+            table.delete_row(table_pos.row_num + 1)
             return ("Rows joined",
-                    TablePos(self.table_pos.row_num, self.table_pos.field_num))
+                    TablePos(table_pos.row_num, table_pos.field_num))
         else:
             raise TableException("Join columns is not permitted")
 
-    def editor_next_field(self):
-        pos = TablePos(self.table_pos.row_num, self.table_pos.field_num)
+    def editor_next_field(self, table, table_pos):
+        pos = TablePos(table_pos.row_num, table_pos.field_num)
 
         moved = False
         while True:
-            if self.table[pos.row_num].is_separator():
-                if pos.row_num + 1 < len(self.table):
+            if table[pos.row_num].is_separator():
+                if pos.row_num + 1 < len(table):
                     pos.field_num = 0
                     pos.row_num += 1
                     moved = True
                     continue
                 else:
                     #sel_row == last_table_row
-                    self.table.insert_empty_row(len(self.table))
+                    table.insert_empty_row(len(table))
                     pos.field_num = 0
                     pos.row_num += 1
                     break
             elif moved:
                 break
-            elif pos.field_num + 1 < self.visual_column_count(pos.row_num):
+            elif pos.field_num + 1 < self.visual_column_count(table, pos.row_num):
                 pos.field_num += 1
                 break
-            elif pos.row_num + 1 < len(self.table):
+            elif pos.row_num + 1 < len(table):
                 pos.field_num = 0
                 pos.row_num += 1
                 moved = True
                 continue
             else:
                 #sel_row == last_table_row
-                self.table.insert_empty_row(len(self.table))
+                table.insert_empty_row(len(table))
                 pos.field_num = 0
                 pos.row_num += 1
                 break
         return ("Cursor position changed", pos)
 
-    def editor_previous_field(self):
-        pos = TablePos(self.table_pos.row_num, self.table_pos.field_num)
+    def editor_previous_field(self, table, table_pos):
+        pos = TablePos(table_pos.row_num, table_pos.field_num)
         moved = False
         while True:
-            if self.table[pos.row_num].is_separator():
+            if table[pos.row_num].is_separator():
                 if pos.row_num > 0:
                     pos.row_num -= 1
-                    pos.field_num = self.visual_column_count(pos.row_num) - 1
+                    pos.field_num = self.visual_column_count(table, pos.row_num) - 1
                     moved = True
                     continue
                 else:
@@ -717,19 +705,13 @@ class TableDriver:
                 break
             elif pos.row_num > 0:
                 pos.row_num -= 1
-                pos.field_num = self.visual_column_count(pos.row_num) - 1
+                pos.field_num = self.visual_column_count(table, pos.row_num) - 1
                 moved = True
                 continue
             else:
                 #row_num == 0
                 break
         return ("Cursor position changed", pos)
-
-    def insert_single_separator_row(self, i):
-        raise TableException("Syntax {0} doesn't support insert single line".format(self.syntax.name))
-
-    def insert_double_separator_row(self, i):
-        raise TableException("Syntax {0} doesn't support insert double line".format(self.syntax.name))
 
 
 class BaseTableParser:
