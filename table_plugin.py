@@ -52,7 +52,7 @@ class TableContext:
 
         self.table = self.syntax.table_parser.parse_text(self.table_text)
         self.table_driver = self.syntax.table_driver
-        self.field_num = self.table_driver.visual_to_internal_index(self.table, self.row_num, self.visual_field_num)
+        self.field_num = self.table_driver.visual_to_internal_index(self.table, self.table_pos).field_num
 
     def _get_table_text(self, first_table_row, last_table_row):
         begin_point = self.view.line(self.view.text_point(first_table_row, 0)
@@ -202,7 +202,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if ctx.table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            col = ctx.table_driver.get_cursor(ctx.table, row_num, visual_field_num)
+            pos = TablePos(row_num, visual_field_num)
+            col = ctx.table_driver.get_cursor(ctx.table, pos)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
 
@@ -214,7 +215,8 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if ctx.table.empty():
             visual_field_num = 0
         else:
-            visual_field_num = ctx.table_driver.internal_to_visual_index(ctx.table, row_num, field_num)
+            pos = TablePos(row_num, field_num)
+            visual_field_num = ctx.table_driver.internal_to_visual_index(ctx.table, pos).field_num
         return self.visual_field_sel(ctx, row_num, visual_field_num)
 
 

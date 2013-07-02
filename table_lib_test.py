@@ -498,28 +498,28 @@ class TextileSyntaxTest(BaseTableTest):
         #formatted = t.render()
 
         # test visual_to_internal_index
-        self.assertEqual(0, d.visual_to_internal_index(t, 1, 0))
-        self.assertEqual(2, d.visual_to_internal_index(t, 1, 1))
-        self.assertEqual(3, d.visual_to_internal_index(t, 1, 2))
-        self.assertEqual(5, d.visual_to_internal_index(t, 1, 3))
+        self.assertEqual(TablePos(1, 0), d.visual_to_internal_index(t, TablePos(1, 0)))
+        self.assertEqual(TablePos(1, 2), d.visual_to_internal_index(t, TablePos(1, 1)))
+        self.assertEqual(TablePos(1, 3), d.visual_to_internal_index(t, TablePos(1, 2)))
+        self.assertEqual(TablePos(1, 5), d.visual_to_internal_index(t, TablePos(1, 3)))
 
-        self.assertEqual(5, d.visual_to_internal_index(t, 1, 1000))
+        self.assertEqual(TablePos(1, 5), d.visual_to_internal_index(t, TablePos(1, 1000)))
 
         # test trivial
         for col in range(len(t[0])):
-            self.assertEqual(col, d.visual_to_internal_index(t, 0, col))
-            self.assertEqual(col, d.visual_to_internal_index(t, 2, col))
+            self.assertEqual(TablePos(0, col), d.visual_to_internal_index(t, TablePos(0, col)))
+            self.assertEqual(TablePos(2, col), d.visual_to_internal_index(t, TablePos(2, col)))
 
-            self.assertEqual(col, d.internal_to_visual_index(t, 0, col))
-            self.assertEqual(col, d.internal_to_visual_index(t, 2, col))
+            self.assertEqual(TablePos(0, col), d.internal_to_visual_index(t, TablePos(0, col)))
+            self.assertEqual(TablePos(2, col), d.internal_to_visual_index(t, TablePos(2, col)))
 
         # test internal_to_visual_index
-        self.assertEqual(0, d.internal_to_visual_index(t, 1, 0))
-        self.assertEqual(0, d.internal_to_visual_index(t, 1, 1))
-        self.assertEqual(1, d.internal_to_visual_index(t, 1, 2))
-        self.assertEqual(2, d.internal_to_visual_index(t, 1, 3))
-        self.assertEqual(2, d.internal_to_visual_index(t, 1, 4))
-        self.assertEqual(3, d.internal_to_visual_index(t, 1, 5))
+        self.assertEqual(TablePos(1, 0), d.internal_to_visual_index(t, TablePos(1, 0)))
+        self.assertEqual(TablePos(1, 0), d.internal_to_visual_index(t, TablePos(1, 1)))
+        self.assertEqual(TablePos(1, 1), d.internal_to_visual_index(t, TablePos(1, 2)))
+        self.assertEqual(TablePos(1, 2), d.internal_to_visual_index(t, TablePos(1, 3)))
+        self.assertEqual(TablePos(1, 2), d.internal_to_visual_index(t, TablePos(1, 4)))
+        self.assertEqual(TablePos(1, 3), d.internal_to_visual_index(t, TablePos(1, 5)))
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):

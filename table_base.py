@@ -484,36 +484,38 @@ class TableDriver:
         return sum([1 for column in table[row_ind].columns
                    if not column.pseudo()])
 
-    def internal_to_visual_index(self, table, row_ind, internal_ind):
-        visual_ind = internal_ind
-        for col_ind in range(internal_ind + 1):
-            if table[row_ind][col_ind].pseudo():
-                visual_ind -= 1
-        return visual_ind
+    def internal_to_visual_index(self, table, internal_pos):
+        visual_pos = TablePos(internal_pos.row_num, internal_pos.field_num)
+        for col_ind in range(internal_pos.field_num + 1):
+            if table[internal_pos.row_num][col_ind].pseudo():
+                visual_pos.field_num -= 1
+        return visual_pos
 
-    def visual_to_internal_index(self, table, row_ind, visual_ind):
+    def visual_to_internal_index(self, table, visual_pos):
+        internal_pos = TablePos(visual_pos.row_num, 0)
         count_visual = 0
-        internal_ind = 0
-        for col_ind in range(len(table[row_ind])):
-            if not table[row_ind][col_ind].pseudo():
+        internal_pos.field_num = 0
+        for col_ind in range(len(table[visual_pos.row_num])):
+            if not table[visual_pos.row_num][col_ind].pseudo():
                 count_visual += 1
-                internal_ind = col_ind
-            if count_visual == visual_ind + 1:
+                internal_pos.field_num = col_ind
+            if count_visual == visual_pos.field_num + 1:
                 break
         else:
             print("WARNING: Visual Index Not found")
-        return internal_ind
+        return internal_pos
 
-    def get_cursor(self, table, row_ind, visual_col_ind):
+    def get_cursor(self, table, visual_pos):
         #
         # '   |  1 |  2  |  3_| 4 |'
-        col_ind = self.visual_to_internal_index(table, row_ind, visual_col_ind)
+        internal_pos = self.visual_to_internal_index(table, visual_pos)
         base_len = (len(table.prefix)
                     + sum([column.col_len for column, ind
-                          in zip(table[row_ind].columns, range(col_ind))])
-                    + col_ind + 1  # count of '|'
+                          in zip(table[visual_pos.row_num].columns,
+                                 range(internal_pos.field_num))])
+                    + internal_pos.field_num + 1  # count of '|'
                     )
-        text = table[row_ind][col_ind].render()
+        text = table[internal_pos.row_num][internal_pos.field_num].render()
         match = re.search(r"([^\s])\s*$", text)
         if match:
             col_pos = match.end(1)
@@ -522,8 +524,8 @@ class TableDriver:
         return base_len + col_pos
 
     def editor_move_column_left(self, table, table_pos):
-        field_num = self.visual_to_internal_index(table, table_pos.row_num,
-                                                  table_pos.field_num)
+        internal_pos = self.visual_to_internal_index(table, table_pos)
+        field_num = internal_pos.field_num
         if field_num > 0:
             if (table.is_col_colspan(field_num) or
                     table.is_col_colspan(field_num - 1)):
@@ -539,8 +541,9 @@ class TableDriver:
                                  "table.")
 
     def editor_move_column_right(self, table, table_pos):
-        field_num = self.visual_to_internal_index(table, table_pos.row_num,
-                                                  table_pos.field_num)
+        internal_pos = self.visual_to_internal_index(table, table_pos)
+        field_num = internal_pos.field_num
+
         if field_num < len(table[table_pos.row_num]) - 1:
             if (table.is_col_colspan(field_num) or
                     table.is_col_colspan(field_num + 1)):
@@ -583,11 +586,14 @@ class TableDriver:
                 TablePos(table_pos.row_num + 1, table_pos.field_num))
 
     def editor_delete_column(self, table, table_pos):
-        if table.is_col_colspan(table_pos.field_num):
+        internal_pos = self.visual_to_internal_index(table, table_pos)
+        field_num = internal_pos.field_num
+
+        if table.is_col_colspan(field_num):
             raise TableException("Delete column is not permitted for "
                                  "colspan column")
         else:
-            table.delete_column(table_pos.field_num)
+            table.delete_column(field_num)
             new_table_pos = TablePos(table_pos.row_num,
                                      table_pos.field_num)
             if (not table.empty() and
@@ -596,11 +602,14 @@ class TableDriver:
             return("Column deleted", new_table_pos)
 
     def editor_insert_column(self, table, table_pos):
-        if table.is_col_colspan(table_pos.field_num):
+        internal_pos = self.visual_to_internal_index(table, table_pos)
+        field_num = internal_pos.field_num
+
+        if table.is_col_colspan(field_num):
             raise TableException("Insert column is not permitted for "
                                  "colspan column")
         else:
-            table.insert_empty_column(table_pos.field_num)
+            table.insert_empty_column(field_num)
             return ("Column inserted",
                     TablePos(table_pos.row_num, table_pos.field_num))
 
