@@ -171,9 +171,6 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
                 region = self.view.line(self.view.text_point(row, 0))
                 self.view.erase(edit, region)
 
-    def create_table(self, ctx):
-        return table_lib.parse_table(ctx.syntax, ctx.table_text)
-
     def create_context(self, sel):
         return TableContext(self.view, sel, self.detect_syntax())
 
@@ -389,11 +386,13 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         row_num = ctx.row_num
         if row_num + 1 < len(ctx.table):
             if len(ctx.table[row_num + 1]) - 1 < field_num:
-                sublime.status_message("Table Editor: Split column is not permitted for short line")
-                return self.field_sel(ctx, row_num, field_num)
+                sublime.status_message("Table Editor: Split column is not "
+                                       "permitted for short line")
+                return self.table_pos_sel(ctx, ctx.table_pos)
             elif ctx.table[row_num + 1][field_num].pseudo():
-                sublime.status_message("Table Editor: Split column is not permitted to colspan column")
-                return self.field_sel(ctx, row_num, field_num)
+                sublime.status_message("Table Editor: Split column is not "
+                                       "permitted to colspan column")
+                return self.table_pos_sel(ctx, ctx.table_pos)
 
         (sel_row, sel_col) = self.view.rowcol(sel.begin())
         rest_data = self.remove_rest_line(edit, sel)

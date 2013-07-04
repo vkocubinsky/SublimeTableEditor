@@ -29,9 +29,9 @@ import math
 import re
 
 try:
-    from .table_line_parser import *
+    from .table_line_parser import LineParser
 except ValueError:
-    from table_line_parser import *
+    from table_line_parser import LineParser
 
 
 class TableConfiguration:
