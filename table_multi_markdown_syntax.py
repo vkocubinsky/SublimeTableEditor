@@ -30,36 +30,38 @@ import re
 
 
 try:
-    from .table_base import *
+    from . import table_base as tbase
+    from . import line_parser as tparser
 except ValueError:
-    from table_base import *
+    import table_base as tbase
+    import table_line_parser as tparser
 
 
 def create_syntax(table_configuration=None):
     return MultiMarkdownTableSyntax(table_configuration)
 
 
-class MultiMarkdownTableSyntax(TableSyntax):
+class MultiMarkdownTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, "Multi Markdown", table_configuration)
+        tbase.TableSyntax.__init__(self, "Multi Markdown", table_configuration)
         self.table_parser = MultiMarkdownTableParser(self)
-        self.line_parser = LineParser("(?:\|\|+)|(?:(?:\+)|(?:\|))")
-        self.table_driver = MultiMarkdownTableDriver()
+        self.line_parser = tparser.LineParser("(?:\|\|+)|(?:(?:\+)|(?:\|))")
+        self.table_driver = MultiMarkdownTableDriver(self)
 
 
-class MultiMarkdownAlignColumn(Column):
+class MultiMarkdownAlignColumn(tbase.Column):
     PATTERN = r"^\s*([\:]?[\-]+[\:]?)\s*$"
 
     def __init__(self, row, data):
-        Column.__init__(self, row)
+        tbase.Column.__init__(self, row)
         col = data.strip()
         if col.count(':') == 2:
-            self._align_follow = Column.ALIGN_CENTER
+            self._align_follow = tbase.Column.ALIGN_CENTER
         elif col[0] == ':':
-            self._align_follow = Column.ALIGN_LEFT
+            self._align_follow = tbase.Column.ALIGN_LEFT
         elif col[-1] == ':':
-            self._align_follow = Column.ALIGN_RIGHT
+            self._align_follow = tbase.Column.ALIGN_RIGHT
         else:
             self._align_follow = None
 
@@ -74,11 +76,11 @@ class MultiMarkdownAlignColumn(Column):
         total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
         total_col_len = total_col_len - (self.colspan - 1)
 
-        if self._align_follow == Column.ALIGN_CENTER:
+        if self._align_follow == tbase.Column.ALIGN_CENTER:
             return ' :' + '-' * (total_col_len - 4) + ': '
-        elif self._align_follow == Column.ALIGN_LEFT:
+        elif self._align_follow == tbase.Column.ALIGN_LEFT:
             return ' :' + '-' * (total_col_len - 4) + '- '
-        elif self._align_follow == Column.ALIGN_RIGHT:
+        elif self._align_follow == tbase.Column.ALIGN_RIGHT:
             return ' -' + '-' * (total_col_len - 4) + ': '
         else:
             return ' -' + '-' * (total_col_len - 4) + '- '
@@ -91,7 +93,7 @@ class MultiMarkdownAlignColumn(Column):
         return re.match(MultiMarkdownAlignColumn.PATTERN, str_col)
 
 
-class MultiMarkdownAlignRow(Row):
+class MultiMarkdownAlignRow(tbase.Row):
 
     def new_empty_column(self):
         return MultiMarkdownAlignColumn(self, '-')
@@ -106,7 +108,7 @@ class MultiMarkdownAlignRow(Row):
         return True
 
 
-class MultiMarkdownTableParser(BaseTableParser):
+class MultiMarkdownTableParser(tbase.BaseTableParser):
 
     def _is_multi_markdown_align_row(self, str_cols):
         for col in str_cols:
@@ -118,20 +120,20 @@ class MultiMarkdownTableParser(BaseTableParser):
         if self._is_multi_markdown_align_row(line.str_cols()):
             row = MultiMarkdownAlignRow(table)
         else:
-            row = DataRow(table)
+            row = tbase.DataRow(table)
         return row
 
     def create_column(self, table, row, line_cell):
-        column = BaseTableParser.create_column(self, table, row, line_cell)
+        column = tbase.BaseTableParser.create_column(self, table, row, line_cell)
         if len(line_cell.right_border_text) > 1:
             column.colspan = len(line_cell.right_border_text)
         return column
 
 
-class MultiMarkdownTableDriver(TableDriver):
+class MultiMarkdownTableDriver(tbase.TableDriver):
 
     def editor_insert_single_hline(self, table, table_pos):
         table.rows.insert(table_pos.row_num + 1, MultiMarkdownAlignRow(table))
         table.pack()
         return ("Single separator row inserted",
-                TablePos(table_pos.row_num, table_pos.field_num))
+                tbase.TablePos(table_pos.row_num, table_pos.field_num))

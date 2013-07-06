@@ -100,14 +100,3 @@ class LineParser:
                 line.cells.append(LineCell(line_text, left_border, right_border))
                 left_border = right_border
         return line
-
-
-if __name__ == '__main__':
-
-    line_parser = LineParser(r"(?:\|\|+)|\|")
-    text = "| a | b || c |||  d  "
-    line = line_parser.parse(text)
-    print(len(text))
-    for cell in line.cells:
-        print("text : '{0.text}', left '{0.left_border_text}' right '{0.right_border_text}'".format(cell))
-        print(cell.left_border, cell.right_border)

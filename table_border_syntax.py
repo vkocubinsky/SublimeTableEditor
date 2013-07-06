@@ -29,15 +29,15 @@ from __future__ import division
 import re
 
 try:
-    from .table_base import *
+    from . import table_base as tbase
 except ValueError:
-    from table_base import *
+    import table_base as tbase
 
 
-class SeparatorRow(Row):
+class SeparatorRow(tbase.Row):
 
     def __init__(self, table, separator='-', size=0):
-        Row.__init__(self, table)
+        tbase.Row.__init__(self, table)
         self.separator = separator
         for i in range(size):
             self.columns.append(SeparatorColumn(self, self.separator))
@@ -64,9 +64,9 @@ class SeparatorRow(Row):
         return r
 
 
-class SeparatorColumn(Column):
+class SeparatorColumn(tbase.Column):
     def __init__(self, row, separator):
-        Column.__init__(self, row)
+        tbase.Column.__init__(self, row)
         self.separator = separator
 
     def min_len(self):
@@ -77,19 +77,19 @@ class SeparatorColumn(Column):
         return self.separator * self.col_len
 
 
-class BorderTableDriver(TableDriver):
+class BorderTableDriver(tbase.TableDriver):
 
     def editor_insert_single_hline(self, table, table_pos):
         table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '-'))
         table.pack()
         return ("Single separator row inserted",
-                TablePos(table_pos.row_num, table_pos.field_num))
+                tbase.TablePos(table_pos.row_num, table_pos.field_num))
 
     def editor_insert_double_hline(self, table, table_pos):
         table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '='))
         table.pack()
         return ("Double separator row inserted",
-                TablePos(table_pos.row_num, table_pos.field_num))
+                tbase.TablePos(table_pos.row_num, table_pos.field_num))
 
     def editor_insert_hline_and_move(self, table, table_pos):
         table.rows.insert(table_pos.row_num + 1, SeparatorRow(table, '-'))
@@ -100,10 +100,10 @@ class BorderTableDriver(TableDriver):
         else:
             table.insert_empty_row(table_pos.row_num + 2)
         return("Single separator row inserted",
-               TablePos(table_pos.row_num + 2, 0))
+               tbase.TablePos(table_pos.row_num + 2, 0))
 
 
-class BorderTableParser(BaseTableParser):
+class BorderTableParser(tbase.BaseTableParser):
 
     def _is_single_row_separator(self, str_cols):
         if len(str_cols) == 0:
@@ -131,4 +131,4 @@ class BorderTableParser(BaseTableParser):
         return row
 
     def create_data_row(self, table, line):
-        return DataRow(table)
+        return tbase.DataRow(table)

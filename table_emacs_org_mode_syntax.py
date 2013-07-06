@@ -26,22 +26,22 @@ from __future__ import print_function
 from __future__ import division
 
 try:
-    from .table_base import *
-    from .table_border_syntax import *
+    from . import table_base as tbase
+    from . import table_border_syntax as tborder
 except ValueError:
-    from table_base import *
-    from table_border_syntax import *
+    import table_base as tbase
+    import table_border_syntax as tborder
 
 
 def create_syntax(table_configuration=None):
     return EmacsOrgModeTableSyntax(table_configuration)
 
 
-class EmacsOrgModeTableSyntax(TableSyntax):
+class EmacsOrgModeTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, "Emacs Org mode", table_configuration)
-        self.table_parser = BorderTableParser(self)
+        tbase.TableSyntax.__init__(self, "Emacs Org mode", table_configuration)
+        self.table_parser = tborder.BorderTableParser(self)
         self.hline_out_border = '|'
         self.hline_in_border = '+'
-        self.table_driver = BorderTableDriver()
+        self.table_driver = tborder.BorderTableDriver(self)

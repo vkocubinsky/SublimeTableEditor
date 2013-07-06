@@ -29,21 +29,21 @@ import re
 
 
 try:
-    from .table_base import *
-    from .table_border_syntax import *
+    from . import table_base as tbase
+    from . import table_border_syntax as tborder
 except ValueError:
-    from table_base import *
-    from table_border_syntax import *
+    import table_base as tbase
+    import table_border_syntax as tborder
 
 
 def create_syntax(table_configuration=None):
     return SimpleTableSyntax(table_configuration)
 
 
-class SimpleTableSyntax(TableSyntax):
+class SimpleTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, "Simple", table_configuration)
+        tbase.TableSyntax.__init__(self, "Simple", table_configuration)
         self.table_parser = SimpleTableParser(self)
         self.custom_column_alignment = self.table_configuration.custom_column_alignment
 
@@ -52,18 +52,18 @@ class SimpleTableSyntax(TableSyntax):
         if self.table_configuration.hline_in_border is not None:
             self.hline_in_border = self.table_configuration.hline_in_border
 
-        self.table_driver = BorderTableDriver()
+        self.table_driver = tborder.BorderTableDriver(self)
 
 
-class CustomAlignColumn(Column):
-    ALIGN_MAP = {'<': Column.ALIGN_LEFT,
-                 '>': Column.ALIGN_RIGHT,
-                 '#': Column.ALIGN_CENTER}
+class CustomAlignColumn(tbase.Column):
+    ALIGN_MAP = {'<': tbase.Column.ALIGN_LEFT,
+                 '>': tbase.Column.ALIGN_RIGHT,
+                 '#': tbase.Column.ALIGN_CENTER}
 
     PATTERN = r"^\s*((?:[\<]+)|(?:[\>]+)|(?:[\#]+))\s*$"
 
     def __init__(self, row, data):
-        Column.__init__(self, row)
+        tbase.Column.__init__(self, row)
         self.align_char = re.search(r"[\<]|[\>]|[\#]", data).group(0)
 
     def align_follow(self):
@@ -81,7 +81,7 @@ class CustomAlignColumn(Column):
         return re.match(CustomAlignColumn.PATTERN, str_col)
 
 
-class CustomAlignRow(Row):
+class CustomAlignRow(tbase.Row):
 
     def new_empty_column(self):
         return CustomAlignColumn(self, '#')
@@ -93,7 +93,7 @@ class CustomAlignRow(Row):
         return True
 
 
-class SimpleTableParser(BorderTableParser):
+class SimpleTableParser(tborder.BorderTableParser):
 
     def _is_custom_align_row(self, str_cols):
         for col in str_cols:
@@ -106,5 +106,5 @@ class SimpleTableParser(BorderTableParser):
                 self._is_custom_align_row(line.str_cols())):
             row = CustomAlignRow(table)
         else:
-            row = BorderTableParser.create_row(self, table, line)
+            row = tborder.BorderTableParser.create_row(self, table, line)
         return row

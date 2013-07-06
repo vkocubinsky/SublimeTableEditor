@@ -26,10 +26,10 @@ import difflib
 
 try:
     from . import table_lib
-    from .table_base import TablePos
+    from . import table_base as tbase
 except ValueError:
     import table_lib
-    from table_base import TablePos
+    import table_base as tbase
 
 
 class BaseTableTest(unittest.TestCase):
@@ -132,8 +132,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_move_column_right(t, TablePos(0, 1))
-        self.assertEqual(TablePos(0, 2), pos)
+        msg, pos = d.editor_move_column_right(t, tbase.TablePos(0, 1))
+        self.assertEqual(tbase.TablePos(0, 2), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveColumnLeft(self):
@@ -155,8 +155,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_move_column_left(t, TablePos(0, 2))
-        self.assertEqual(TablePos(0, 1), pos)
+        msg, pos = d.editor_move_column_left(t, tbase.TablePos(0, 2))
+        self.assertEqual(tbase.TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testDeleteColumn(self):
@@ -178,8 +178,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_delete_column(t, TablePos(0, 1))
-        self.assertEqual(TablePos(0, 1), pos)
+        msg, pos = d.editor_delete_column(t, tbase.TablePos(0, 1))
+        self.assertEqual(tbase.TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveRowDown(self):
@@ -201,8 +201,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_move_row_down(t, TablePos(3, 0))
-        self.assertEqual(TablePos(4, 0), pos)
+        msg, pos = d.editor_move_row_down(t, tbase.TablePos(3, 0))
+        self.assertEqual(tbase.TablePos(4, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testMoveRowUp(self):
@@ -224,8 +224,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_move_row_up(t, TablePos(4, 0))
-        self.assertEqual(TablePos(3, 0), pos)
+        msg, pos = d.editor_move_row_up(t, tbase.TablePos(4, 0))
+        self.assertEqual(tbase.TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testKillRow(self):
@@ -246,8 +246,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_kill_row(t, TablePos(4, 0))
-        self.assertEqual(TablePos(3, 0), pos)
+        msg, pos = d.editor_kill_row(t, tbase.TablePos(4, 0))
+        self.assertEqual(tbase.TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertColumn(self):
@@ -269,8 +269,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_insert_column(t, TablePos(0, 1))
-        self.assertEqual(TablePos(0, 1), pos)
+        msg, pos = d.editor_insert_column(t, tbase.TablePos(0, 1))
+        self.assertEqual(tbase.TablePos(0, 1), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertRow(self):
@@ -293,8 +293,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_insert_row(t, TablePos(3, 0))
-        self.assertEqual(TablePos(3, 0), pos)
+        msg, pos = d.editor_insert_row(t, tbase.TablePos(3, 0))
+        self.assertEqual(tbase.TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertSingleHline(self):
@@ -315,8 +315,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_insert_single_hline(t, TablePos(1, 0))
-        self.assertEqual(TablePos(1, 0), pos)
+        msg, pos = d.editor_insert_single_hline(t, tbase.TablePos(1, 0))
+        self.assertEqual(tbase.TablePos(1, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertHlineAndMove(self):
@@ -337,8 +337,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_insert_hline_and_move(t, TablePos(1, 0))
-        self.assertEqual(TablePos(3, 0), pos)
+        msg, pos = d.editor_insert_hline_and_move(t, tbase.TablePos(1, 0))
+        self.assertEqual(tbase.TablePos(3, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testInsertDoubleHline(self):
@@ -359,8 +359,8 @@ class SimpleSyntaxTest(BaseTableTest):
 
         t = self.syntax.table_parser.parse_text(text)
         d = self.syntax.table_driver
-        msg, pos = d.editor_insert_double_hline(t, TablePos(1, 0))
-        self.assertEqual(TablePos(1, 0), pos)
+        msg, pos = d.editor_insert_double_hline(t, tbase.TablePos(1, 0))
+        self.assertEqual(tbase.TablePos(1, 0), pos)
         self.assert_table_equals(expected, t.render())
 
     def testParseCsv(self):
@@ -374,7 +374,8 @@ a,b,c
 | 1 | 2 | 3 |
         """.strip()
 
-        t = table_lib.parse_csv(self.syntax, csv_text)
+        d = self.syntax.table_driver
+        t = d.parse_csv(csv_text)
         self.assert_table_equals(expected, t.render())
 
 
@@ -498,28 +499,28 @@ class TextileSyntaxTest(BaseTableTest):
         #formatted = t.render()
 
         # test visual_to_internal_index
-        self.assertEqual(TablePos(1, 0), d.visual_to_internal_index(t, TablePos(1, 0)))
-        self.assertEqual(TablePos(1, 2), d.visual_to_internal_index(t, TablePos(1, 1)))
-        self.assertEqual(TablePos(1, 3), d.visual_to_internal_index(t, TablePos(1, 2)))
-        self.assertEqual(TablePos(1, 5), d.visual_to_internal_index(t, TablePos(1, 3)))
+        self.assertEqual(tbase.TablePos(1, 0), d.visual_to_internal_index(t, tbase.TablePos(1, 0)))
+        self.assertEqual(tbase.TablePos(1, 2), d.visual_to_internal_index(t, tbase.TablePos(1, 1)))
+        self.assertEqual(tbase.TablePos(1, 3), d.visual_to_internal_index(t, tbase.TablePos(1, 2)))
+        self.assertEqual(tbase.TablePos(1, 5), d.visual_to_internal_index(t, tbase.TablePos(1, 3)))
 
-        self.assertEqual(TablePos(1, 5), d.visual_to_internal_index(t, TablePos(1, 1000)))
+        self.assertEqual(tbase.TablePos(1, 5), d.visual_to_internal_index(t, tbase.TablePos(1, 1000)))
 
         # test trivial
         for col in range(len(t[0])):
-            self.assertEqual(TablePos(0, col), d.visual_to_internal_index(t, TablePos(0, col)))
-            self.assertEqual(TablePos(2, col), d.visual_to_internal_index(t, TablePos(2, col)))
+            self.assertEqual(tbase.TablePos(0, col), d.visual_to_internal_index(t, tbase.TablePos(0, col)))
+            self.assertEqual(tbase.TablePos(2, col), d.visual_to_internal_index(t, tbase.TablePos(2, col)))
 
-            self.assertEqual(TablePos(0, col), d.internal_to_visual_index(t, TablePos(0, col)))
-            self.assertEqual(TablePos(2, col), d.internal_to_visual_index(t, TablePos(2, col)))
+            self.assertEqual(tbase.TablePos(0, col), d.internal_to_visual_index(t, tbase.TablePos(0, col)))
+            self.assertEqual(tbase.TablePos(2, col), d.internal_to_visual_index(t, tbase.TablePos(2, col)))
 
         # test internal_to_visual_index
-        self.assertEqual(TablePos(1, 0), d.internal_to_visual_index(t, TablePos(1, 0)))
-        self.assertEqual(TablePos(1, 0), d.internal_to_visual_index(t, TablePos(1, 1)))
-        self.assertEqual(TablePos(1, 1), d.internal_to_visual_index(t, TablePos(1, 2)))
-        self.assertEqual(TablePos(1, 2), d.internal_to_visual_index(t, TablePos(1, 3)))
-        self.assertEqual(TablePos(1, 2), d.internal_to_visual_index(t, TablePos(1, 4)))
-        self.assertEqual(TablePos(1, 3), d.internal_to_visual_index(t, TablePos(1, 5)))
+        self.assertEqual(tbase.TablePos(1, 0), d.internal_to_visual_index(t, tbase.TablePos(1, 0)))
+        self.assertEqual(tbase.TablePos(1, 0), d.internal_to_visual_index(t, tbase.TablePos(1, 1)))
+        self.assertEqual(tbase.TablePos(1, 1), d.internal_to_visual_index(t, tbase.TablePos(1, 2)))
+        self.assertEqual(tbase.TablePos(1, 2), d.internal_to_visual_index(t, tbase.TablePos(1, 3)))
+        self.assertEqual(tbase.TablePos(1, 2), d.internal_to_visual_index(t, tbase.TablePos(1, 4)))
+        self.assertEqual(tbase.TablePos(1, 3), d.internal_to_visual_index(t, tbase.TablePos(1, 5)))
 
 
 class MultiMarkdownSyntaxTest(BaseTableTest):

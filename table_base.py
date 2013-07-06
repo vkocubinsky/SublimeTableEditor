@@ -27,11 +27,12 @@ from __future__ import division
 
 import math
 import re
+import csv
 
 try:
-    from .table_line_parser import LineParser
+    from . import table_line_parser as tparser
 except ValueError:
-    from table_line_parser import LineParser
+    import table_line_parser as tparser
 
 
 class TableConfiguration:
@@ -61,10 +62,10 @@ class TableSyntax:
         self.keep_space_left = self.table_configuration.keep_space_left
         self.intelligent_formatting = self.table_configuration.intelligent_formatting
 
-        self.line_parser = LineParser("(?:(?:\+)|(?:\|))")
+        self.line_parser = tparser.LineParser("(?:(?:\+)|(?:\|))")
         # Should be set in sublass constructor
         self.table_parser = None
-        self.table_driver = TableDriver()
+        self.table_driver = TableDriver(self)
 
 
 class Column(object):
@@ -477,8 +478,8 @@ class TablePos:
 
 class TableDriver:
 
-    def __init__(self):
-        pass
+    def __init__(self, syntax):
+        self.syntax = syntax
 
     def visual_column_count(self, table, row_ind):
         return sum([1 for column in table[row_ind].columns
@@ -721,6 +722,25 @@ class TableDriver:
                 #row_num == 0
                 break
         return ("Cursor position changed", pos)
+
+    def parse_csv(self, text):
+        try:
+            table = TextTable(self.syntax)
+            dialect = csv.Sniffer().sniff(text)
+            table_reader = csv.reader(text.splitlines(), dialect)
+            for cols in table_reader:
+                row = DataRow(table)
+                for col in cols:
+                    row.columns.append(DataColumn(row, col))
+                table.rows.append(row)
+        except csv.Error:
+            table = TextTable(self.syntax)
+            for line in text.splitlines():
+                row = Row(table, Row.ROW_DATA)
+                row.columns.append(DataColumn(row, line))
+                table.rows.append(row)
+        table.pack()
+        return table
 
 
 class BaseTableParser:

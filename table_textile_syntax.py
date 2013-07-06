@@ -30,23 +30,23 @@ import re
 
 
 try:
-    from .table_base import *
+    from . import table_base as tbase
 except ValueError:
-    from table_base import *
+    import table_base as tbase
 
 
 def create_syntax(table_configuration=None):
     return TextileTableSyntax(table_configuration)
 
 
-class TextileTableSyntax(TableSyntax):
+class TextileTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
-        TableSyntax.__init__(self, "Textile", table_configuration)
+        tbase.TableSyntax.__init__(self, "Textile", table_configuration)
         self.table_parser = TextileTableParser(self)
 
 
-class TextileCellColumn(Column):
+class TextileCellColumn(tbase.Column):
     PATTERN = (
         r"\s*("
         # Sequence of one or more table cell terms
@@ -64,7 +64,7 @@ class TextileCellColumn(Column):
     ROWSPAN_PATTERN = r"/(\d+)"
 
     def __init__(self, row, data):
-        Column.__init__(self, row)
+        tbase.Column.__init__(self, row)
         cell_mo = re.match(TextileCellColumn.PATTERN, data)
         self.attr = cell_mo.group(1)
         self.data = cell_mo.group(2).strip()
@@ -100,16 +100,16 @@ class TextileCellColumn(Column):
         return re.match(TextileCellColumn.PATTERN, str_col)
 
 
-class TextileRow(Row):
+class TextileRow(tbase.Row):
 
     def new_empty_column(self):
-        return DataColumn(self, '')
+        return tbase.DataColumn(self, '')
 
     def create_column(self, text):
         if TextileCellColumn.match_cell(text):
             return TextileCellColumn(self, text)
         else:
-            return DataColumn(self, text)
+            return tbase.DataColumn(self, text)
 
     def is_data(self):
         return not self.is_header_separator()
@@ -123,7 +123,7 @@ class TextileRow(Row):
         return True
 
 
-class TextileTableParser(BaseTableParser):
+class TextileTableParser(tbase.BaseTableParser):
 
     def create_row(self, table, line):
         return TextileRow(table)

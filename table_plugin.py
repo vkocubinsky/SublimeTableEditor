@@ -26,13 +26,11 @@ import sublime_plugin
 import re
 
 try:
-    from . import table_lib
-    from . import table_base
-    from .table_base import TablePos
+    from . import table_lib as tlib
+    from . import table_base as tbase
 except ValueError:
-    import table_lib
-    import table_base
-    from table_base import TablePos
+    import table_lib as tlib
+    import table_base as tbase
 
 
 class TableContext:
@@ -48,7 +46,7 @@ class TableContext:
         self.visual_field_num = self._visual_field_num(sel_row, sel_col)
         self.row_num = sel_row - self.first_table_row
 
-        self.table_pos = TablePos(self.row_num, self.visual_field_num)
+        self.table_pos = tbase.TablePos(self.row_num, self.visual_field_num)
 
         self.table = self.syntax.table_parser.parse_text(self.table_text)
         self.table_driver = self.syntax.table_driver
@@ -102,7 +100,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         else:
             syntax_name = self.auto_detect_syntax_name()
 
-        table_configuration = table_lib.TableConfiguration()
+        table_configuration = tbase.TableConfiguration()
 
         border_style = (self.view.settings().get("table_editor_border_style", None)
                         or self.view.settings().get("table_editor_style", None))
@@ -131,7 +129,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if self.view.settings().has("table_editor_intelligent_formatting"):
             table_configuration.intelligent_formatting = self.view.settings().get("table_editor_intelligent_formatting")
 
-        syntax = table_lib.create_syntax(syntax_name, table_configuration)
+        syntax = tlib.create_syntax(syntax_name, table_configuration)
         return syntax
 
     def auto_detect_syntax_name(self):
@@ -199,7 +197,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if ctx.table.empty():
             pt = self.view.text_point(ctx.first_table_row, 0)
         else:
-            pos = TablePos(row_num, visual_field_num)
+            pos = tbase.TablePos(row_num, visual_field_num)
             col = ctx.table_driver.get_cursor(ctx.table, pos)
             pt = self.view.text_point(ctx.first_table_row + row_num, col)
         return sublime.Region(pt, pt)
@@ -212,7 +210,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
         if ctx.table.empty():
             visual_field_num = 0
         else:
-            pos = TablePos(row_num, field_num)
+            pos = tbase.TablePos(row_num, field_num)
             visual_field_num = ctx.table_driver.internal_to_visual_index(ctx.table, pos).field_num
         return self.visual_field_sel(ctx, row_num, visual_field_num)
 
@@ -435,7 +433,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
         else:
             syntax = self.detect_syntax()
             text = self.view.substr(sel)
-            table = table_lib.parse_csv(syntax, text)
+            table = tlib.parse_csv(syntax, text)
             self.view.replace(edit, sel, table.render())
 
             first_row = self.view.rowcol(sel.begin())[0]
