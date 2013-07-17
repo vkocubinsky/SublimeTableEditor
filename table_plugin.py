@@ -433,7 +433,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
         else:
             syntax = self.detect_syntax()
             text = self.view.substr(sel)
-            table = tlib.parse_csv(syntax, text)
+            table = syntax.table_driver.parse_csv(text)
             self.view.replace(edit, sel, table.render())
 
             first_row = self.view.rowcol(sel.begin())[0]
