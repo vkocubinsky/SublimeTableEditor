@@ -636,6 +636,5 @@ class ReStructuredTextSyntaxTest(BaseTableTest):
         self.assert_table_equals(expected, formatted)
 
 
-
 if __name__ == '__main__':
     unittest.main()
