@@ -189,7 +189,7 @@ class AbstractTableCommand(sublime_plugin.TextCommand):
             self.merge(edit, ctx)
             sublime.status_message("Table Editor: {0}".format(msg))
             return self.table_pos_sel(ctx, table_pos)
-        except table_base.TableException as err:
+        except tbase.TableException as err:
             sublime.status_message("Table Editor: {0}".format(err))
             return self.table_pos_sel(ctx, ctx.table_pos)
 

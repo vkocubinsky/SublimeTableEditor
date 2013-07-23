@@ -37,11 +37,16 @@ class CallbackTest:
     def __init__(self, name, syntax):
         self.name = name
         self.commands = []
-        self.commands.append(CommandDef("table_editor_set_syntax", {"syntax": syntax}))
-        self.commands.append(CommandDef("table_editor_disable_for_current_view", {"prop": "table_editor_keep_space_left"}))
-        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_detect_header"}))
-        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_align_number_right"}))
-        self.commands.append(CommandDef("table_editor_enable_for_current_view", {"prop": "table_editor_intelligent_formatting"}))
+        self.commands.append(CommandDef("table_editor_set_syntax",
+                                        {"syntax": syntax}))
+        self.commands.append(CommandDef("table_editor_disable_for_current_view",
+                                        {"prop": "table_editor_keep_space_left"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view",
+                                        {"prop": "table_editor_detect_header"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view",
+                                        {"prop": "table_editor_align_number_right"}))
+        self.commands.append(CommandDef("table_editor_enable_for_current_view",
+                                        {"prop": "table_editor_intelligent_formatting"}))
         self.commands.append(CommandDef("select_all"))
         self.commands.append(CommandDef("cut"))
 
@@ -462,7 +467,7 @@ class EmacsOrgModeAlignTest(CallbackTest):
 
 class MarkdownColspanTest(CallbackTest):
     def __init__(self):
-        CallbackTest.__init__(self, "Markdown Colspan Test", "Markdow")
+        CallbackTest.__init__(self, "MultiMarkdown Colspan Test", "MultiMarkdown")
         self.commands.append(CommandDef("insert", {"characters": self.description}))
         self.commands.append(CommandDef("insert", {"characters": """
 |              |           Grouping          ||
@@ -478,7 +483,7 @@ class MarkdownColspanTest(CallbackTest):
     @property
     def description(self):
         return """Test: {0}
-- Markdown Syntax
+- MultiMarkdown Syntax
 """.format(self.name)
 
     def expected_value(self):
