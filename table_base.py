@@ -736,7 +736,7 @@ class TableDriver:
         except csv.Error:
             table = TextTable(self.syntax)
             for line in text.splitlines():
-                row = Row(table, Row.ROW_DATA)
+                row = DataRow(table)
                 row.columns.append(DataColumn(row, line))
                 table.rows.append(row)
         table.pack()

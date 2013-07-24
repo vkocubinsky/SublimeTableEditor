@@ -438,7 +438,7 @@ class TableEditorCsvToTable(AbstractTableCommand):
 
             first_row = self.view.rowcol(sel.begin())[0]
 
-            pt = self.view.text_point(first_row, syntax.table_driver(table).get_cursor(0, 0))
+            pt = self.view.text_point(first_row, syntax.table_driver.get_cursor(table, tbase.TablePos(0, 0)))
             sublime.status_message("Table Editor: Table created from CSV")
             return sublime.Region(pt, pt)
 
