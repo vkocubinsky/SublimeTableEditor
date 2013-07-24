@@ -372,9 +372,11 @@ class TextTable:
         for row in self.rows[start_row_ind:]:
             if (row.is_data()
                     and col_ind < len(row.columns)
-                    and len(row.columns[col_ind].data.strip()) > 0
-                    and not re.match("^\s*[0-9]*[.,]?[0-9]+\s*$", row.columns[col_ind].data)):
-                return False
+                    and len(row.columns[col_ind].data.strip()) > 0):
+                        try:
+                            float(row.columns[col_ind].data)
+                        except ValueError:
+                            return False
         return True
 
     def render_lines(self):
