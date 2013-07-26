@@ -294,7 +294,7 @@ Table editor support next table syntax:
     | Anna      |  20 |
     | Alexander |  27 |
 
-**Markdown**
+**Multi Markdown**
 
 Alignment:
 
