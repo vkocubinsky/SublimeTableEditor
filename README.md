@@ -138,7 +138,7 @@ cursor in the *| Age |* column or you can click *alt+left* when cursor position 
     | Alexander | 987654321 | 28_ |
     |           |           |     |
 
-Now cursor position in the *| Age |* column, when you click *ctrl+shift+left*, column *| Age |* will be deleted
+Now cursor position in the *| Age |* column, when you click *alt+shift+left*, column *| Age |* will be deleted
 
     |    Name   |   Phone    |
     |-----------|------------|
@@ -327,11 +327,11 @@ Colspan(alpha status):
 
 Alignment:
 
-    |_.    Name   |_. Age |_. Custom Alignment Demo |
-    |   Anna      |    20 |<. left                  |
-    |   Alexander |    27 |>.                 right |
-    |   Misha     |    42 |=.         center        |
-    |             |       |                         |
+    |_.   Name  |_. Age |_. Custom Alignment Demo |
+    | Anna      |    20 |<. left                  |
+    | Alexander |    27 |>.                 right |
+    | Misha     |    42 |=.         center        |
+    |           |       |                         |
 
 Colspan(alpha status):
 

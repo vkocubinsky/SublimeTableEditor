@@ -104,6 +104,9 @@ class MultiMarkdownAlignRow(tbase.Row):
     def is_header_separator(self):
         return True
 
+    def is_separator(self):
+        return True
+
     def is_align(self):
         return True
 
