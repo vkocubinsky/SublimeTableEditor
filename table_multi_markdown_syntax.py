@@ -140,3 +140,14 @@ class MultiMarkdownTableDriver(tbase.TableDriver):
         table.pack()
         return ("Single separator row inserted",
                 tbase.TablePos(table_pos.row_num, table_pos.field_num))
+
+    def editor_insert_hline_and_move(self, table, table_pos):
+        table.rows.insert(table_pos.row_num + 1, MultiMarkdownAlignRow(table))
+        table.pack()
+        if table_pos.row_num + 2 < len(table):
+            if table[table_pos.row_num + 2].is_separator():
+                table.insert_empty_row(table_pos.row_num + 2)
+        else:
+            table.insert_empty_row(table_pos.row_num + 2)
+        return("Single separator row inserted",
+               tbase.TablePos(table_pos.row_num + 2, 0))

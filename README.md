@@ -646,7 +646,7 @@ and this result of Table Editor with
 **ctrl+k, =**
 
         Insert double horizontal line below current row. 
-        Doesn't make sense and doesn't supported for Markdow, Textile syntaxes
+        Doesn't make sense and doesn't supported for Textile syntaxes
 
 
 **ctrl+k, enter**
