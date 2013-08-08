@@ -32,7 +32,7 @@ try:
     from . import table_emacs_org_mode_syntax as emacs
     from . import table_pandoc_syntax as pandoc
     from . import table_multi_markdown_syntax as markdown
-    from . import table_re_structured_text_syntax as restructred
+    from . import table_re_structured_text_syntax as re_structured_text
     from . import table_textile_syntax as textile
 except ValueError:
     import table_base as tbase
