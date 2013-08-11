@@ -31,8 +31,10 @@ import csv
 
 try:
     from . import table_line_parser as tparser
+    from .widechar_support import wlen, wcount
 except ValueError:
     import table_line_parser as tparser
+    from widechar_support import wlen, wcount
 
 
 class TableConfiguration:
@@ -208,31 +210,37 @@ class DataColumn(Column):
     def total_min_len(self):
         # min of '   ' or ' xxxx '
         space_len = len(self.left_space) + len(self.right_space)
-        total_min_len = max(space_len + 1, len(self._norm()) + space_len)
-        # if self.syntax.multi_markdown_syntax():
-        #     total_min_len += self.colspan - 1
-        total_min_len = total_min_len + (len(self.left_border_text) - 1) + (len(self.right_border_text) - 1)
+        total_min_len = max(space_len + 1, wlen(self._norm()) + space_len)
+        total_min_len = (total_min_len
+                         + (len(self.left_border_text) - 1)
+                         + (len(self.right_border_text) - 1))
         return total_min_len
 
     def render(self):
         # colspan -1 is count of '|'
-        total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
+        total_col_len = (self.col_len
+                         + (self.colspan - 1)
+                         + sum([col.col_len for col in self.pseudo_columns]))
 
         #if self.syntax.multi_markdown_syntax():
         #    total_col_len = total_col_len - (self.colspan - 1)
-        total_col_len = total_col_len - (len(self.left_border_text) - 1) - (len(self.right_border_text) - 1)
+        total_col_len = (total_col_len
+                         - (len(self.left_border_text) - 1)
+                         - (len(self.right_border_text) - 1))
 
         norm = self._norm()
         space_len = len(self.left_space) + len(self.right_space)
 
+        total_align_len = total_col_len - wcount(norm)
+        print("total_col_len", total_col_len, "wcount", wcount(norm), "total_align_len", total_align_len)
         if self.header and self.syntax.detect_header:
-            align_value = norm.center(total_col_len - space_len, ' ')
+            align_value = norm.center(total_align_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
-            align_value = norm.rjust(total_col_len - space_len, ' ')
+            align_value = norm.rjust(total_align_len - space_len, ' ')
         elif self.align == Column.ALIGN_CENTER:
-            align_value = norm.center(total_col_len - space_len, ' ')
+            align_value = norm.center(total_align_len - space_len, ' ')
         else:
-            align_value = norm.ljust(total_col_len - space_len, ' ')
+            align_value = norm.ljust(total_align_len - space_len, ' ')
         return self.left_space + align_value + self.right_space
 
 
