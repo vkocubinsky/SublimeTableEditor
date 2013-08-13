@@ -31,9 +31,10 @@ import re
 
 try:
     from . import table_base as tbase
+    from .widechar_support import wlen, wcount
 except ValueError:
     import table_base as tbase
-
+    from widechar_support import wlen, wcount
 
 def create_syntax(table_configuration=None):
     return TextileTableSyntax(table_configuration)
@@ -82,18 +83,19 @@ class TextileCellColumn(tbase.Column):
 
     def total_min_len(self):
         # '<. data '
-        return len(self.attr) + len(self.data) + 2
+        return len(self.attr) + wlen(self.data) + 2
 
     def render(self):
         # colspan -1 is count of '|'
         total_col_len = self.col_len + (self.colspan - 1) + sum([col.col_len for col in self.pseudo_columns])
 
+        total_align_len = total_col_len - wcount(self.data)
         if '>' in self.attr and not '<>' in self.attr:
-            return self.attr + ' ' + self.data.rjust(total_col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.rjust(total_align_len - len(self.attr) - 2, ' ') + ' '
         elif '=' in self.attr or '_' in self.attr:
-            return self.attr + ' ' + self.data.center(total_col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.center(total_align_len - len(self.attr) - 2, ' ') + ' '
         else:
-            return self.attr + ' ' + self.data.ljust(total_col_len - len(self.attr) - 2, ' ') + ' '
+            return self.attr + ' ' + self.data.ljust(total_align_len - len(self.attr) - 2, ' ') + ' '
 
     @staticmethod
     def match_cell(str_col):

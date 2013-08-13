@@ -232,7 +232,7 @@ class DataColumn(Column):
         space_len = len(self.left_space) + len(self.right_space)
 
         total_align_len = total_col_len - wcount(norm)
-        print("total_col_len", total_col_len, "wcount", wcount(norm), "total_align_len", total_align_len)
+        #print("total_col_len", total_col_len, "wcount", wcount(norm), "total_align_len", total_align_len)
         if self.header and self.syntax.detect_header:
             align_value = norm.center(total_align_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
