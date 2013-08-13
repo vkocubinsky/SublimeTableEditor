@@ -519,19 +519,23 @@ class TableDriver:
     def get_cursor(self, table, visual_pos):
         #
         # '   |  1 |  2  |  3_| 4 |'
+        print("visual_pos", visual_pos)
         internal_pos = self.visual_to_internal_index(table, visual_pos)
         base_len = (len(table.prefix)
-                    + sum([column.col_len for column, ind
+                    + sum([column.col_len - wcount(column.render()) for column, ind
                           in zip(table[visual_pos.row_num].columns,
                                  range(internal_pos.field_num))])
                     + internal_pos.field_num + 1  # count of '|'
                     )
         text = table[internal_pos.row_num][internal_pos.field_num].render()
+        print("base_len", base_len, "text", text, "wcount", wcount(text))
         match = re.search(r"([^\s])\s*$", text)
         if match:
             col_pos = match.end(1)
         else:
             col_pos = 1
+        print("col_pos", col_pos)
+        print("return", base_len + col_pos)
         return base_len + col_pos
 
     def editor_move_column_left(self, table, table_pos):
