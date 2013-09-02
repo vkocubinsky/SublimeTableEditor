@@ -21,7 +21,7 @@
 - direct support subset of wiki table syntax
     - Simple
     - EmacsOrgMode
-    - Pandoc
+    - Pandoc(Grid Tables, Pipe Tables)
     - Multi Markdown(support colspan in alpha status)
     - reStructuredText
     - Textile(support colspan and rowspan in alpha status)
@@ -287,14 +287,26 @@ Table editor support next table syntax:
     | Anna      |  20 |
     | Alexander |  27 |
 
-**Pandoc**
+**Pandoc Grid Tables**
 
-    |    Name   | Age |
     +-----------+-----+
+    |    Name   | Age |
+    +===========+=====+
     | Anna      |  20 |
+    +-----------+-----+
     | Alexander |  27 |
+    +-----------+-----+
 
-**Multi Markdown**
+**Pandoc Pipe tables/Multi Markdown**
+
+    | Right | Left | Default | Center |
+    | ----: | :--- | ------- | :----: |
+    |    12 | 12   |      12 |   12   |
+    |   123 | 123  |     123 |  123   |
+    |     1 | 1    |       1 |   1    |
+
+
+**Multi Markdown/Pandoc Pipe tables**
 
 Alignment:
 
@@ -302,6 +314,7 @@ Alignment:
     | :-------- | :---: | ---------: |
     | Anna      |   12  |         20 |
     | Alexander |   13  |         27 |
+
 
 Colspan(alpha status):
 
