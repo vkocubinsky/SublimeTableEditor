@@ -16,8 +16,6 @@
 - split long cell
 - join two rows into one
 - convert selected CSV region into table
-- support single hline with character '-'
-- support double hline with character '='
 - direct support subset of wiki table syntax
     - Simple
     - EmacsOrgMode
@@ -29,6 +27,7 @@
 - switch between different table syntax on the fly
 - temporary disable/enable table editor for current view
 - customize table syntax with settings
+- support CJK : Chinese, Japanese, Korean
 - show demo film in scratch view
 
 ## Note about Sublime Text 3
@@ -38,7 +37,6 @@ Package Control. Easy way to install is copy Table Editor from Sublime Text 2
  to Sublime Text 3. More detail click "Browse Packages ..." in Sublime Text 2, 
  navigate to "Table Editor", click Command+c(Ctrl+c), switch to Sublime Text 3, 
  click "Browse Package ...", click Command+v(Ctrl+v).
-
 
 ## Usage
 
@@ -297,14 +295,10 @@ Table editor support next table syntax:
     | Alexander |  27 |
     +-----------+-----+
 
-**Pandoc Pipe tables/Multi Markdown**
+**Pandoc Pipe tables**
 
-    | Right | Left | Default | Center |
-    | ----: | :--- | ------- | :----: |
-    |    12 | 12   |      12 |   12   |
-    |   123 | 123  |     123 |  123   |
-    |     1 | 1    |       1 |   1    |
-
+Pandoc Pipe tables is the same as Multi Markdown, you have to switch into 
+Multi Markdown if you use this table style.
 
 **Multi Markdown/Pandoc Pipe tables**
 
@@ -314,6 +308,13 @@ Alignment:
     | :-------- | :---: | ---------: |
     | Anna      |   12  |         20 |
     | Alexander |   13  |         27 |
+
+
+    | Right | Left | Default | Center |
+    | ----: | :--- | ------- | :----: |
+    |    12 | 12   |      12 |   12   |
+    |   123 | 123  |     123 |  123   |
+    |     1 | 1    |       1 |   1    |
 
 
 Colspan(alpha status):
