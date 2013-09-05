@@ -2,7 +2,8 @@
 
 ## Overview
 
-*Table Editor* is a package for the *Sublime Text 2* editor for edit text tables. 
+*Table Editor* is a package for the *Sublime Text 2* and *Sublime Text 3* 
+editor for edit text tables. 
 *Table Editor* is has almost the same keys as Emacs-org mode table editor. 
 
 *Table Editor* allow on easy way edit text table, it allows:
@@ -27,7 +28,7 @@
 - switch between different table syntax on the fly
 - temporary disable/enable table editor for current view
 - customize table syntax with settings
-- support CJK : Chinese, Japanese, Korean
+- support CJK : Chinese, Japanese, Korean(alpha status)
 - show demo film in scratch view
 
 ## Note about Sublime Text 3
@@ -382,6 +383,31 @@ Table Editor syntax detected by user settings and if it is not specified recogni
 - Table Editor: Set table syntax 'Textile' for current view
 
 Above commands automatically enable table editor for current view.
+
+### CJK support
+
+Table Editor supports CJK languages. If you use CJK language you have to set 
+monospaced fonts which supports CJK characters. For example next fonts work
+on my windows computer 
+
+- NSimSun
+- FangSong
+- SimHei
+
+
+```javascript
+"font_face": "NSimSun",
+```
+
+
+```
+| column A | column B |     column C    |
++----------+----------+-----------------+
+| 这家伙   | 真的     | 棒极了！        |
+| この男   | 本当に   | 素晴らしいです! |
+```
+
+Size of CJK glyph in monospaced font equals 2 normal characters.
 
 ### Demo 
 
