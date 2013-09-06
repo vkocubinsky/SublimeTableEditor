@@ -2,8 +2,9 @@
 
 ## Overview
 
-*Table Editor* is a package for the *Sublime Text 2* editor for edit text tables. 
-*Table Editor* is very similar to Emacs-org mode table editor with almost the same keys. 
+*Table Editor* is a package for the *Sublime Text 2* and *Sublime Text 3* 
+editor for edit text tables. 
+*Table Editor* is has almost the same keys as Emacs-org mode table editor. 
 
 *Table Editor* allow on easy way edit text table, it allows:
 
@@ -16,20 +17,20 @@
 - split long cell
 - join two rows into one
 - convert selected CSV region into table
-- support single hline with character '-'
-- support double hline with character '='
 - direct support subset of wiki table syntax
     - Simple
     - EmacsOrgMode
-    - Pandoc
-    - Multi Markdown
+    - Pandoc(Grid Tables, Pipe Tables)
+    - Multi Markdown(support colspan in alpha status)
     - reStructuredText
-    - Textile
+    - Textile(support colspan and rowspan in alpha status)
 - auto detect table syntax by view syntax
 - switch between different table syntax on the fly
-- temporary disable/enable table editor
-- customize table syntax
+- temporary disable/enable table editor for current view
+- customize table syntax with settings
+- support CJK : Chinese, Japanese, Korean(alpha status)
 - show demo film in scratch view
+
 
 For more information see
 
