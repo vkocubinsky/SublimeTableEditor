@@ -31,14 +31,6 @@ editor for edit text tables.
 - support CJK : Chinese, Japanese, Korean(alpha status)
 - show demo film in scratch view
 
-## Note about Sublime Text 3
-
-Table Editor can be installed on Sublime Text 3, but for now without
-Package Control. Easy way to install is copy Table Editor from Sublime Text 2 
- to Sublime Text 3. More detail click "Browse Packages ..." in Sublime Text 2, 
- navigate to "Table Editor", click Command+c(Ctrl+c), switch to Sublime Text 3, 
- click "Browse Package ...", click Command+v(Ctrl+v).
-
 ## Usage
 
 ### Basic editing
