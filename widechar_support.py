@@ -67,9 +67,9 @@ def _is_widechar(c):
 
 
 def _norm_text(text):
-    import locale
-    if not isinstance(text, unicode):
-        text = unicode(text, locale.getpreferredencoding())
+    # import locale
+    # if not isinstance(text, unicode):
+    #     text = unicode(text, locale.getpreferredencoding())
     return text
 
 
