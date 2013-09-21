@@ -26,6 +26,7 @@ import sys
 
 def wcount(text):
     if sys.version_info[0] == 2 and isinstance(text, str):
+        # this case is not from sublime but from test film
         return 0
     else:
         return len([x for x in text if unicodedata.east_asian_width(x) == 'W'])
