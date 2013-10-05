@@ -49,9 +49,9 @@ class SimpleTableSyntax(tbase.TableSyntax):
         self.custom_column_alignment = self.table_configuration.custom_column_alignment
 
         self.line_parser = tparser.LineParserWithHLine(
-                            hline_pattern = '(([\|\-\s]+)|([\|\=\s]+))$',
-                            hline_parser = tparser.LineParser("(?:(?:\+)|(?:\|))"),
-                            data_parser = tparser.LineParser("(?:\|)"))
+                            hline_pattern = r'(([\|\-\s\+]+)|([\|\=\s\+]+))$',
+                            hline_parser = tparser.LineParser(r"(?:(?:\+)|(?:\|))"),
+                            data_parser = tparser.LineParser(r"(?:\|)"))
         self.table_parser = SimpleTableParser(self)
         self.table_driver = tborder.BorderTableDriver(self)
 

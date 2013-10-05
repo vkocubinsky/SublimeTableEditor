@@ -111,7 +111,9 @@ class LineParserWithHLine:
 
     def parse(self, line_text):
         if re.match(self.hline_pattern, line_text):
+            print("hline_parser for line", line_text)
             return self.hline_parser.parse(line_text)
         else:
+            print("data_parser for line", line_text)
             return self.data_parser.parse(line_text)
 
