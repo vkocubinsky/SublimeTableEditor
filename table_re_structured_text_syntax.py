@@ -44,7 +44,10 @@ class ReStructuredTextTableSyntax(tbase.TableSyntax):
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "reStructuredText", table_configuration)
 
-        self.line_parser = tparser.LineParser("(?:(?:\+)|(?:\|))")
+        self.line_parser = tparser.LineParserWithHLine(
+                            hline_pattern = '(([\|\-\s]+)|([\|\=\s]+))$',
+                            hline_parser = tparser.LineParser("(?:(?:\+)|(?:\|))"),
+                            data_parser = tparser.LineParser("(?:\|)"))
         self.table_parser = tborder.BorderTableParser(self)
         self.table_driver = tborder.BorderTableDriver(self)
 

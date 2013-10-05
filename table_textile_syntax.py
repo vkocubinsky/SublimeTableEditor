@@ -47,7 +47,7 @@ class TextileTableSyntax(tbase.TableSyntax):
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "Textile", table_configuration)
 
-        self.line_parser = tparser.LineParser("(?:(?:\+)|(?:\|))")
+        self.line_parser = tparser.LineParser("(?:\|)")
         self.table_parser = TextileTableParser(self)
         self.table_driver = tbase.TableDriver(self)
 

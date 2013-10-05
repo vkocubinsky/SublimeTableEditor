@@ -774,8 +774,7 @@ class BaseTableParser:
         return column
 
     def is_table_row(self, row):
-        return re.match(r"^\s*" + self.syntax.line_parser.border_pattern,
-                        row) is not None
+        return re.match(r"^\s*[\|\+]",row) is not None
 
     def parse_text(self, text):
         table = TextTable(self.syntax)

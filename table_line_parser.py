@@ -102,14 +102,16 @@ class LineParser:
         return line
 
 
-class MapLineParser:
+class LineParserWithHLine:
 
-    def __init__(self, line_parser_map):
-        self.line_parser_map = line_parser_map
+    def __init__(self, hline_pattern, hline_parser, data_parser):
+        self.hline_pattern = hline_pattern
+        self.hline_parser = hline_parser
+        self.data_parser = data_parser
 
     def parse(self, line_text):
-        for line_pattern, line_parser in self.line_parser_map.items():
-            if re.match(line_pattern, line_text):
-                return line_parser.parse(line_text)
-        raise ValueError("Can't find parser for line {}".format(line_text))
+        if re.match(self.hline_pattern, line_text):
+            return self.hline_parser.parse(line_text)
+        else:
+            return self.data_parser.parse(line_text)
 
