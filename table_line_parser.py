@@ -100,3 +100,16 @@ class LineParser:
                 line.cells.append(LineCell(line_text, left_border, right_border))
                 left_border = right_border
         return line
+
+
+class MapLineParser:
+
+    def __init__(self, line_parser_map):
+        self.line_parser_map = line_parser_map
+
+    def parse(self, line_text):
+        for line_pattern, line_parser in self.line_parser_map.items():
+            if re.match(line_pattern, line_text):
+                return line_parser.parse(line_text)
+        raise ValueError("Can't find parser for line {}".format(line_text))
+

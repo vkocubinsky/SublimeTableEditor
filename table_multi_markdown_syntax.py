@@ -45,8 +45,9 @@ class MultiMarkdownTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "Multi Markdown", table_configuration)
-        self.table_parser = MultiMarkdownTableParser(self)
+
         self.line_parser = tparser.LineParser("(?:(?:\|\|+)|(?:(?:\+)|(?:\|)))")
+        self.table_parser = MultiMarkdownTableParser(self)
         self.table_driver = MultiMarkdownTableDriver(self)
 
 

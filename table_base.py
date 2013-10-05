@@ -55,19 +55,18 @@ class TableSyntax:
     def __init__(self, name, table_configuration):
         self.name = name
         self.table_configuration = table_configuration or TableConfiguration()
-        #should be set in subclass
-        self.hline_out_border = '|'
-        self.hline_in_border = '|'
 
         self.align_number_right = self.table_configuration.align_number_right
         self.detect_header = self.table_configuration.detect_header
         self.keep_space_left = self.table_configuration.keep_space_left
         self.intelligent_formatting = self.table_configuration.intelligent_formatting
 
-        self.line_parser = tparser.LineParser("(?:(?:\+)|(?:\|))")
-        # Should be set in sublass constructor
+        # Must be set in sublass constructor
+        self.line_parser = None
         self.table_parser = None
-        self.table_driver = TableDriver(self)
+        self.table_driver = None
+
+
 
 
 class Column(object):
@@ -232,7 +231,6 @@ class DataColumn(Column):
         space_len = len(self.left_space) + len(self.right_space)
 
         total_align_len = total_col_len - wcount(norm)
-        #print("total_col_len", total_col_len, "wcount", wcount(norm), "total_align_len", total_align_len)
         if self.header and self.syntax.detect_header:
             align_value = norm.center(total_align_len - space_len, ' ')
         elif self.align == Column.ALIGN_RIGHT:
@@ -519,7 +517,6 @@ class TableDriver:
     def get_cursor(self, table, visual_pos):
         #
         # '   |  1 |  2  |  3_| 4 |'
-        print("visual_pos", visual_pos)
         internal_pos = self.visual_to_internal_index(table, visual_pos)
         base_len = (len(table.prefix)
                     + sum([column.col_len - wcount(column.render()) for column, ind
@@ -528,14 +525,11 @@ class TableDriver:
                     + internal_pos.field_num + 1  # count of '|'
                     )
         text = table[internal_pos.row_num][internal_pos.field_num].render()
-        print("base_len", base_len, "text", text, "wcount", wcount(text))
         match = re.search(r"([^\s])\s*$", text)
         if match:
             col_pos = match.end(1)
         else:
             col_pos = 1
-        print("col_pos", col_pos)
-        print("return", base_len + col_pos)
         return base_len + col_pos
 
     def editor_move_column_left(self, table, table_pos):

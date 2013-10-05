@@ -28,9 +28,11 @@ from __future__ import division
 try:
     from . import table_base as tbase
     from . import table_border_syntax as tborder
+    from . import table_line_parser as tparser
 except ValueError:
     import table_base as tbase
     import table_border_syntax as tborder
+    import table_line_parser as tparser
 
 
 def create_syntax(table_configuration=None):
@@ -41,7 +43,10 @@ class ReStructuredTextTableSyntax(tbase.TableSyntax):
 
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "reStructuredText", table_configuration)
+
+        self.line_parser = tparser.LineParser("(?:(?:\+)|(?:\|))")
         self.table_parser = tborder.BorderTableParser(self)
+        self.table_driver = tborder.BorderTableDriver(self)
+
         self.hline_out_border = '+'
         self.hline_in_border = '+'
-        self.table_driver = tborder.BorderTableDriver(self)
