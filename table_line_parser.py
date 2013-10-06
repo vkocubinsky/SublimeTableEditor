@@ -102,18 +102,22 @@ class LineParser:
         return line
 
 
-class LineParserWithHLine:
+class LineParserPlus:
 
-    def __init__(self, hline_pattern, hline_parser, data_parser):
-        self.hline_pattern = hline_pattern
-        self.hline_parser = hline_parser
-        self.data_parser = data_parser
+    def __init__(self, border_pattern):
+        self.plus_line_parser = LineParser("(?:[+|])")
+
+        self.plus_line_pattern = re.compile("^\s*[+]")
+        self.single_hline_pattern = re.compile('^\s*[|+]\s*-[\s|+-]+$')
+        self.double_hline_pattern = re.compile('^\s*[|+]\s*=[\s|+=]+$')
+
+        self.data_line_parser = LineParser(border_pattern)
 
     def parse(self, line_text):
-        if re.match(self.hline_pattern, line_text):
-            print("hline_parser for line", line_text)
-            return self.hline_parser.parse(line_text)
+        if (self.single_hline_pattern.match(line_text) or
+                self.double_hline_pattern.match(line_text) or
+                self.plus_line_pattern.match(line_text)):
+            return self.plus_line_parser.parse(line_text)
         else:
-            print("data_parser for line", line_text)
-            return self.data_parser.parse(line_text)
+            return self.data_line_parser.parse(line_text)
 

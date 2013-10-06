@@ -28,11 +28,9 @@ from __future__ import division
 try:
     from . import table_base as tbase
     from . import table_border_syntax as tborder
-    from . import table_line_parser as tparser
 except ValueError:
     import table_base as tbase
     import table_border_syntax as tborder
-    import table_line_parser as tparser
 
 
 def create_syntax(table_configuration=None):
@@ -44,10 +42,6 @@ class EmacsOrgModeTableSyntax(tbase.TableSyntax):
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "Emacs Org mode", table_configuration)
 
-        self.line_parser = tparser.LineParserWithHLine(
-                            hline_pattern = r'(([\|\-\s\+]+)|([\|\=\s\+]+))$',
-                            hline_parser = tparser.LineParser(r"(?:(?:\+)|(?:\|))"),
-                            data_parser = tparser.LineParser(r"(?:\|)"))
         self.table_parser = tborder.BorderTableParser(self)
         self.table_driver = tborder.BorderTableDriver(self)
 

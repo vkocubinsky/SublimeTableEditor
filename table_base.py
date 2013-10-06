@@ -61,8 +61,8 @@ class TableSyntax:
         self.keep_space_left = self.table_configuration.keep_space_left
         self.intelligent_formatting = self.table_configuration.intelligent_formatting
 
+        self.line_parser = tparser.LineParserPlus("(?:[|])")
         # Must be set in sublass constructor
-        self.line_parser = None
         self.table_parser = None
         self.table_driver = None
 
@@ -774,7 +774,7 @@ class BaseTableParser:
         return column
 
     def is_table_row(self, row):
-        return re.match(r"^\s*[\|\+]",row) is not None
+        return re.match(r"^\s*[|+]",row) is not None
 
     def parse_text(self, text):
         table = TextTable(self.syntax)

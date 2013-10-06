@@ -382,6 +382,12 @@ class TableEditorSplitColumnDown(AbstractTableCommand):
         ctx = self.create_context(sel)
         field_num = ctx.field_num
         row_num = ctx.row_num
+        if (ctx.table[row_num].is_separator() or
+                ctx.table[row_num].is_header_separator()):
+            sublime.status_message("Table Editor: Split column is not "
+                                   "permitted for separator or header "
+                                   "separator line")
+            return self.table_pos_sel(ctx, ctx.table_pos)
         if row_num + 1 < len(ctx.table):
             if len(ctx.table[row_num + 1]) - 1 < field_num:
                 sublime.status_message("Table Editor: Split column is not "

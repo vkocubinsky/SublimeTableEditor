@@ -31,11 +31,9 @@ import re
 try:
     from . import table_base as tbase
     from . import table_border_syntax as tborder
-    from . import table_line_parser as tparser
 except ValueError:
     import table_base as tbase
     import table_border_syntax as tborder
-    import table_line_parser as tparser
 
 
 def create_syntax(table_configuration=None):
@@ -48,10 +46,6 @@ class SimpleTableSyntax(tbase.TableSyntax):
         tbase.TableSyntax.__init__(self, "Simple", table_configuration)
         self.custom_column_alignment = self.table_configuration.custom_column_alignment
 
-        self.line_parser = tparser.LineParserWithHLine(
-                            hline_pattern = r'(([\|\-\s\+]+)|([\|\=\s\+]+))$',
-                            hline_parser = tparser.LineParser(r"(?:(?:\+)|(?:\|))"),
-                            data_parser = tparser.LineParser(r"(?:\|)"))
         self.table_parser = SimpleTableParser(self)
         self.table_driver = tborder.BorderTableDriver(self)
 

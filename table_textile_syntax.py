@@ -32,11 +32,9 @@ import re
 try:
     from . import table_base as tbase
     from .widechar_support import wlen, wcount
-    from . import table_line_parser as tparser
 except ValueError:
     import table_base as tbase
     from widechar_support import wlen, wcount
-    import table_line_parser as tparser
 
 def create_syntax(table_configuration=None):
     return TextileTableSyntax(table_configuration)
@@ -47,7 +45,6 @@ class TextileTableSyntax(tbase.TableSyntax):
     def __init__(self, table_configuration):
         tbase.TableSyntax.__init__(self, "Textile", table_configuration)
 
-        self.line_parser = tparser.LineParser("(?:\|)")
         self.table_parser = TextileTableParser(self)
         self.table_driver = tbase.TableDriver(self)
 
