@@ -55,6 +55,7 @@ breakable_char_ranges = [
 ]
 
 
+
 def _is_widechar(c):
     c = ord(c)
     for i in breakable_char_ranges:
