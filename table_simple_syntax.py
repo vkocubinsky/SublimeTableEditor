@@ -100,6 +100,8 @@ class CustomAlignRow(tbase.Row):
 class SimpleTableParser(tborder.BorderTableParser):
 
     def _is_custom_align_row(self, str_cols):
+        if len(str_cols) == 0:
+            return False
         for col in str_cols:
             if not CustomAlignColumn.match_cell(col):
                 return False

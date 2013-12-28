@@ -115,6 +115,8 @@ class MultiMarkdownAlignRow(tbase.Row):
 class MultiMarkdownTableParser(tbase.BaseTableParser):
 
     def _is_multi_markdown_align_row(self, str_cols):
+        if len(str_cols) == 0:
+            return False
         for col in str_cols:
             if not MultiMarkdownAlignColumn.match_cell(col):
                 return False
