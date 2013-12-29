@@ -224,7 +224,8 @@ class DataColumn(Column):
         #if self.syntax.multi_markdown_syntax():
         #    total_col_len = total_col_len - (self.colspan - 1)
         total_col_len = (total_col_len
-                         - (len(self.left_border_text) - 1)
+                         # left border already calculated
+                         # - (len(self.left_border_text) - 1)
                          - (len(self.right_border_text) - 1))
 
         norm = self._norm()
