@@ -735,12 +735,13 @@ class TableDriver:
     def parse_csv(self, text):
         try:
             table = TextTable(self.syntax)
-            dialect = csv.Sniffer().sniff(text)
-            table_reader = csv.reader(text.splitlines(), dialect)
+            bytetext = text.encode('utf-8')
+            dialect = csv.Sniffer().sniff(bytetext)
+            table_reader = csv.reader(bytetext.splitlines(), dialect)
             for cols in table_reader:
                 row = DataRow(table)
                 for col in cols:
-                    row.columns.append(DataColumn(row, col))
+                    row.columns.append(DataColumn(row, unicode(col,'utf-8')))
                 table.rows.append(row)
         except csv.Error:
             table = TextTable(self.syntax)
