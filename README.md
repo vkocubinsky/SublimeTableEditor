@@ -463,13 +463,13 @@ You can control table syntax with settings
 ```javascript
 {
     // Set table syntax for Table Editor.
-    // Valid options are: "Auto", "Simple", "EmacsOrgMode", "Pandoc", "MultiMarkdown",
+    // Valid options are: "Simple", "EmacsOrgMode", "Pandoc", "MultiMarkdown",
     //                    "reStructuredText", "Textile"
-    "table_editor_syntax": "Auto"
+    "table_editor_syntax": "Simple"
 }
 ```
 
-"Auto" settings detect table syntax by view syntax with next rules:
+By default TableEditor auto detects table syntax by view syntax with next rules:
 
 - Markdown, MultiMarkdown -> MultiMarkdown
 - reStructuredText -> reStructuredText
