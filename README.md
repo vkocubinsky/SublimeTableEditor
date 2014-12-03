@@ -69,7 +69,7 @@ And then click *ctrl+k,enter*.
     |------|-------|
     | _    |       |
 
-*Table Editor* support double hline with character '='. Type bellow 
+*Table Editor* support double hline with character '='. Type below 
 
     | Name | Phone |
     |=
