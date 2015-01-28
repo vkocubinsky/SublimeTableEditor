@@ -1,3 +1,7 @@
+# This package is no more supported. I moved back to Emacs.
+
+
+
 # Table Editor
 
 ## Overview
