@@ -1,4 +1,4 @@
-# This package is no more supported. I moved to Emacs.
+# This package is no more supported. I moved to Emacs and vim.
 
 
 
