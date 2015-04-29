@@ -51,7 +51,9 @@ breakable_char_ranges = [
     # See http://en.wikipedia.org/wiki/Kanbun
     (0x3190, 0x319F),   # Kanbun
     # See http://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms
-    (0xFF00, 0xFFEF),    # Halfwidth and Fullwidth Forms
+    (0xFF00, 0xFF5E),   # Fullwidth ASCII variants
+    (0xFF5F, 0xFF60),   # Fullwidth brackets
+    (0xFFE0, 0xFFE6),   # Fullwidth symbol variants
 ]
 
 
