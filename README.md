@@ -595,7 +595,7 @@ It is true by default for textile syntax. You can disable it if you want
 {
     "table_editor_intelligent_formatting":false
 }
-``` 
+```
 
 Let you have a table
 
