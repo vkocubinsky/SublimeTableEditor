@@ -707,7 +707,7 @@ and this result of Table Editor with
 
 ## License
 
-Package is distributed by GNU General Public License v3.0.
+Package is distributed by Apache 2.0 License
 
 ## Testing
 
